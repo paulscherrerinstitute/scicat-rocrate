@@ -1,13 +1,27 @@
-
 {
     "@context": [
         "https://w3id.org/ro/crate/1.1/context",
-        {
-            "SLSDataset": "https://w3id.org/scicat/type/SLSDataset",
-            "beamEnergy": "https://w3id.org/scicat/attribute/beamEnergy"
-        }
+        {"datacite": "https://Datacite"},
+        {"datacite:author": "https://author"}
     ],
     "@graph": [
+        {
+            "@id": "https://Datacite",
+            "@type": "rdfs:Class",
+            "rdfs:label": "Datacite type definition in JSON-LD"
+        },
+        {
+            "@id": "https://author",
+            "@type": "rdfs:Property",
+            "rdfs:label": "Datacite ",
+            "rdfs:comment": "Energy of the beam",
+            "rdfs:domain": [
+                {
+                    "@id": "https://Datacite"
+                }
+            ],
+            "rdfs:range": "string"
+        },
         {
             "@type": "CreativeWork",
             "@id": "ro-crate-metadata.json",
@@ -21,8 +35,7 @@
         {
             "@id": "./",
             "@type": [
-                "Dataset",
-                "SLSDataset"
+                "datacite"
             ],
             "headline": "Experimental results from Rat Lung Tomography",
             "alternativeHeadline": "Experimentelle Ergebnisse aus der Rattenlungentomographie",
@@ -30,7 +43,7 @@
                 "@id": "https://ror.org/03eh3y714"
             },
             "name": "Experimental results from Rat Lung Tomography",
-            "author": [
+            "datacite:author": [
                 {
                     "@id": "https://orcid.org/XXXX-XXXX-XXXX-XXXX"
                 },
