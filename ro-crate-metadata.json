@@ -1,0 +1,150 @@
+
+{
+    "@context": [
+        "https://w3id.org/ro/crate/1.1/context",
+        {
+            "SLSDataset": "https://w3id.org/scicat/type/SLSDataset",
+            "beamEnergy": "https://w3id.org/scicat/attribute/beamEnergy"
+        }
+    ],
+    "@graph": [
+        {
+            "@type": "CreativeWork",
+            "@id": "ro-crate-metadata.json",
+            "conformsTo": {
+                "@id": "https://w3id.org/ro/crate/1.1"
+            },
+            "about": {
+                "@id": "./"
+            }
+        },
+        {
+            "@id": "./",
+            "@type": [
+                "Dataset",
+                "SLSDataset"
+            ],
+            "headline": "Experimental results from Rat Lung Tomography",
+            "alternativeHeadline": "Experimentelle Ergebnisse aus der Rattenlungentomographie",
+            "publisher": {
+                "@id": "https://ror.org/03eh3y714"
+            },
+            "name": "Experimental results from Rat Lung Tomography",
+            "author": [
+                {
+                    "@id": "https://orcid.org/XXXX-XXXX-XXXX-XXXX"
+                },
+                {
+                    "@id": "https://orcid.org/XXXX-XXXX-XXXX-XXXY"
+                }
+            ],
+            "datePublished": "2024-06-20T16:31",
+            "keywords": [
+                {
+                    "@id": "Physics"
+                }
+            ],
+            "inLanguage": "en",
+            "identifier": [
+                {
+                    "@id": "https://doi.org/abcd1234"
+                },
+                {
+                    "@id": "https://doi.psi.ch/oaipmh/abcd1234"
+                }
+            ],
+            "citation": [
+                {
+                    "@id": "https://archive.org/123"
+                }
+            ],
+            "license": "https://creativecommons.org/licenses/by/4.0/legalcode",
+            "description": "Dataset containing all the files acquired during rat lung tomography",
+            "funding": {
+                "@id": "https://ror.org/03eh3y714"
+            },
+            "hasPart": [
+                {
+                    "@id": "data1.txt"
+                },
+                {
+                    "@id": "https://s3/123"
+                }
+            ],
+            "beamEnergy": 123
+        },
+        {
+            "@id": "https://archive.org/123",
+            "@type": "CreativeWork"
+        },
+        {
+            "@id": "https://doi.org/abcd1234",
+            "@type": "PropertyValue",
+            "value": "https://doi.org/abcd1234",
+            "propertyID": "https://www.doi.org/the-identifier/what-is-a-doi/"
+        },
+        {
+            "@id": "https://doi.psi.ch/oaipmh/abcd1234",
+            "@type": "PropertyValue",
+            "value": "https://doi.psi.ch/oaipmh/abcd1234"
+        },
+        {
+            "@id": "https://orcid.org/XXXX-XXXX-XXXX-XXXX",
+            "@type": "Person",
+            "affiliation": {
+                "@id": "https://ror.org/03f0f6041"
+            },
+            "email": "alice.bob@example.com",
+            "name": "Alice Bob"
+        },
+        {
+            "@id": "https://orcid.org/XXXX-XXXX-XXXX-XXXY",
+            "@type": "Person",
+            "affiliation": {
+                "@id": "https://ror.org/03f0f6041"
+            },
+            "email": "alice.mallory@example.com",
+            "name": "Alice Mallory"
+        },
+        {
+            "@id": "https://ror.org/03eh3y714",
+            "@type": "Organization",
+            "name": "Paul Scherrer Institut"
+        },
+        {
+            "@id": "Physics",
+            "@type": "DefinedTerm",
+            "name": "Physics",
+            "termCode": "PHS",
+            "inDefinedTermSet": "https://example.org/vocabulary/subjects"
+        },
+        {
+            "@id": "data1.txt",
+            "@type": "File",
+            "contentSize": "383766"
+        },
+        {
+            "@id": "https://s3/123",
+            "@type": "File",
+            "contentSize": "123456",
+            "encodingFormat": "application/pdf",
+            "sdDatePublished": "2020-04-09T13:09:21+01:00Z"
+        },
+        {
+            "@id": "https://w3id.org/scicat/type/SLSDataset",
+            "@type": "rdfs:Class",
+            "rdfs:label": "SLS Dataset"
+        },
+        {
+            "@id": "https://w3id.org/scicat/attribute/beamEnergy",
+            "@type": "rdf:Property",
+            "rdfs:label": "beamEnergy",
+            "rdfs:comment": "Energy of the beam",
+            "rdfs:domain": [
+                {
+                    "@id": "SLSDataset"
+                }
+            ]
+        }
+    ]
+}
