@@ -28,9 +28,9 @@
             ],
             "scicat:publisher": "PSI",
             "scicat:publicationYear": 2020,
-            "scicat:title": "Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron",
+            "scicat:title": {"@id": "#titlename"},
             "scicat:url": "",
-            "name": "Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron",
+            "name": {"@id": "#titlename"},
             "scicat:abstract": "Data of the paper \"Matching of turn pattern measurements for cyclotrons using multiobjective optimization\" published in Physical Review Accelerators and Beams. The data is generated as part of the PhD thesis funded by the Swiss National Science Foundation (SNSF) under contract number 200021_159936. ",
             "scicat:dataDescription": "Data of the turn pattern matching paper .",
             "description": "Data of the turn pattern matching paper .",
@@ -53,6 +53,11 @@
             "scicat:updatedBy": "archiveManager",
             "scicat:createdAt": "2020-09-09T12:25:31.298Z",
             "scicat:updatedAt": "2021-02-13T04:02:16.436Z"
+        },
+        {
+            "@id": "#titlename",
+            "value": "Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron",
+            "@type": "name"
         }
     ]
 }
