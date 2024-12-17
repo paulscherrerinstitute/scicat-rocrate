@@ -9,8 +9,7 @@
   "@context": [
     "https://w3id.org/ro/crate/1.1/context",
     {
-      "SLSDataset": "https://w3id.org/scicat/type/SLSDataset",
-      "beamEnergy": "https://w3id.org/scicat/attribute/beamEnergy"
+      "scicat": "https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#"
     }
   ],
   "@graph": [
@@ -28,123 +27,31 @@
       "@id": "./",
       "@type": [
         "Dataset",
-        "SLSDataset"
+        "scicat:PublishedData"
       ],
-      "headline": "Experimental results from Rat Lung Tomography",
-      "alternativeHeadline": "Experimentelle Ergebnisse aus der Rattenlungentomographie",
-      "publisher": {
-        "@id": "https://ror.org/03eh3y714"
-      },
-      "name": "Experimental results from Rat Lung Tomography",
-      "author": [
-        {
-          "@id": "https://orcid.org/XXXX-XXXX-XXXX-XXXX"
-        },
-        {
-          "@id": "https://orcid.org/XXXX-XXXX-XXXX-XXXY"
-        }
-      ],
-      "datePublished": "2024-06-20T16:31",
-      "keywords": {
-        "@id": "Physics"
-      },
-      "inLanguage": "en",
-      "identifier": [
-        {
-          "@id": "https://doi.org/abcd1234"
-        },
-        {
-          "@id": "https://doi.psi.ch/oaipmh/abcd1234"
-        }
-      ],
-      "citation": {
-        "@id": "https://archive.org/123"
-      },
+      "scicat:doi": "10.16907/00b95267-8b8b-48a7-8de6-8da6b9b7bb7d",
+      "scicat:creator": "Matthias Frey",
+      "scicat:publisher": "PSI",
+      "scicat:publicationYear": 2020,
+      "scicat:title": "Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron",
+      "scicat:url": "",
+      "name": "Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron",
+      "scicat:abstract": "Data of the paper \"Matching of turn pattern measurements for cyclotrons using multiobjective optimization\" published in Physical Review Accelerators and Beams. The data is generated as part of the PhD thesis funded by the Swiss National Science Foundation (SNSF) under contract number 200021_159936. ",
+      "scicat:dataDescription": "Data of the turn pattern matching paper .",
+      "description": "Data of the turn pattern matching paper .",
       "license": "https://creativecommons.org/licenses/by/4.0/legalcode",
-      "description": "Dataset containing all the files acquired during rat lung tomography",
-      "funding": {
-        "@id": "https://ror.org/03eh3y714"
-      },
-      "hasPart": [
-        {
-          "@id": "data1.txt"
-        },
-        {
-          "@id": "https://s3/123"
-        }
-      ],
-      "beamEnergy": 123
-    },
-    {
-      "@id": "https://ror.org/03eh3y714",
-      "@type": "Organization",
-      "name": "Paul Scherrer Institut"
-    },
-    {
-      "@id": "https://orcid.org/XXXX-XXXX-XXXX-XXXX",
-      "@type": "Person",
-      "affiliation": {
-        "@id": "https://ror.org/03f0f6041"
-      },
-      "email": "alice.bob@example.com",
-      "name": "Alice Bob"
-    },
-    {
-      "@id": "https://orcid.org/XXXX-XXXX-XXXX-XXXY",
-      "@type": "Person",
-      "affiliation": {
-        "@id": "https://ror.org/03f0f6041"
-      },
-      "email": "alice.mallory@example.com",
-      "name": "Alice Mallory"
-    },
-    {
-      "@id": "Physics",
-      "@type": "DefinedTerm",
-      "name": "Physics",
-      "termCode": "PHS",
-      "inDefinedTermSet": "https://example.org/vocabulary/subjects"
-    },
-    {
-      "@id": "https://doi.org/abcd1234",
-      "@type": "PropertyValue",
-      "value": "https://doi.org/abcd1234",
-      "propertyID": "https://www.doi.org/the-identifier/what-is-a-doi/"
-    },
-    {
-      "@id": "https://doi.psi.ch/oaipmh/abcd1234",
-      "@type": "PropertyValue",
-      "value": "https://doi.psi.ch/oaipmh/abcd1234"
-    },
-    {
-      "@id": "https://archive.org/123",
-      "@type": "CreativeWork"
-    },
-    {
-      "@id": "data1.txt",
-      "@type": "File",
-      "contentSize": "383766"
-    },
-    {
-      "@id": "https://s3/123",
-      "@type": "File",
-      "contentSize": "123456",
-      "encodingFormat": "application/pdf",
-      "sdDatePublished": "2020-04-09T13:09:21+01:00Z"
-    },
-    {
-      "@id": "https://w3id.org/scicat/type/SLSDataset",
-      "@type": "rdfs:Class",
-      "rdfs:label": "SLS Dataset"
-    },
-    {
-      "@id": "https://w3id.org/scicat/attribute/beamEnergy",
-      "@type": "rdf:Property",
-      "rdfs:label": "beamEnergy",
-      "rdfs:comment": "Energy of the beam",
-      "rdfs:domain": {
-        "@id": "SLSDataset"
-      }
+      "datePublished": "2020-09-09T12:25:37.608Z",
+      "scicat:resourceType": "raw",
+      "scicat:pidArray": "20.500.11935/5148ff5d-3f0d-464b-9e3b-7d71e18b4822",
+      "scicat:registeredTime": "2020-09-09T12:25:37.608Z",
+      "scicat:status": "registered",
+      "scicat:thumbnail": "data:image/png;base64,iVBORw0KGgoAA...RU5ErkJggg==",
+      "scicat:relatedPublications": "https://doi.org/10.1103/PhysRevAccelBeams.22.064602",
+      "scicat:downloadLink": "",
+      "scicat:createdBy": "ms-ad.frey_m",
+      "scicat:updatedBy": "archiveManager",
+      "scicat:createdAt": "2020-09-09T12:25:31.298Z",
+      "scicat:updatedAt": "2021-02-13T04:02:16.436Z"
     }
   ]
 }
@@ -173,17 +80,17 @@ table.table {
   <nav class="navbar">
 
     <ul class="nav navbar-nav" >
-        <li ><a href="#"><span class="glyphicon glyphicon-home dataset_name">&nbsp;Experimental results from Rat Lung Tomography</span></a></li>
+        <li ><a href="#"><span class="glyphicon glyphicon-home dataset_name">&nbsp;Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron</span></a></li>
     </ul>
 
   </nav>
 <div class="container">
 <div class="jumbotron">
 <h4 class="citation"></h4>
-<h3 class="item_name">Experimental results from Rat Lung Tomography</h3>
+<h3 class="item_name">Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron</h3>
 
 
-<a href="./ro-crate-metadata.json">⬇️🏷️ Download all the metadata for <span class='name'>Experimental results from Rat Lung Tomography</span> in JSON-LD format</a>
+<a href="./ro-crate-metadata.json">⬇️🏷️ Download all the metadata for <span class='name'>Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron</span> in JSON-LD format</a>
 
 
 <div id="check"></div>
@@ -196,7 +103,7 @@ table.table {
 <div id="summary">
 <div class='all-meta'>
             <div>
-                <h3> Experimental results from Rat Lung Tomography</h3>
+                <h3> Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron</h3>
                 
                 
                 
@@ -209,332 +116,83 @@ table.table {
             <td style='text-align:left'><span>./</span></td>
             </tr><tr>
             <th style="text-align:left;" class="prop">name<span>&nbsp;</span><a href="http://schema.org/name">[?]</a></th>
-            <td style='text-align:left'><span>Experimental results from Rat Lung Tomography</span></td>
+            <td style='text-align:left'><span>Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron</span></td>
             </tr><tr>
             <th style="text-align:left;" class="prop">@type</th>
             <td style='text-align:left'><ul>
                         <li><span>Dataset</span></li>
                         
-                        <li><span>SLSDataset</span></li>
+                        <li><span>scicat:PublishedData</span></li>
                         </ul></td>
             </tr><tr>
             <th style="text-align:left;" class="prop">description<span>&nbsp;</span><a href="http://schema.org/description">[?]</a></th>
-            <td style='text-align:left'><span>Dataset containing all the files acquired during rat lung tomography</span></td>
+            <td style='text-align:left'><span>Data of the turn pattern matching paper .</span></td>
             </tr><tr>
             <th style="text-align:left;" class="prop">datePublished<span>&nbsp;</span><a href="http://schema.org/datePublished">[?]</a></th>
-            <td style='text-align:left'><span>2024-06-20T16:31</span></td>
+            <td style='text-align:left'><span>2020-09-09T12:25:37.608Z</span></td>
             </tr><tr>
-            <th style="text-align:left;" class="prop">author<span>&nbsp;</span><a href="http://schema.org/author">[?]</a></th>
-            <td style='text-align:left'><ul>
-                        <li><a href="#https%3A//orcid.org/XXXX-XXXX-XXXX-XXXX">Alice Bob</a></li>
-                        
-                        <li><a href="#https%3A//orcid.org/XXXX-XXXX-XXXX-XXXY">Alice Mallory</a></li>
-                        </ul></td>
+            <th style="text-align:left;" class="prop">scicat:doi<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#doi">[?]</a></th>
+            <td style='text-align:left'><span>10.16907/00b95267-8b8b-48a7-8de6-8da6b9b7bb7d</span></td>
             </tr><tr>
-            <th style="text-align:left;" class="prop">headline<span>&nbsp;</span><a href="http://schema.org/headline">[?]</a></th>
-            <td style='text-align:left'><span>Experimental results from Rat Lung Tomography</span></td>
+            <th style="text-align:left;" class="prop">scicat:creator<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#creator">[?]</a></th>
+            <td style='text-align:left'><span>Matthias Frey</span></td>
             </tr><tr>
-            <th style="text-align:left;" class="prop">alternativeHeadline<span>&nbsp;</span><a href="http://schema.org/alternativeHeadline">[?]</a></th>
-            <td style='text-align:left'><span>Experimentelle Ergebnisse aus der Rattenlungentomographie</span></td>
+            <th style="text-align:left;" class="prop">scicat:publisher<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#publisher">[?]</a></th>
+            <td style='text-align:left'><span>PSI</span></td>
             </tr><tr>
-            <th style="text-align:left;" class="prop">publisher<span>&nbsp;</span><a href="http://schema.org/publisher">[?]</a></th>
-            <td style='text-align:left'><a href="#https%3A//ror.org/03eh3y714">Paul Scherrer Institut</a></td>
+            <th style="text-align:left;" class="prop">scicat:publicationYear<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#publicationYear">[?]</a></th>
+            <td style='text-align:left'><span>2020</span></td>
             </tr><tr>
-            <th style="text-align:left;" class="prop">keywords<span>&nbsp;</span><a href="http://schema.org/keywords">[?]</a></th>
-            <td style='text-align:left'><a href="#Physics">Physics</a></td>
+            <th style="text-align:left;" class="prop">scicat:title<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#title">[?]</a></th>
+            <td style='text-align:left'><span>Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron</span></td>
             </tr><tr>
-            <th style="text-align:left;" class="prop">inLanguage<span>&nbsp;</span><a href="http://schema.org/inLanguage">[?]</a></th>
-            <td style='text-align:left'><span>en</span></td>
+            <th style="text-align:left;" class="prop">scicat:url<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#url">[?]</a></th>
+            <td style='text-align:left'></td>
             </tr><tr>
-            <th style="text-align:left;" class="prop">identifier<span>&nbsp;</span><a href="http://schema.org/identifier">[?]</a></th>
-            <td style='text-align:left'><ul>
-                        <li>undefined: https://doi.org/abcd1234</li>
-                        
-                        <li>undefined: https://doi.psi.ch/oaipmh/abcd1234</li>
-                        </ul></td>
+            <th style="text-align:left;" class="prop">scicat:abstract<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#abstract">[?]</a></th>
+            <td style='text-align:left'><span>Data of the paper "Matching of turn pattern measurements for cyclotrons using multiobjective optimization" published in Physical Review Accelerators and Beams. The data is generated as part of the PhD thesis funded by the Swiss National Science Foundation (SNSF) under contract number 200021_159936. </span></td>
             </tr><tr>
-            <th style="text-align:left;" class="prop">citation<span>&nbsp;</span><a href="http://schema.org/citation">[?]</a></th>
-            <td style='text-align:left'><a href="#https%3A//archive.org/123">https://archive.org/123</a></td>
+            <th style="text-align:left;" class="prop">scicat:dataDescription<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#dataDescription">[?]</a></th>
+            <td style='text-align:left'><span>Data of the turn pattern matching paper .</span></td>
             </tr><tr>
             <th style="text-align:left;" class="prop">license<span>&nbsp;</span><a href="http://schema.org/license">[?]</a></th>
             <td style='text-align:left'><a href="https://creativecommons.org/licenses/by/4.0/legalcode">https://creativecommons.org/licenses/by/4.0/legalcode</a></td>
             </tr><tr>
-            <th style="text-align:left;" class="prop">funding<span>&nbsp;</span><a href="http://schema.org/funding">[?]</a></th>
-            <td style='text-align:left'><a href="#https%3A//ror.org/03eh3y714">Paul Scherrer Institut</a></td>
+            <th style="text-align:left;" class="prop">scicat:resourceType<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#resourceType">[?]</a></th>
+            <td style='text-align:left'><span>raw</span></td>
             </tr><tr>
-            <th style="text-align:left;" class="prop">hasPart<span>&nbsp;</span><a href="http://schema.org/hasPart">[?]</a></th>
-            <td style='text-align:left'><ul>
-                        <li><a href="#data1.txt">data1.txt</a></li>
-                        
-                        <li><a href="#https%3A//s3/123">https://s3/123</a></li>
-                        </ul></td>
+            <th style="text-align:left;" class="prop">scicat:pidArray<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#pidArray">[?]</a></th>
+            <td style='text-align:left'><span>20.500.11935/5148ff5d-3f0d-464b-9e3b-7d71e18b4822</span></td>
             </tr><tr>
-            <th style="text-align:left;" class="prop">beamEnergy<span>&nbsp;</span><span name="propName" title="Energy of the beam">[?]</span></th>
-            <td style='text-align:left'><span>123</span></td>
+            <th style="text-align:left;" class="prop">scicat:registeredTime<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#registeredTime">[?]</a></th>
+            <td style='text-align:left'><span>2020-09-09T12:25:37.608Z</span></td>
+            </tr><tr>
+            <th style="text-align:left;" class="prop">scicat:status<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#status">[?]</a></th>
+            <td style='text-align:left'><span>registered</span></td>
+            </tr><tr>
+            <th style="text-align:left;" class="prop">scicat:thumbnail<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#thumbnail">[?]</a></th>
+            <td style='text-align:left'><span>data:image/png;base64,iVBORw0KGgoAA...RU5ErkJggg==</span></td>
+            </tr><tr>
+            <th style="text-align:left;" class="prop">scicat:relatedPublications<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#relatedPublications">[?]</a></th>
+            <td style='text-align:left'><a href="https://doi.org/10.1103/PhysRevAccelBeams.22.064602">https://doi.org/10.1103/PhysRevAccelBeams.22.064602</a></td>
+            </tr><tr>
+            <th style="text-align:left;" class="prop">scicat:downloadLink<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#downloadLink">[?]</a></th>
+            <td style='text-align:left'></td>
+            </tr><tr>
+            <th style="text-align:left;" class="prop">scicat:createdBy<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#createdBy">[?]</a></th>
+            <td style='text-align:left'><span>ms-ad.frey_m</span></td>
+            </tr><tr>
+            <th style="text-align:left;" class="prop">scicat:updatedBy<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#updatedBy">[?]</a></th>
+            <td style='text-align:left'><span>archiveManager</span></td>
+            </tr><tr>
+            <th style="text-align:left;" class="prop">scicat:createdAt<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#createdAt">[?]</a></th>
+            <td style='text-align:left'><span>2020-09-09T12:25:31.298Z</span></td>
+            </tr><tr>
+            <th style="text-align:left;" class="prop">scicat:updatedAt<span>&nbsp;</span><a href="https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#updatedAt">[?]</a></th>
+            <td style='text-align:left'><span>2021-02-13T04:02:16.436Z</span></td>
             </tr><tr><th colspan="2" style="text-align:center">Items that reference this one</th><tr><tr>
             <th style="text-align:left;" class="prop">about<span>&nbsp;</span><a href="http://schema.org/about">[?]</a></th>
             <td style='text-align:left'><a href="#ro-crate-metadata.json">ro-crate-metadata.json</a></td>
-            </tr></tbody>
-            </table>
-        </div>
-            </div>
-        <hr/><br/><br/>
-            <div>
-                <h3><a href="https://orcid.org/XXXX-XXXX-XXXX-XXXX">Go to: </a> Alice Bob</h3>
-                
-                
-                
-                
-        <div id="https://orcid.org/XXXX-XXXX-XXXX-XXXX">
-            
-            <table class="table metadata table-striped" >
-                <tbody><tr>
-            <th style="text-align:left;" class="prop">@id</th>
-            <td style='text-align:left'><a href="https://orcid.org/XXXX-XXXX-XXXX-XXXX">https://orcid.org/XXXX-XXXX-XXXX-XXXX</a></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">name<span>&nbsp;</span><a href="http://schema.org/name">[?]</a></th>
-            <td style='text-align:left'><span>Alice Bob</span></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">@type</th>
-            <td style='text-align:left'><span>Person</span></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">affiliation<span>&nbsp;</span><a href="http://schema.org/affiliation">[?]</a></th>
-            <td style='text-align:left'><a href="https://ror.org/03f0f6041">https://ror.org/03f0f6041</a></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">email<span>&nbsp;</span><a href="http://schema.org/email">[?]</a></th>
-            <td style='text-align:left'><span>alice.bob@example.com</span></td>
-            </tr><tr><th colspan="2" style="text-align:center">Items that reference this one</th><tr><tr>
-            <th style="text-align:left;" class="prop">author<span>&nbsp;</span><a href="http://schema.org/author">[?]</a></th>
-            <td style='text-align:left'><a href="#./">Experimental results from Rat Lung Tomography</a></td>
-            </tr></tbody>
-            </table>
-        </div>
-            </div>
-        <hr/><br/><br/>
-            <div>
-                <h3><a href="https://orcid.org/XXXX-XXXX-XXXX-XXXY">Go to: </a> Alice Mallory</h3>
-                
-                
-                
-                
-        <div id="https://orcid.org/XXXX-XXXX-XXXX-XXXY">
-            
-            <table class="table metadata table-striped" >
-                <tbody><tr>
-            <th style="text-align:left;" class="prop">@id</th>
-            <td style='text-align:left'><a href="https://orcid.org/XXXX-XXXX-XXXX-XXXY">https://orcid.org/XXXX-XXXX-XXXX-XXXY</a></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">name<span>&nbsp;</span><a href="http://schema.org/name">[?]</a></th>
-            <td style='text-align:left'><span>Alice Mallory</span></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">@type</th>
-            <td style='text-align:left'><span>Person</span></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">affiliation<span>&nbsp;</span><a href="http://schema.org/affiliation">[?]</a></th>
-            <td style='text-align:left'><a href="https://ror.org/03f0f6041">https://ror.org/03f0f6041</a></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">email<span>&nbsp;</span><a href="http://schema.org/email">[?]</a></th>
-            <td style='text-align:left'><span>alice.mallory@example.com</span></td>
-            </tr><tr><th colspan="2" style="text-align:center">Items that reference this one</th><tr><tr>
-            <th style="text-align:left;" class="prop">author<span>&nbsp;</span><a href="http://schema.org/author">[?]</a></th>
-            <td style='text-align:left'><a href="#./">Experimental results from Rat Lung Tomography</a></td>
-            </tr></tbody>
-            </table>
-        </div>
-            </div>
-        <hr/><br/><br/>
-            <div>
-                <h3><a href="https://ror.org/03eh3y714">Go to: </a> Paul Scherrer Institut</h3>
-                
-                
-                
-                
-        <div id="https://ror.org/03eh3y714">
-            
-            <table class="table metadata table-striped" >
-                <tbody><tr>
-            <th style="text-align:left;" class="prop">@id</th>
-            <td style='text-align:left'><a href="https://ror.org/03eh3y714">https://ror.org/03eh3y714</a></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">name<span>&nbsp;</span><a href="http://schema.org/name">[?]</a></th>
-            <td style='text-align:left'><span>Paul Scherrer Institut</span></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">@type</th>
-            <td style='text-align:left'><span>Organization</span></td>
-            </tr><tr><th colspan="2" style="text-align:center">Items that reference this one</th><tr><tr>
-            <th style="text-align:left;" class="prop">publisher<span>&nbsp;</span><a href="http://schema.org/publisher">[?]</a></th>
-            <td style='text-align:left'><a href="#./">Experimental results from Rat Lung Tomography</a></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">funding<span>&nbsp;</span><a href="http://schema.org/funding">[?]</a></th>
-            <td style='text-align:left'><a href="#./">Experimental results from Rat Lung Tomography</a></td>
-            </tr></tbody>
-            </table>
-        </div>
-            </div>
-        <hr/><br/><br/>
-            <div>
-                <h3> Physics</h3>
-                
-                
-                
-                
-        <div id="Physics">
-            
-            <table class="table metadata table-striped" >
-                <tbody><tr>
-            <th style="text-align:left;" class="prop">@id</th>
-            <td style='text-align:left'><span>Physics</span></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">name<span>&nbsp;</span><a href="http://schema.org/name">[?]</a></th>
-            <td style='text-align:left'><span>Physics</span></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">@type</th>
-            <td style='text-align:left'><span>DefinedTerm</span></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">termCode<span>&nbsp;</span><a href="http://schema.org/termCode">[?]</a></th>
-            <td style='text-align:left'><span>PHS</span></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">inDefinedTermSet<span>&nbsp;</span><a href="http://schema.org/inDefinedTermSet">[?]</a></th>
-            <td style='text-align:left'><a href="https://example.org/vocabulary/subjects">https://example.org/vocabulary/subjects</a></td>
-            </tr><tr><th colspan="2" style="text-align:center">Items that reference this one</th><tr><tr>
-            <th style="text-align:left;" class="prop">keywords<span>&nbsp;</span><a href="http://schema.org/keywords">[?]</a></th>
-            <td style='text-align:left'><a href="#./">Experimental results from Rat Lung Tomography</a></td>
-            </tr></tbody>
-            </table>
-        </div>
-            </div>
-        <hr/><br/><br/>
-            <div>
-                <h3><a href="https://doi.org/abcd1234">Go to: </a> https://doi.org/abcd1234</h3>
-                
-                
-                
-                
-        <div id="https://doi.org/abcd1234">
-            
-            <table class="table metadata table-striped" >
-                <tbody><tr>
-            <th style="text-align:left;" class="prop">@id</th>
-            <td style='text-align:left'><a href="https://doi.org/abcd1234">https://doi.org/abcd1234</a></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">@type</th>
-            <td style='text-align:left'><span>PropertyValue</span></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">value<span>&nbsp;</span><a href="http://schema.org/value">[?]</a></th>
-            <td style='text-align:left'><a href="https://doi.org/abcd1234">https://doi.org/abcd1234</a></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">propertyID<span>&nbsp;</span><a href="http://schema.org/propertyID">[?]</a></th>
-            <td style='text-align:left'><a href="https://www.doi.org/the-identifier/what-is-a-doi/">https://www.doi.org/the-identifier/what-is-a-doi/</a></td>
-            </tr><tr><th colspan="2" style="text-align:center">Items that reference this one</th><tr><tr>
-            <th style="text-align:left;" class="prop">identifier<span>&nbsp;</span><a href="http://schema.org/identifier">[?]</a></th>
-            <td style='text-align:left'><a href="#./">Experimental results from Rat Lung Tomography</a></td>
-            </tr></tbody>
-            </table>
-        </div>
-            </div>
-        <hr/><br/><br/>
-            <div>
-                <h3><a href="https://doi.psi.ch/oaipmh/abcd1234">Go to: </a> https://doi.psi.ch/oaipmh/abcd1234</h3>
-                
-                
-                
-                
-        <div id="https://doi.psi.ch/oaipmh/abcd1234">
-            
-            <table class="table metadata table-striped" >
-                <tbody><tr>
-            <th style="text-align:left;" class="prop">@id</th>
-            <td style='text-align:left'><a href="https://doi.psi.ch/oaipmh/abcd1234">https://doi.psi.ch/oaipmh/abcd1234</a></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">@type</th>
-            <td style='text-align:left'><span>PropertyValue</span></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">value<span>&nbsp;</span><a href="http://schema.org/value">[?]</a></th>
-            <td style='text-align:left'><a href="https://doi.psi.ch/oaipmh/abcd1234">https://doi.psi.ch/oaipmh/abcd1234</a></td>
-            </tr><tr><th colspan="2" style="text-align:center">Items that reference this one</th><tr><tr>
-            <th style="text-align:left;" class="prop">identifier<span>&nbsp;</span><a href="http://schema.org/identifier">[?]</a></th>
-            <td style='text-align:left'><a href="#./">Experimental results from Rat Lung Tomography</a></td>
-            </tr></tbody>
-            </table>
-        </div>
-            </div>
-        <hr/><br/><br/>
-            <div>
-                <h3><a href="https://archive.org/123">Go to: </a> https://archive.org/123</h3>
-                
-                
-                
-                
-        <div id="https://archive.org/123">
-            
-            <table class="table metadata table-striped" >
-                <tbody><tr>
-            <th style="text-align:left;" class="prop">@id</th>
-            <td style='text-align:left'><a href="https://archive.org/123">https://archive.org/123</a></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">@type</th>
-            <td style='text-align:left'><span>CreativeWork</span></td>
-            </tr><tr><th colspan="2" style="text-align:center">Items that reference this one</th><tr><tr>
-            <th style="text-align:left;" class="prop">citation<span>&nbsp;</span><a href="http://schema.org/citation">[?]</a></th>
-            <td style='text-align:left'><a href="#./">Experimental results from Rat Lung Tomography</a></td>
-            </tr></tbody>
-            </table>
-        </div>
-            </div>
-        <hr/><br/><br/>
-            <div>
-                <h3><a href="data1.txt">⬇️ Download: </a> data1.txt</h3>
-                
-                <iframe src='data1.txt' width='100%' height='500'></iframe>
-                
-                
-        <div id="data1.txt">
-            
-            <table class="table metadata table-striped" >
-                <tbody><tr>
-            <th style="text-align:left;" class="prop">@id</th>
-            <td style='text-align:left'><span>data1.txt</span></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">@type</th>
-            <td style='text-align:left'><span>File</span></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">contentSize<span>&nbsp;</span><a href="http://schema.org/contentSize">[?]</a></th>
-            <td style='text-align:left'><span>383766</span></td>
-            </tr><tr><th colspan="2" style="text-align:center">Items that reference this one</th><tr><tr>
-            <th style="text-align:left;" class="prop">hasPart<span>&nbsp;</span><a href="http://schema.org/hasPart">[?]</a></th>
-            <td style='text-align:left'><a href="#./">Experimental results from Rat Lung Tomography</a></td>
-            </tr></tbody>
-            </table>
-        </div>
-            </div>
-        <hr/><br/><br/>
-            <div>
-                <h3><a href="https://s3/123">Go to: </a> https://s3/123</h3>
-                
-                
-                
-                
-        <div id="https://s3/123">
-            
-            <table class="table metadata table-striped" >
-                <tbody><tr>
-            <th style="text-align:left;" class="prop">@id</th>
-            <td style='text-align:left'><a href="https://s3/123">https://s3/123</a></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">@type</th>
-            <td style='text-align:left'><span>File</span></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">encodingFormat<span>&nbsp;</span><a href="http://schema.org/encodingFormat">[?]</a></th>
-            <td style='text-align:left'><span>application/pdf</span></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">contentSize<span>&nbsp;</span><a href="http://schema.org/contentSize">[?]</a></th>
-            <td style='text-align:left'><span>123456</span></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">sdDatePublished<span>&nbsp;</span><a href="http://schema.org/sdDatePublished">[?]</a></th>
-            <td style='text-align:left'><span>2020-04-09T13:09:21+01:00Z</span></td>
-            </tr><tr><th colspan="2" style="text-align:center">Items that reference this one</th><tr><tr>
-            <th style="text-align:left;" class="prop">hasPart<span>&nbsp;</span><a href="http://schema.org/hasPart">[?]</a></th>
-            <td style='text-align:left'><a href="#./">Experimental results from Rat Lung Tomography</a></td>
             </tr></tbody>
             </table>
         </div>

@@ -1,10 +1,8 @@
-
 {
     "@context": [
         "https://w3id.org/ro/crate/1.1/context",
         {
-            "SLSDataset": "https://w3id.org/scicat/type/SLSDataset",
-            "beamEnergy": "https://w3id.org/scicat/attribute/beamEnergy"
+            "scicat": "https://raw.githubusercontent.com/paulscherrerinstitute/scicat-rocrate/refs/heads/scicat-types/scicat-types/published-data.jsonld#"
         }
     ],
     "@graph": [
@@ -22,129 +20,39 @@
             "@id": "./",
             "@type": [
                 "Dataset",
-                "SLSDataset"
+                "scicat:PublishedData"
             ],
-            "headline": "Experimental results from Rat Lung Tomography",
-            "alternativeHeadline": "Experimentelle Ergebnisse aus der Rattenlungentomographie",
-            "publisher": {
-                "@id": "https://ror.org/03eh3y714"
-            },
-            "name": "Experimental results from Rat Lung Tomography",
-            "author": [
-                {
-                    "@id": "https://orcid.org/XXXX-XXXX-XXXX-XXXX"
-                },
-                {
-                    "@id": "https://orcid.org/XXXX-XXXX-XXXX-XXXY"
-                }
+            "scicat:doi": "10.16907/00b95267-8b8b-48a7-8de6-8da6b9b7bb7d",
+            "scicat:creator": [
+                "Matthias Frey"
             ],
-            "datePublished": "2024-06-20T16:31",
-            "keywords": [
-                {
-                    "@id": "Physics"
-                }
-            ],
-            "inLanguage": "en",
-            "identifier": [
-                {
-                    "@id": "https://doi.org/abcd1234"
-                },
-                {
-                    "@id": "https://doi.psi.ch/oaipmh/abcd1234"
-                }
-            ],
-            "citation": [
-                {
-                    "@id": "https://archive.org/123"
-                }
-            ],
+            "scicat:publisher": "PSI",
+            "scicat:publicationYear": 2020,
+            "scicat:title": "Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron",
+            "scicat:url": "",
+            "name": "Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron",
+            "scicat:abstract": "Data of the paper \"Matching of turn pattern measurements for cyclotrons using multiobjective optimization\" published in Physical Review Accelerators and Beams. The data is generated as part of the PhD thesis funded by the Swiss National Science Foundation (SNSF) under contract number 200021_159936. ",
+            "scicat:dataDescription": "Data of the turn pattern matching paper .",
+            "description": "Data of the turn pattern matching paper .",
             "license": "https://creativecommons.org/licenses/by/4.0/legalcode",
-            "description": "Dataset containing all the files acquired during rat lung tomography",
-            "funding": {
-                "@id": "https://ror.org/03eh3y714"
-            },
-            "hasPart": [
-                {
-                    "@id": "data1.txt"
-                },
-                {
-                    "@id": "https://s3/123"
-                }
+            "datePublished": "2020-09-09T12:25:37.608Z",
+            "scicat:resourceType": "raw",
+            "scicat:numberOfFiles": null,
+            "scicat:sizeOfArchive": null,
+            "scicat:pidArray": [
+                "20.500.11935/5148ff5d-3f0d-464b-9e3b-7d71e18b4822"
             ],
-            "beamEnergy": 123
-        },
-        {
-            "@id": "https://archive.org/123",
-            "@type": "CreativeWork"
-        },
-        {
-            "@id": "https://doi.org/abcd1234",
-            "@type": "PropertyValue",
-            "value": "https://doi.org/abcd1234",
-            "propertyID": "https://www.doi.org/the-identifier/what-is-a-doi/"
-        },
-        {
-            "@id": "https://doi.psi.ch/oaipmh/abcd1234",
-            "@type": "PropertyValue",
-            "value": "https://doi.psi.ch/oaipmh/abcd1234"
-        },
-        {
-            "@id": "https://orcid.org/XXXX-XXXX-XXXX-XXXX",
-            "@type": "Person",
-            "affiliation": {
-                "@id": "https://ror.org/03f0f6041"
-            },
-            "email": "alice.bob@example.com",
-            "name": "Alice Bob"
-        },
-        {
-            "@id": "https://orcid.org/XXXX-XXXX-XXXX-XXXY",
-            "@type": "Person",
-            "affiliation": {
-                "@id": "https://ror.org/03f0f6041"
-            },
-            "email": "alice.mallory@example.com",
-            "name": "Alice Mallory"
-        },
-        {
-            "@id": "https://ror.org/03eh3y714",
-            "@type": "Organization",
-            "name": "Paul Scherrer Institut"
-        },
-        {
-            "@id": "Physics",
-            "@type": "DefinedTerm",
-            "name": "Physics",
-            "termCode": "PHS",
-            "inDefinedTermSet": "https://example.org/vocabulary/subjects"
-        },
-        {
-            "@id": "data1.txt",
-            "@type": "File",
-            "contentSize": "383766"
-        },
-        {
-            "@id": "https://s3/123",
-            "@type": "File",
-            "contentSize": "123456",
-            "encodingFormat": "application/pdf",
-            "sdDatePublished": "2020-04-09T13:09:21+01:00Z"
-        },
-        {
-            "@id": "https://w3id.org/scicat/type/SLSDataset",
-            "@type": "rdfs:Class",
-            "rdfs:label": "SLS Dataset"
-        },
-        {
-            "@id": "https://w3id.org/scicat/attribute/beamEnergy",
-            "@type": "rdf:Property",
-            "rdfs:label": "beamEnergy",
-            "rdfs:comment": "Energy of the beam",
-            "rdfs:domain": [
-                {
-                    "@id": "SLSDataset"
-                }
-            ]
+            "scicat:registeredTime": "2020-09-09T12:25:37.608Z",
+            "scicat:status": "registered",
+            "scicat:thumbnail": "data:image/png;base64,iVBORw0KGgoAA...RU5ErkJggg==",
+            "scicat:relatedPublications": [
+                "https://doi.org/10.1103/PhysRevAccelBeams.22.064602"
+            ],
+            "scicat:downloadLink": "",
+            "scicat:createdBy": "ms-ad.frey_m",
+            "scicat:updatedBy": "archiveManager",
+            "scicat:createdAt": "2020-09-09T12:25:31.298Z",
+            "scicat:updatedAt": "2021-02-13T04:02:16.436Z"
         }
     ]
 }
