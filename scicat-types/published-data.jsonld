@@ -1,0 +1,41 @@
+{
+    "@context": {
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "schema": "https://schema.org/",
+        "xsd": "http://www.w3.org/2001/XMLSchema#"
+    },
+    "@graph": [
+        {
+            "@id": "scicat:PublishedData",
+            "@type": "rdfs:Class"
+        },
+        {
+            "@id": "scicat:doi",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:string"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:affiliation",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:string"
+                }
+            ]
+        }
+    ]
+}
