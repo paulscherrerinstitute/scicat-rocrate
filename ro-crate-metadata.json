@@ -19,7 +19,21 @@
         {
             "@id": "./",
             "@type": [
-                "Dataset",
+                "Dataset"
+            ],
+            "name": "Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron",
+            "description": "Data of the turn pattern matching paper .",
+            "license": "https://creativecommons.org/licenses/by/4.0/legalcode",
+            "datePublished": "2020-09-09T12:25:37.608Z",
+            "hasParts": [
+                {
+                    "@id": "https://doi.psi.ch/detail/10.16907%2F00b95267-8b8b-48a7-8de6-8da6b9b7bb7d"
+                }
+            ]
+        },
+        {
+            "@id": "https://doi.psi.ch/detail/10.16907%2F00b95267-8b8b-48a7-8de6-8da6b9b7bb7d",
+            "@type": [
                 "scicat:PublishedData"
             ],
             "scicat:doi": "10.16907/00b95267-8b8b-48a7-8de6-8da6b9b7bb7d",
@@ -33,14 +47,13 @@
             "name": "Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron",
             "scicat:abstract": "Data of the paper \"Matching of turn pattern measurements for cyclotrons using multiobjective optimization\" published in Physical Review Accelerators and Beams. The data is generated as part of the PhD thesis funded by the Swiss National Science Foundation (SNSF) under contract number 200021_159936. ",
             "scicat:dataDescription": "Data of the turn pattern matching paper .",
-            "description": "Data of the turn pattern matching paper .",
-            "license": "https://creativecommons.org/licenses/by/4.0/legalcode",
-            "datePublished": "2020-09-09T12:25:37.608Z",
             "scicat:resourceType": "raw",
-            "scicat:numberOfFiles": null,
-            "scicat:sizeOfArchive": null,
+            "scicat:numberOfFiles": 1,
+            "scicat:sizeOfArchive": 383766,
             "scicat:pidArray": [
-                "20.500.11935/5148ff5d-3f0d-464b-9e3b-7d71e18b4822"
+                {
+                    "@id": "https://discovery.psi.ch/datasets/20.500.11935%2f5148ff5d-3f0d-464b-9e3b-7d71e18b4822"
+                }
             ],
             "scicat:registeredTime": "2020-09-09T12:25:37.608Z",
             "scicat:status": "registered",
@@ -52,7 +65,17 @@
             "scicat:createdBy": "ms-ad.frey_m",
             "scicat:updatedBy": "archiveManager",
             "scicat:createdAt": "2020-09-09T12:25:31.298Z",
-            "scicat:updatedAt": "2021-02-13T04:02:16.436Z"
+            "scicat:updatedAt": "2021-02-13T04:02:16.436Z",
+            "hasParts": [
+                {
+                    "@id": "data1.txt"
+                }
+            ]
+        },
+        {
+            "@id": "data1.txt",
+            "@type": "File",
+            "contentSize": "383766"
         }
     ]
 }
