@@ -1,8 +1,11 @@
 {
   "@context": {
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-    "schema": "https://schema.org/",
-    "xsd": "http://www.w3.org/2001/XMLSchema#"
+    "schema": "http://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "datacite": "https://raw.githubusercontent.com/paulscherrerinstitute/datacite-ontology/refs/heads/main/datacite.ttl#",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "scicat": "http://scicat-schema.psi.ch/"
   },
   "@graph": [
     {
@@ -40,6 +43,7 @@
     {
       "@id": "scicat:creator",
       "@type": "rdfs:Property",
+      "owl:equivalentProperty": "datacite:creatorName",
       "schema:domainIncludes": [
         {
           "@id": "scicat:PublishedData"
@@ -68,6 +72,7 @@
     {
       "@id": "scicat:publicationYear",
       "@type": "rdfs:Property",
+      "owl:equivalentProperty": "datacite:publicationYear",
       "schema:domainIncludes": [
         {
           "@id": "scicat:PublishedData"
@@ -82,6 +87,7 @@
     {
       "@id": "scicat:title",
       "@type": "rdfs:Property",
+      "owl:equivalentProperty": "datacite:title",
       "schema:domainIncludes": [
         {
           "@id": "scicat:PublishedData"

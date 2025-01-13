@@ -1,0 +1,406 @@
+{
+    "@context": [
+        "https://w3id.org/ro/crate/1.1/context",
+        {
+            "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+            "schema": "http://schema.org/",
+            "xsd": "http://www.w3.org/2001/XMLSchema#",
+            "datacite": "https://raw.githubusercontent.com/paulscherrerinstitute/datacite-ontology/refs/heads/main/datacite.ttl#",
+            "owl": "http://www.w3.org/2002/07/owl#",
+            "scicat": "http://scicat-schema.psi.ch/"
+        }
+    ],
+    "@graph": [
+        {
+            "@type": "CreativeWork",
+            "@id": "ro-crate-metadata.json",
+            "conformsTo": {
+                "@id": "https://w3id.org/ro/crate/1.1"
+            },
+            "about": {
+                "@id": "./"
+            }
+        },
+        {
+            "@id": "./",
+            "@type": [
+                "Dataset"
+            ],
+            "name": "Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron",
+            "description": "Data of the turn pattern matching paper .",
+            "license": "https://creativecommons.org/licenses/by/4.0/legalcode",
+            "datePublished": "2020-09-09T12:25:37.608Z",
+            "hasParts": [
+                {
+                    "@id": "https://doi.psi.ch/detail/10.16907%2F00b95267-8b8b-48a7-8de6-8da6b9b7bb7d"
+                }
+            ]
+        },
+        {
+            "@id": "https://doi.psi.ch/detail/10.16907%2F00b95267-8b8b-48a7-8de6-8da6b9b7bb7d",
+            "@type": [
+                "scicat:PublishedData"
+            ],
+            "scicat:doi": "10.16907/00b95267-8b8b-48a7-8de6-8da6b9b7bb7d",
+            "scicat:creator": [
+                "Matthias Frey"
+            ],
+            "scicat:publisher": "PSI",
+            "scicat:publicationYear": 2020,
+            "scicat:title": "Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron",
+            "scicat:url": "",
+            "scicat:abstract": "Data of the paper \"Matching of turn pattern measurements for cyclotrons using multiobjective optimization\" published in Physical Review Accelerators and Beams. The data is generated as part of the PhD thesis funded by the Swiss National Science Foundation (SNSF) under contract number 200021_159936. ",
+            "scicat:dataDescription": "Data of the turn pattern matching paper .",
+            "scicat:resourceType": "raw",
+            "scicat:numberOfFiles": 1,
+            "scicat:sizeOfArchive": 383766,
+            "scicat:pidArray": [
+                {
+                    "@id": "https://discovery.psi.ch/datasets/20.500.11935%2f5148ff5d-3f0d-464b-9e3b-7d71e18b4822"
+                }
+            ],
+            "scicat:registeredTime": "2020-09-09T12:25:37.608Z",
+            "scicat:status": "registered",
+            "scicat:thumbnail": "data:image/png;base64,iVBORw0KGgoAA...RU5ErkJggg==",
+            "scicat:relatedPublications": [
+                "https://doi.org/10.1103/PhysRevAccelBeams.22.064602"
+            ],
+            "scicat:downloadLink": "",
+            "scicat:createdBy": "ms-ad.frey_m",
+            "scicat:updatedBy": "archiveManager",
+            "scicat:createdAt": "2020-09-09T12:25:31.298Z",
+            "scicat:updatedAt": "2021-02-13T04:02:16.436Z",
+            "hasParts": [
+                {
+                    "@id": "data1.txt"
+                }
+            ]
+        },
+        {
+            "@id": "data1.txt",
+            "@type": "File",
+            "contentSize": "383766"
+        },
+        {
+            "@id": "scicat:PublishedData",
+            "@type": "rdfs:Class"
+        },
+        {
+            "@id": "scicat:doi",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:string"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:affiliation",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:string"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:creator",
+            "@type": "rdfs:Property",
+            "owl:equivalentProperty": {
+                "@id": "datacite:creatorName"
+            },
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "rdf:List"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:publisher",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:string"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:publicationYear",
+            "@type": "rdfs:Property",
+            "owl:equivalentProperty": {
+                "@id": "datacite:publicationYear"
+            },
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:integer"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:title",
+            "@type": "rdfs:Property",
+            "owl:equivalentProperty": {
+                "@id": "datacite:title"
+            },
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:string"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:url",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:string"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:abstract",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:string"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:dataDescription",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:string"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:resourceType",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:string"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:numberOfFiles",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:integer"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:sizeOfArchive",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:integer"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:pidArray",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "rdf:List"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:authors",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "rdf:List"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:registeredTime",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:dateTime"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:status",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:string"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:scicatUser",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:string"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:thumbnail",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:string"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:relatedPublications",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "rdf:List"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:downloadLink",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:string"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:createdAt",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:dateTime"
+                }
+            ]
+        },
+        {
+            "@id": "scicat:updatedAt",
+            "@type": "rdfs:Property",
+            "schema:domainIncludes": [
+                {
+                    "@id": "scicat:PublishedData"
+                }
+            ],
+            "schema:rangeIncludes": [
+                {
+                    "@id": "xsd:dateTime"
+                }
+            ]
+        }
+    ]
+}
