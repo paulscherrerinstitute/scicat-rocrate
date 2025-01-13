@@ -1,0 +1,427 @@
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix ns0: <http://scicat-schema.psi.ch/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix datacite: <http://datacite.org/schema/kernel-4#> .
+@base <http://www.w3.org/2002/07/owl#> .
+
+[ rdf:type owl:Ontology ;
+   owl:imports datacite:
+ ] .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+###  http://purl.org/dc/terms/conformsTo
+dc:conformsTo rdf:type owl:AnnotationProperty .
+
+
+###  http://schema.org/about
+schema:about rdf:type owl:AnnotationProperty .
+
+
+###  http://schema.org/contentSize
+schema:contentSize rdf:type owl:AnnotationProperty .
+
+
+###  http://schema.org/datePublished
+schema:datePublished rdf:type owl:AnnotationProperty .
+
+
+###  http://schema.org/description
+schema:description rdf:type owl:AnnotationProperty .
+
+
+###  http://schema.org/domainIncludes
+schema:domainIncludes rdf:type owl:AnnotationProperty .
+
+
+###  http://schema.org/license
+schema:license rdf:type owl:AnnotationProperty .
+
+
+###  http://schema.org/name
+schema:name rdf:type owl:AnnotationProperty .
+
+
+###  http://schema.org/rangeIncludes
+schema:rangeIncludes rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/abstract
+ns0:abstract rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/createdAt
+ns0:createdAt rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/createdBy
+ns0:createdBy rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/dataDescription
+ns0:dataDescription rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/doi
+ns0:doi rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/downloadLink
+ns0:downloadLink rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/numberOfFiles
+ns0:numberOfFiles rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/pidArray
+ns0:pidArray rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/publicationYear
+ns0:publicationYear rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/publisher
+ns0:publisher rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/registeredTime
+ns0:registeredTime rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/relatedPublications
+ns0:relatedPublications rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/resourceType
+ns0:resourceType rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/sizeOfArchive
+ns0:sizeOfArchive rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/status
+ns0:status rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/thumbnail
+ns0:thumbnail rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/title
+ns0:title rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/updatedAt
+ns0:updatedAt rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/updatedBy
+ns0:updatedBy rdf:type owl:AnnotationProperty .
+
+
+###  http://scicat-schema.psi.ch/url
+ns0:url rdf:type owl:AnnotationProperty .
+
+
+###  http://xmlns.com/foaf/0.1/name
+<http://xmlns.com/foaf/0.1/name> rdf:type owl:AnnotationProperty .
+
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://datacite.org/schema/kernel-4#creatorName
+datacite:creatorName owl:equivalentProperty ns0:creator .
+
+
+###  http://scicat-schema.psi.ch/creator
+ns0:creator rdf:type owl:ObjectProperty ;
+            schema:domainIncludes ns0:PublishedData ;
+            schema:rangeIncludes rdf:List .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://schema.org/CreativeWork
+schema:CreativeWork rdf:type owl:Class .
+
+
+###  http://schema.org/Dataset
+schema:Dataset rdf:type owl:Class .
+
+
+###  http://schema.org/MediaObject
+schema:MediaObject rdf:type owl:Class .
+
+
+###  http://scicat-schema.psi.ch/PublishedData
+ns0:PublishedData rdf:type owl:Class .
+
+
+###  http://www.w3.org/2000/01/rdf-schema#Property
+rdfs:Property rdf:type owl:Class .
+
+
+###  http://xmlns.com/foaf/0.1/Person
+<http://xmlns.com/foaf/0.1/Person> rdf:type owl:Class .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://scicat-schema.psi.ch/
+ns0: rdf:type owl:NamedIndividual ,
+              schema:Dataset ;
+     schema:datePublished "2020-09-09T12:25:37.608Z" ;
+     schema:description "Data of the turn pattern matching paper ." ;
+     schema:license "https://creativecommons.org/licenses/by/4.0/legalcode" ;
+     schema:name "Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron" .
+
+
+###  http://scicat-schema.psi.ch/Matthias
+ns0:Matthias rdf:type owl:NamedIndividual ,
+                      <http://xmlns.com/foaf/0.1/Person> ;
+             <http://xmlns.com/foaf/0.1/name> "Matthias Frey" .
+
+
+###  http://scicat-schema.psi.ch/abstract
+ns0:abstract rdf:type owl:NamedIndividual ,
+                      rdfs:Property .
+
+
+###  http://scicat-schema.psi.ch/affiliation
+ns0:affiliation rdf:type owl:NamedIndividual ,
+                         rdfs:Property ;
+                schema:domainIncludes ns0:PublishedData ;
+                schema:rangeIncludes xsd:string .
+
+
+###  http://scicat-schema.psi.ch/authors
+ns0:authors rdf:type owl:NamedIndividual ,
+                     rdfs:Property ;
+            schema:domainIncludes ns0:PublishedData ;
+            schema:rangeIncludes rdf:List .
+
+
+###  http://scicat-schema.psi.ch/createdAt
+ns0:createdAt rdf:type owl:NamedIndividual ,
+                       rdfs:Property .
+
+
+###  http://scicat-schema.psi.ch/data1.txt
+ns0:data1.txt rdf:type owl:NamedIndividual ,
+                       schema:MediaObject ;
+              schema:contentSize "383766" .
+
+
+###  http://scicat-schema.psi.ch/dataDescription
+ns0:dataDescription rdf:type owl:NamedIndividual ,
+                             rdfs:Property .
+
+
+###  http://scicat-schema.psi.ch/doi
+ns0:doi rdf:type owl:NamedIndividual ,
+                 rdfs:Property .
+
+
+###  http://scicat-schema.psi.ch/downloadLink
+ns0:downloadLink rdf:type owl:NamedIndividual ,
+                          rdfs:Property .
+
+
+###  http://scicat-schema.psi.ch/numberOfFiles
+ns0:numberOfFiles rdf:type owl:NamedIndividual ,
+                           rdfs:Property .
+
+
+###  http://scicat-schema.psi.ch/pidArray
+ns0:pidArray rdf:type owl:NamedIndividual ,
+                      rdfs:Property .
+
+
+###  http://scicat-schema.psi.ch/publicationYear
+ns0:publicationYear rdf:type owl:NamedIndividual ,
+                             rdfs:Property .
+
+
+###  http://scicat-schema.psi.ch/publisher
+ns0:publisher rdf:type owl:NamedIndividual ,
+                       rdfs:Property .
+
+
+###  http://scicat-schema.psi.ch/registeredTime
+ns0:registeredTime rdf:type owl:NamedIndividual ,
+                            rdfs:Property .
+
+
+###  http://scicat-schema.psi.ch/relatedPublications
+ns0:relatedPublications rdf:type owl:NamedIndividual ,
+                                 rdfs:Property .
+
+
+###  http://scicat-schema.psi.ch/resourceType
+ns0:resourceType rdf:type owl:NamedIndividual ,
+                          rdfs:Property .
+
+
+###  http://scicat-schema.psi.ch/ro-crate-metadata.json
+ns0:ro-crate-metadata.json rdf:type owl:NamedIndividual ,
+                                    schema:CreativeWork ;
+                           dc:conformsTo <https://w3id.org/ro/crate/1.1> ;
+                           schema:about ns0: .
+
+
+###  http://scicat-schema.psi.ch/scicatUser
+ns0:scicatUser rdf:type owl:NamedIndividual ,
+                        rdfs:Property ;
+               schema:domainIncludes ns0:PublishedData ;
+               schema:rangeIncludes xsd:string .
+
+
+###  http://scicat-schema.psi.ch/sizeOfArchive
+ns0:sizeOfArchive rdf:type owl:NamedIndividual ,
+                           rdfs:Property .
+
+
+###  http://scicat-schema.psi.ch/status
+ns0:status rdf:type owl:NamedIndividual ,
+                    rdfs:Property .
+
+
+###  http://scicat-schema.psi.ch/thumbnail
+ns0:thumbnail rdf:type owl:NamedIndividual ,
+                       rdfs:Property .
+
+
+###  http://scicat-schema.psi.ch/title
+ns0:title rdf:type owl:NamedIndividual ,
+                   rdfs:Property .
+
+
+###  http://scicat-schema.psi.ch/updatedAt
+ns0:updatedAt rdf:type owl:NamedIndividual ,
+                       rdfs:Property .
+
+
+###  http://scicat-schema.psi.ch/url
+ns0:url rdf:type owl:NamedIndividual ,
+                 rdfs:Property .
+
+
+###  https://doi.psi.ch/detail/10.16907%2F00b95267-8b8b-48a7-8de6-8da6b9b7bb7d
+<https://doi.psi.ch/detail/10.16907%2F00b95267-8b8b-48a7-8de6-8da6b9b7bb7d> rdf:type owl:NamedIndividual ,
+                                                                                     ns0:PublishedData ;
+                                                                            ns0:creator ns0:Matthias ;
+                                                                            ns0:abstract "Data of the paper \"Matching of turn pattern measurements for cyclotrons using multiobjective optimization\" published in Physical Review Accelerators and Beams. The data is generated as part of the PhD thesis funded by the Swiss National Science Foundation (SNSF) under contract number 200021_159936. " ;
+                                                                            ns0:createdAt "2020-09-09T12:25:31.298Z" ;
+                                                                            ns0:createdBy "ms-ad.frey_m" ;
+                                                                            ns0:dataDescription "Data of the turn pattern matching paper ." ;
+                                                                            ns0:doi "10.16907/00b95267-8b8b-48a7-8de6-8da6b9b7bb7d" ;
+                                                                            ns0:downloadLink "" ;
+                                                                            ns0:numberOfFiles 1 ;
+                                                                            ns0:pidArray <https://discovery.psi.ch/datasets/20.500.11935%2f5148ff5d-3f0d-464b-9e3b-7d71e18b4822> ;
+                                                                            ns0:publicationYear 2020 ;
+                                                                            ns0:publisher "PSI" ;
+                                                                            ns0:registeredTime "2020-09-09T12:25:37.608Z" ;
+                                                                            ns0:relatedPublications "https://doi.org/10.1103/PhysRevAccelBeams.22.064602" ;
+                                                                            ns0:resourceType "raw" ;
+                                                                            ns0:sizeOfArchive 383766 ;
+                                                                            ns0:status "registered" ;
+                                                                            ns0:thumbnail "data:image/png;base64,iVBORw0KGgoAA...RU5ErkJggg==" ;
+                                                                            ns0:title "Data of turn pattern matching between measurement and simulation of the PSI Ring Cyclotron" ;
+                                                                            ns0:updatedAt "2021-02-13T04:02:16.436Z" ;
+                                                                            ns0:updatedBy "archiveManager" ;
+                                                                            ns0:url "" .
+
+
+#################################################################
+#    Annotations
+#################################################################
+
+ns0:abstract schema:domainIncludes ns0:PublishedData ;
+             schema:rangeIncludes xsd:string .
+
+
+ns0:createdAt schema:domainIncludes ns0:PublishedData ;
+              schema:rangeIncludes xsd:dateTime .
+
+
+ns0:dataDescription schema:domainIncludes ns0:PublishedData ;
+                    schema:rangeIncludes xsd:string .
+
+
+ns0:doi schema:domainIncludes ns0:PublishedData ;
+        schema:rangeIncludes xsd:string .
+
+
+ns0:downloadLink schema:domainIncludes ns0:PublishedData ;
+                 schema:rangeIncludes xsd:string .
+
+
+ns0:numberOfFiles schema:domainIncludes ns0:PublishedData ;
+                  schema:rangeIncludes xsd:integer .
+
+
+ns0:pidArray schema:domainIncludes ns0:PublishedData ;
+             schema:rangeIncludes rdf:List .
+
+
+ns0:publicationYear schema:domainIncludes ns0:PublishedData ;
+                    schema:rangeIncludes xsd:integer .
+
+
+ns0:publisher schema:domainIncludes ns0:PublishedData ;
+              schema:rangeIncludes xsd:string .
+
+
+ns0:registeredTime schema:domainIncludes ns0:PublishedData ;
+                   schema:rangeIncludes xsd:dateTime .
+
+
+ns0:relatedPublications schema:domainIncludes ns0:PublishedData ;
+                        schema:rangeIncludes rdf:List .
+
+
+ns0:resourceType schema:domainIncludes ns0:PublishedData ;
+                 schema:rangeIncludes xsd:string .
+
+
+ns0:sizeOfArchive schema:domainIncludes ns0:PublishedData ;
+                  schema:rangeIncludes xsd:integer .
+
+
+ns0:status schema:domainIncludes ns0:PublishedData ;
+           schema:rangeIncludes xsd:string .
+
+
+ns0:thumbnail schema:domainIncludes ns0:PublishedData ;
+              schema:rangeIncludes xsd:string .
+
+
+ns0:title schema:domainIncludes ns0:PublishedData ;
+          schema:rangeIncludes xsd:string .
+
+
+ns0:updatedAt schema:domainIncludes ns0:PublishedData ;
+              schema:rangeIncludes xsd:dateTime .
+
+
+ns0:url schema:domainIncludes ns0:PublishedData ;
+        schema:rangeIncludes xsd:string .
+
+
+###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi
