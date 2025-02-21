@@ -1,0 +1,337 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "hasPart": [
+        {
+          "@id": "scicat:publisher"
+        },
+        {
+          "@id": "scicat:dataDescription"
+        },
+        {
+          "@id": "scicat:thumbnail"
+        },
+        {
+          "@id": "10.16907/808de0df-a9d3-4698-8e9f-d6e091516650"
+        },
+        {
+          "@id": "scicat:creator"
+        },
+        {
+          "@id": "scicat:registeredTime"
+        },
+        {
+          "@id": "scicat:downloadLink"
+        },
+        {
+          "@id": "scicat:PublishedData"
+        },
+        {
+          "@id": "scicat:url"
+        },
+        {
+          "@id": "scicat:numberOfFiles"
+        },
+        {
+          "@id": "scicat:relatedPublications"
+        },
+        {
+          "@id": "scicat:publicationYear"
+        },
+        {
+          "@id": "scicat:resourceType"
+        },
+        {
+          "@id": "scicat:sizeOfArchive"
+        },
+        {
+          "@id": "scicat:updatedAt"
+        },
+        {
+          "@id": "scicat:doi"
+        },
+        {
+          "@id": "scicat:updatedBy"
+        },
+        {
+          "@id": "scicat:createdAt"
+        },
+        {
+          "@id": "scicat:title"
+        },
+        {
+          "@id": "scicat:pidArray"
+        },
+        {
+          "@id": "scicat:abstract"
+        },
+        {
+          "@id": "scicat:status"
+        },
+        {
+          "@id": "scicat:scicatUser"
+        }
+      ]
+    },
+    {
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      },
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork"
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:title",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      },
+      "owl:equivalentProperty": {
+        "@id": "datacite:title"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:thumbnail",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:numberOfFiles",
+      "schema:rangeIncludes": {
+        "@id": "xsd:integer"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:updatedBy",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:resourceType",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:doi",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:creator",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      },
+      "owl:equivalentProperty": {
+        "@id": "datacite:creatorName"
+      }
+    },
+    {
+      "@id": "scicat:PublishedData",
+      "@type": "rdfs:Class",
+      "rdfs:subClassOf": {
+        "@id": "Thing"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:registeredTime",
+      "schema:rangeIncludes": {
+        "@id": "xsd:dateTime"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:publicationYear",
+      "schema:rangeIncludes": {
+        "@id": "xsd:integer"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      },
+      "owl:equivalentProperty": {
+        "@id": "datacite:publicationYear"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:dataDescription",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:pidArray",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:abstract",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:scicatUser",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:status",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:publisher",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:relatedPublications",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:updatedAt",
+      "schema:rangeIncludes": {
+        "@id": "xsd:dateTime"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:createdAt",
+      "schema:rangeIncludes": {
+        "@id": "xsd:dateTime"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:url",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      }
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:sizeOfArchive",
+      "schema:rangeIncludes": {
+        "@id": "xsd:integer"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      }
+    },
+    {
+      "@type": "scicat:PublishedData",
+      "scicat:downloadLink": "",
+      "scicat:doi": "10.16907/808de0df-a9d3-4698-8e9f-d6e091516650",
+      "scicat:numberOfFiles": 0,
+      "scicat:scicatUser": "egli",
+      "scicat:updatedBy": "archiveManager",
+      "scicat:status": "registered",
+      "scicat:updatedAt": "2021-02-13T16:34:56.947Z",
+      "scicat:publicationYear": "2020",
+      "scicat:sizeOfArchive": 0,
+      "scicat:registeredTime": "2020-05-19T14:16:43.742Z",
+      "scicat:publisher": "PSI",
+      "scicat:abstract": "Demonstration dataset collected with JUNGFRAU 4M at X06SA beamline\n",
+      "scicat:title": "JUNGFRAU detector for brighter X-ray sources - solutions for IT and data science challenges in macromolecular crystallography",
+      "scicat:dataDescription": "Lysozyme crystal measured at 100 deg/s with JUNGFRAU 4M. Use code in https://github.com/fleon-psi/JFConverter/tree/5a3850081149ae971e5ae453cacd9fd0420b3069 for conversion.\n",
+      "scicat:resourceType": "raw",
+      "scicat:createdAt": "2025-02-21T15:45:54.620Z",
+      "scicat:url": "",
+      "@id": "10.16907/808de0df-a9d3-4698-8e9f-d6e091516650"
+    },
+    {
+      "@type": "rdfs:Property",
+      "@id": "scicat:downloadLink",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": "scicat:PublishedData"
+      }
+    }
+  ]
+}
