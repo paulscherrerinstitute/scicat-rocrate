@@ -1,0 +1,484 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "Micrometer-resolution X-ray tomographic imaging of a complete intact post mortem juvenile rat lung",
+      "description": "In the associate article to these data sets, we present an X-ray tomographic imaging method that is well suited for pulmonary disease studies in animal models, to resolve the full pathway from gas intake to gas exchange. Current state-of-the-art synchrotron-based tomographic phase-contrast imaging methods allow for three-dimensional microscopic imaging data to be acquired non-destructively in scan times of the order of seconds with good soft tissue contrast. However, when studying multi-scale hierarchically structured objects, such as the mammalian lung, the overall sample size typically exceeds the field of view illuminated by the X-rays in a single scan, and the necessity for achieving a high spatial resolution conflicts with the need to image the whole sample. Several image-stitching and calibration techniques to achieve extended high-resolution fields of view have been reported, but those approaches tend to fail when imaging non-stable samples, thus precluding tomographic measurements of large biological samples, which are prone to degradation and motion during extended scan times. In this work, we demonstrate a full-volume three-dimensional reconstruction of an intact rat lung under immediate post mortem conditions and at an isotropic voxel size of (2.75 µm)^3. We present the methodology for collecting multiple local tomographies with 360 degree extended field of view scans followed by locally non-rigid volumetric stitching. Applied to the lung, it allows to resolve the entire pulmonary structure from the trachea down to the parenchyma in a single dataset.",
+      "datePublished": "2020",
+      "license": "Unknown",
+      "hasPart": [
+        {
+          "@id": ":creator"
+        },
+        {
+          "@id": ":dataDescription"
+        },
+        {
+          "@id": ":updatedAt"
+        },
+        {
+          "@id": ":resourceType"
+        },
+        {
+          "@id": ":pidArray"
+        },
+        {
+          "@id": ":publisher"
+        },
+        {
+          "@id": ":updatedBy"
+        },
+        {
+          "@id": ":createdAt"
+        },
+        {
+          "@id": ":publicationYear"
+        },
+        {
+          "@id": ":title"
+        },
+        {
+          "@id": ":abstract"
+        },
+        {
+          "@id": ":PublishedData"
+        },
+        {
+          "@id": ":registeredTime"
+        },
+        {
+          "@id": ":scicatUser"
+        },
+        {
+          "@id": ":numberOfFiles"
+        },
+        {
+          "@id": ":status"
+        },
+        {
+          "@id": ":relatedPublications"
+        },
+        {
+          "@id": ":doi"
+        },
+        {
+          "@id": "10.16907/7eb141d3-11f1-47a6-9d0e-76f8832ed1b2"
+        }
+      ]
+    },
+    {
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      },
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork"
+    },
+    {
+      "@id": ":updatedBy",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": ":PublishedData"
+      },
+      "@type": "rdfs:Property"
+    },
+    {
+      "@id": ":createdAt",
+      "schema:rangeIncludes": {
+        "@id": "xsd:dateTime"
+      },
+      "schema:domainIncludes": {
+        "@id": ":PublishedData"
+      },
+      "@type": "rdfs:Property"
+    },
+    {
+      "@id": "https://dacat.psi.ch/api/v3/datasets/20.500.11935%2F7f8adb54-6abe-4c02-a1ad-c9b4a6d60f97",
+      "name": "PSI-2018-R2-6_segmented_cropped_volume",
+      "description": "Full-volume high-resolution x-ray tomographic microscopy reconstruction of a juvenile rat lung in fresh post mortem conditions; cropped to the maximum extent of the lung structure and segmented to separate air spaces from lung tissue",
+      "contentSize": "302324856686",
+      "numberOfFiles": 6350,
+      "@type": "Dataset"
+    },
+    {
+      "@id": ":title",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": ":PublishedData"
+      },
+      "owl:equivalentProperty": {
+        "@id": "datacite:title"
+      },
+      "@type": "rdfs:Property"
+    },
+    {
+      "@id": "https://doi.org/10.16907/7eb141d3-11f1-47a6-9d0e-76f8832ed1b2",
+      ":doi": "10.16907/7eb141d3-11f1-47a6-9d0e-76f8832ed1b2",
+      ":creator": [
+        {
+          "@id": "#creator_0"
+        },
+        {
+          "@id": "#creator_1"
+        },
+        {
+          "@id": "#creator_2"
+        },
+        {
+          "@id": "#creator_3"
+        },
+        {
+          "@id": "#creator_4"
+        },
+        {
+          "@id": "#creator_5"
+        },
+        {
+          "@id": "#creator_6"
+        },
+        {
+          "@id": "#creator_7"
+        },
+        {
+          "@id": "#creator_8"
+        }
+      ],
+      ":publisher": "PSI",
+      ":publicationYear": 2020,
+      ":title": "Micrometer-resolution X-ray tomographic imaging of a complete intact post mortem juvenile rat lung",
+      ":url": "",
+      ":abstract": "In the associate article to these data sets, we present an X-ray tomographic imaging method that is well suited for pulmonary disease studies in animal models, to resolve the full pathway from gas intake to gas exchange. Current state-of-the-art synchrotron-based tomographic phase-contrast imaging methods allow for three-dimensional microscopic imaging data to be acquired non-destructively in scan times of the order of seconds with good soft tissue contrast. However, when studying multi-scale hierarchically structured objects, such as the mammalian lung, the overall sample size typically exceeds the field of view illuminated by the X-rays in a single scan, and the necessity for achieving a high spatial resolution conflicts with the need to image the whole sample. Several image-stitching and calibration techniques to achieve extended high-resolution fields of view have been reported, but those approaches tend to fail when imaging non-stable samples, thus precluding tomographic measurements of large biological samples, which are prone to degradation and motion during extended scan times. In this work, we demonstrate a full-volume three-dimensional reconstruction of an intact rat lung under immediate post mortem conditions and at an isotropic voxel size of (2.75 µm)^3. We present the methodology for collecting multiple local tomographies with 360 degree extended field of view scans followed by locally non-rigid volumetric stitching. Applied to the lung, it allows to resolve the entire pulmonary structure from the trachea down to the parenchyma in a single dataset.",
+      ":dataDescription": "This published data collection contains three large volume datasets obtained by X-ray tomographic microscopy of the full juvenile rat lung structure at micrometer resolution. Data were collected and processed at the TOMCAT beamline X02DA of the Swiss Light Source. The first dataset contains the full scanned volume reconstruction (ca. 1.2 Tb), while a second one contains the same data but cropped down in size to the smallest bounding box encompassing the entire lung structure. The third dataset is a binarized version of the second one after thresholding operations to segment out the air volume of the lung.",
+      ":resourceType": "derived",
+      ":numberOfFiles": 0,
+      ":sizeOfArchive": 0,
+      ":pidArray": [
+        {
+          "@id": "https://dacat.psi.ch/api/v3/datasets/20.500.11935%2F904aa555-ac63-488e-9250-0fbeb6d9267c"
+        },
+        {
+          "@id": "https://dacat.psi.ch/api/v3/datasets/20.500.11935%2F7f8adb54-6abe-4c02-a1ad-c9b4a6d60f97"
+        },
+        {
+          "@id": "https://dacat.psi.ch/api/v3/datasets/20.500.11935%2F07f633c1-7b3d-4e0e-bdce-491d57defce3"
+        }
+      ],
+      ":registeredTime": "2020-02-03T08:44:00.000Z",
+      ":status": "registered",
+      ":scicatUser": "schlepuetz_c",
+      ":relatedPublications": {
+        "@id": "#publication_0"
+      },
+      ":createdAt": "2025-02-27T09:39:01.217Z",
+      "publisher": {
+        "@id": "https://ror.org/03eh3y714"
+      },
+      "creator": [
+        {
+          "@id": "#person_0"
+        },
+        {
+          "@id": "#person_1"
+        },
+        {
+          "@id": "#person_2"
+        },
+        {
+          "@id": "#person_3"
+        },
+        {
+          "@id": "#person_4"
+        },
+        {
+          "@id": "#person_5"
+        },
+        {
+          "@id": "#person_6"
+        },
+        {
+          "@id": "#person_7"
+        },
+        {
+          "@id": "#person_8"
+        }
+      ],
+      "hasPart": [
+        {
+          "@id": "https://dacat.psi.ch/api/v3/datasets/20.500.11935%2F904aa555-ac63-488e-9250-0fbeb6d9267c"
+        },
+        {
+          "@id": "https://dacat.psi.ch/api/v3/datasets/20.500.11935%2F7f8adb54-6abe-4c02-a1ad-c9b4a6d60f97"
+        },
+        {
+          "@id": "https://dacat.psi.ch/api/v3/datasets/20.500.11935%2F07f633c1-7b3d-4e0e-bdce-491d57defce3"
+        }
+      ],
+      "@type": [
+        ":PublishedData",
+        "CreativeWork"
+      ]
+    },
+    {
+      "@id": ":abstract",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": ":PublishedData"
+      },
+      "@type": "rdfs:Property"
+    },
+    {
+      "@id": "#creator_7",
+      "@value": "Johannes C. Schittny"
+    },
+    {
+      "@id": "#creator_6",
+      "@value": "Marco Stampanoni"
+    },
+    {
+      "@id": ":status",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": ":PublishedData"
+      },
+      "@type": "rdfs:Property"
+    },
+    {
+      "@id": "#creator_8",
+      "@value": "Christian M. Schlepütz"
+    },
+    {
+      "@id": ":doi",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": ":PublishedData"
+      },
+      "@type": "rdfs:Property"
+    },
+    {
+      "@id": ":creator",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": ":PublishedData"
+      },
+      "owl:equivalentProperty": {
+        "@id": "datacite:creatorName"
+      },
+      "@type": "rdfs:Property"
+    },
+    {
+      "@id": ":dataDescription",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": ":PublishedData"
+      },
+      "@type": "rdfs:Property"
+    },
+    {
+      "@id": ":updatedAt",
+      "schema:rangeIncludes": {
+        "@id": "xsd:dateTime"
+      },
+      "schema:domainIncludes": {
+        "@id": ":PublishedData"
+      },
+      "@type": "rdfs:Property"
+    },
+    {
+      "@id": "#creator_1",
+      "@value": "Goran Lovric"
+    },
+    {
+      "@id": "https://dacat.psi.ch/api/v3/datasets/20.500.11935%2F07f633c1-7b3d-4e0e-bdce-491d57defce3",
+      "name": "data_final_volume_fullresolution/PSI-2018-R2-6_full_volume",
+      "description": "Full-volume high-resolution x-ray tomographic microscopy reconstruction of a juvenile rat lung in fresh post mortem conditions",
+      "contentSize": "1173381773872",
+      "numberOfFiles": 7084,
+      "@type": "Dataset"
+    },
+    {
+      "@id": "#creator_0",
+      "@value": "Elena Borisova"
+    },
+    {
+      "@id": ":resourceType",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": ":PublishedData"
+      },
+      "@type": "rdfs:Property"
+    },
+    {
+      "@id": "#creator_3",
+      "@value": "Luca Fardin"
+    },
+    {
+      "@id": "#creator_2",
+      "@value": "Arttu Mietinen"
+    },
+    {
+      "@id": "#creator_5",
+      "@value": "Anders Larsson"
+    },
+    {
+      "@id": "#creator_4",
+      "@value": "Sam Bayat"
+    },
+    {
+      "@id": "#person_4",
+      "name": "Sam Bayat",
+      "@type": "Person"
+    },
+    {
+      "@id": ":pidArray",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": ":PublishedData"
+      },
+      "@type": "rdfs:Property"
+    },
+    {
+      "@id": "#person_3",
+      "name": "Luca Fardin",
+      "@type": "Person"
+    },
+    {
+      "@id": "#person_6",
+      "name": "Marco Stampanoni",
+      "@type": "Person"
+    },
+    {
+      "@id": ":publisher",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": ":PublishedData"
+      },
+      "@type": "rdfs:Property"
+    },
+    {
+      "@id": "#person_5",
+      "name": "Anders Larsson",
+      "@type": "Person"
+    },
+    {
+      "@id": "#person_0",
+      "name": "Elena Borisova",
+      "@type": "Person"
+    },
+    {
+      "@id": "#person_2",
+      "name": "Arttu Mietinen",
+      "@type": "Person"
+    },
+    {
+      "@id": "#person_1",
+      "name": "Goran Lovric",
+      "@type": "Person"
+    },
+    {
+      "@id": ":publicationYear",
+      "schema:rangeIncludes": {
+        "@id": "xsd:integer"
+      },
+      "schema:domainIncludes": {
+        "@id": ":PublishedData"
+      },
+      "owl:equivalentProperty": {
+        "@id": "datacite:publicationYear"
+      },
+      "@type": "rdfs:Property"
+    },
+    {
+      "@id": "#publication_0",
+      "@value": "E. Borisova, G. Lovrić, A. Miettinen, L. Fardin, S. Bayat, A. Larsson, M. Stampanoni, J. C. Schittny, and C. M. Schlepütz. Micrometer-resolution X-ray tomographic full-volume reconstruction of an intact post-mortem juvenile rat lung. Histochem Cell Biol (2020). https://doi.org/10.1007/s00418-020-01868-8"
+    },
+    {
+      "@id": "#person_8",
+      "name": "Christian M. Schlepütz",
+      "@type": "Person"
+    },
+    {
+      "@id": "#person_7",
+      "name": "Johannes C. Schittny",
+      "@type": "Person"
+    },
+    {
+      "@id": ":PublishedData",
+      "rdfs:subClassOf": {
+        "@id": "Thing"
+      },
+      "@type": "rdfs:Class"
+    },
+    {
+      "@id": ":registeredTime",
+      "schema:rangeIncludes": {
+        "@id": "xsd:dateTime"
+      },
+      "schema:domainIncludes": {
+        "@id": ":PublishedData"
+      },
+      "@type": "rdfs:Property"
+    },
+    {
+      "@id": ":scicatUser",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": ":PublishedData"
+      },
+      "@type": "rdfs:Property"
+    },
+    {
+      "@id": ":numberOfFiles",
+      "schema:rangeIncludes": {
+        "@id": "xsd:integer"
+      },
+      "schema:domainIncludes": {
+        "@id": ":PublishedData"
+      },
+      "@type": "rdfs:Property"
+    },
+    {
+      "@id": "https://dacat.psi.ch/api/v3/datasets/20.500.11935%2F904aa555-ac63-488e-9250-0fbeb6d9267c",
+      "name": "PSI-2018-R2-6_cropped_volume",
+      "description": "Full-volume high-resolution x-ray tomographic microscopy reconstruction of a juvenile rat lung in fresh post mortem conditions; cropped to the maximum extent of the lung structure",
+      "contentSize": "604648500482",
+      "numberOfFiles": 6350,
+      "@type": "Dataset"
+    },
+    {
+      "@id": ":relatedPublications",
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      },
+      "schema:domainIncludes": {
+        "@id": ":PublishedData"
+      },
+      "@type": "rdfs:Property"
+    }
+  ]
+}
