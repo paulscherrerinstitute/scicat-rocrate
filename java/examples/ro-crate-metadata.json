@@ -1,7 +1,10 @@
 {
   "@context": [
-    "https://w3id.org/ro/crate/1.1/context",
     {
+      "name": "http://schema.org/name",
+      "datePublished": "http://schema.org/datePublished",
+      "description": "http://schema.org/description",
+      ...[and the rest from schema.org that we use],
       "owl": "https://www.w3.org/TR/owl-ref/#",
       "datacite": "http://datacite.org/schema/kernel-4#",
       "xsd": "http://www.w3.org/2001/XMLSchema#",
@@ -21,22 +24,22 @@
       "datePublished": "2020",
       "hasPart": [
         {
-          "@id": "_:scicatUser"
+          "@id": "scicat:scicatUser"
         },
         {
           "@id": "https://doi.org/10.16907/7eb141d3-11f1-47a6-9d0e-76f8832ed1b2"
         },
         {
-          "@id": "_:sizeOfArchive"
+          "@id": "scicat:sizeOfArchive"
         },
         {
-          "@id": "_:relatedPublications"
+          "@id": "scicat:relatedPublications"
         },
         {
-          "@id": "_:PublishedData"
+          "@id": "scicat:PublishedData"
         },
         {
-          "@id": "_:numberOfFiles"
+          "@id": "scicat:numberOfFiles"
         }
       ]
     },
@@ -145,7 +148,7 @@
       "@type": "Dataset"
     },
     {
-      "@id": "_:sizeOfArchive",
+      "@id": "scicat:sizeOfArchive",
       "schema:rangeIncludes": {
         "@id": "xsd:integer"
       },
@@ -155,12 +158,15 @@
       "@type": "rdfs:Property"
     },
     {
-      "@id": "_:relatedPublications",
+      "@id": "scicat:relatedPublications",
       "schema:rangeIncludes": {
         "@id": "xsd:string"
       },
       "owl:equivalentProperty": {
         "@id": "datacite:relatedIdentifier"
+      },
+      "owl:equivalentProperty": {
+        "@id": "isBasedOn"
       },
       "schema:domainIncludes": {
         "@id": "PublishedData"
@@ -168,14 +174,14 @@
       "@type": "rdfs:Property"
     },
     {
-      "@id": "_:PublishedData",
+      "@id": "scicat:PublishedData",
       "rdfs:subClassOf": {
         "@id": "Thing"
       },
       "@type": "rdfs:Class"
     },
     {
-      "@id": "_:numberOfFiles",
+      "@id": "scicat:numberOfFiles",
       "schema:rangeIncludes": {
         "@id": "xsd:integer"
       },
