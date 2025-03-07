@@ -165,9 +165,6 @@
       "owl:equivalentProperty": {
         "@id": "datacite:relatedIdentifier"
       },
-      "owl:equivalentProperty": {
-        "@id": "isBasedOn"
-      },
       "schema:domainIncludes": {
         "@id": "PublishedData"
       },
