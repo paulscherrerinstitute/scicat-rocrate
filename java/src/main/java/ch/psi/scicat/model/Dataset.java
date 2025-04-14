@@ -1,4 +1,4 @@
-package ch.psi.scicat;
+package ch.psi.scicat.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

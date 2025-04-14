@@ -1,0 +1,38 @@
+<?xml version='1.0'?>
+
+<!-- 
+Download a Jena binary distribution from:
+  https://jena.apache.org/download/index.cgi#apache-jena-binary-distributions
+Usage: ${JENA_ROOT}/bin/schemagen -c schemagen.rdf
+-->
+<!DOCTYPE rdf:RDF [
+    <!ENTITY jena 'http://jena.hpl.hp.com/'>
+
+    <!ENTITY rdf 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+    <!ENTITY rdfs 'http://www.w3.org/2000/01/rdf-schema#'>
+    <!ENTITY owl 'http://www.w3.org/2002/07/owl#'>
+    <!ENTITY xsd 'http://www.w3.org/2001/XMLSchema#'>
+    <!ENTITY base '&jena;2003/04/schemagen'>
+    <!ENTITY sgen '&base;#'>
+]>
+
+<rdf:RDF
+    xmlns:rdf="&rdf;"
+    xmlns:rdfs="&rdfs;"
+    xmlns:owl="&owl;"
+    xmlns:sgen="&sgen;"
+    xmlns="&sgen;"
+    xml:base="&base;"
+>
+
+    <sgen:Config>
+        <sgen:owl rdf:datatype="&xsd;boolean">true</sgen:owl>
+        <sgen:ontology rdf:datatype="&xsd;boolean">true</sgen:ontology>
+        <sgen:inference rdf:datatype="&xsd;boolean">true </sgen:inference>
+        <sgen:package rdf:datatype="&xsd;string">org.schema</sgen:package>
+        <sgen:classname rdf:datatype="&xsd;string">SchemaVocab</sgen:classname>
+        <sgen:output rdf:datatype="&xsd;string">src/main/java/org/schema</sgen:output>
+        <sgen:input rdf:resource="https://schema.org/version/latest/schemaorg-current-http.ttl" />
+    </sgen:Config>
+
+</rdf:RDF>
