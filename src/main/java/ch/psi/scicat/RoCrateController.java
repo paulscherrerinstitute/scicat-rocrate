@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFParser;
+import org.apache.jena.riot.RiotException;
 import org.apache.jena.riot.lang.LangJSONLD11;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
@@ -109,15 +110,21 @@ public class RoCrateController {
     @Consumes({ ExtraMediaType.APPLICATION_JSONLD, ExtraMediaType.APPLICATION_ZIP })
     @Produces(MediaType.APPLICATION_JSON)
     public Response validateRoCrate(InputStream inputStream) {
-        Model model = RDFParser.create()
-                .source(inputStream)
-                .lang(Lang.JSONLD11)
-                .base("file:///")
-                .context(org.apache.jena.sparql.util.Context.create().set(LangJSONLD11.JSONLD_OPTIONS, jsonLdOptions))
-                .build()
-                .toModel();
+        Model model;
+        try {
+            model = RDFParser.create()
+                    .source(inputStream)
+                    .lang(Lang.JSONLD11)
+                    .base("file:///")
+                    .context(org.apache.jena.sparql.util.Context.create().set(LangJSONLD11.JSONLD_OPTIONS,
+                            jsonLdOptions))
+                    .build()
+                    .toModel();
+            importer.loadModel(model);
+        } catch (RiotException e) {
+            return Response.status(Status.BAD_REQUEST).build();
+        }
 
-        importer.loadModel(model);
         ValidationReport report = importer.validate();
 
         return Response.ok(report).build();
