@@ -3,10 +3,8 @@ package ch.psi.scicat;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.resteasy.reactive.RestResponse;
 
-import ch.psi.scicat.model.CredentialsDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
-import ch.psi.scicat.model.ReturnedAuthLoginDto;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
@@ -32,8 +30,4 @@ public interface ScicatService {
     @GET
     @Path("datasets/{pid}")
     RestResponse<Dataset> getDatasetByPid(@PathParam("pid") String pid);
-
-    @POST
-    @Path("auth/login")
-    RestResponse<ReturnedAuthLoginDto> login(CredentialsDto credentials);
 }
