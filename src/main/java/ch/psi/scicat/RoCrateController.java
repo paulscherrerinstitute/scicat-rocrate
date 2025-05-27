@@ -1,7 +1,9 @@
 package ch.psi.scicat;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.jena.rdf.model.Model;
@@ -11,6 +13,7 @@ import org.apache.jena.riot.RiotException;
 import org.apache.jena.riot.lang.LangJSONLD11;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
 import org.jboss.resteasy.reactive.RestHeader;
 
@@ -34,6 +37,8 @@ import jakarta.ws.rs.core.Response.Status;
 @Tag(name = "ro-crate")
 public class RoCrateController {
     private int cacheSize = 0;
+
+    private static final Logger LOG = Logger.getLogger(RoCrateController.class);
 
     @Inject
     RoCrateExporter exporter;
@@ -145,13 +150,17 @@ public class RoCrateController {
 
         importer.loadModel(model);
         ValidationReport report = importer.validate();
+        Map<String, String> importMap = new HashMap<>();
         report.getEntities().forEach(e -> {
             if (e.object() instanceof PublishedData publishedData) {
-                System.out.println(publishedData);
+                // TODO: create the objects
+                importMap.put(e.id(), "NOT CREATED");
             }
         });
-        // var publications = importer.listPublications();
 
-        return Response.ok().build(); // TODO: should be a created
+        return Response
+                .status(Status.CREATED)
+                .entity(importMap)
+                .build();
     }
 }
