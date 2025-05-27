@@ -1,5 +1,6 @@
 package ch.psi.scicat.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -87,6 +88,14 @@ public record PublishedData(
         public PublishedDataBuilder creator(List<String> creator) {
             this.creator = creator;
             return this;
+        }
+
+        public void addCreator(String creator) {
+            if (this.creator == null) {
+                this.creator = new ArrayList<>();
+            }
+
+            this.creator.add(creator);
         }
 
         public PublishedDataBuilder publisher(String publisher) {
@@ -204,7 +213,10 @@ public record PublishedData(
             // throw new IllegalStateException("PublishedData is missing required property
             // 'pidArray'");
             // } else {
-            return new PublishedData(this);
+            PublishedData result = new PublishedData(this);
+            System.out.println(result);
+
+            return result;
             // }
         }
     }

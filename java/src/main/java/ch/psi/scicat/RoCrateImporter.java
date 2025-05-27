@@ -1,30 +1,37 @@
 package ch.psi.scicat;
 
+import java.text.ParseException;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Map;
 
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ReasonerRegistry;
-import org.apache.jena.shared.PropertyNotFoundException;
-import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.SchemaDO;
 import org.jboss.logging.Logger;
-import org.schema.SchemaVocab;
 
+import com.fasterxml.jackson.databind.util.StdDateFormat;
+
+import ch.psi.scicat.ValidationReport.Entity;
+import ch.psi.scicat.model.NoEntityFound;
+import ch.psi.scicat.model.PropertyError;
+import ch.psi.scicat.model.PropertyRequirements;
 import ch.psi.scicat.model.PublishedData;
 import ch.psi.scicat.model.PublishedData.PublishedDataBuilder;
 import jakarta.enterprise.context.RequestScoped;
@@ -33,9 +40,10 @@ import jakarta.enterprise.context.RequestScoped;
 public class RoCrateImporter {
     private static final Logger LOG = Logger.getLogger(RoCrateImporter.class);
 
-    private Model model = ModelFactory.createDefaultModel();
+    private Model model = ModelFactory.createOntologyModel();
     private Reasoner reasoner = ReasonerRegistry.getOWLReasoner();
     private InfModel infModel = ModelFactory.createInfModel(reasoner, model);
+    private DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     public void loadModel(Model model) {
         this.model = model;
@@ -43,219 +51,197 @@ public class RoCrateImporter {
         infModel.setDerivationLogging(true);
     }
 
-    public List<PublishedData> listPublications() {
-        List<PublishedData> publications = new ArrayList<>();
+    public ValidationReport validate() {
+        ValidationReport report = new ValidationReport();
+        List<Resource> potentialPublications = listPublications();
+        if (potentialPublications.isEmpty()) {
+            report.addError(new NoEntityFound());
+            return report;
+        }
 
-        listCreativeWorks().forEach(creativeWork -> {
-            LOG.infof("Trying to convert %s to PublishedData", creativeWork.getURI());
-            tryIntoPublishedData(creativeWork).ifPresentOrElse(p -> {
-                LOG.infof("Conversion of %s to PublishedData succeeded", creativeWork.getURI());
-                publications.add(p);
-            }, () -> {
-                LOG.infof("Conversion of %s to PublishedData failed", creativeWork.getURI());
+        for (Resource p : potentialPublications) {
+            try {
+                report.addEntity(validatePublication(p));
+            } catch (ValidationException e) {
+                report.addError(e);
+            }
+        }
+
+        return report;
+    }
+
+    public List<Resource> listPublications() {
+        List<Resource> publications = new ArrayList<>();
+
+        Query query = QueryFactory.create(String.format("""
+                PREFIX schema: <https://schema.org/>
+
+                SELECT ?creativeWork ?identifier
+                WHERE {
+                    ?creativeWork a <%s> .
+                    ?creativeWork <%s> ?identifier .
+                }
+                """, SchemaDO.CreativeWork.getURI(), SchemaDO.identifier.getURI()));
+        try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+            ResultSet results = qexec.execSelect();
+            results.forEachRemaining(querySolution -> {
+                // TODO: try/catch?
+                Resource pub = querySolution.getResource("creativeWork");
+                Literal identifier = querySolution.getLiteral("identifier");
+                // Note: Should we accept different formats and try to extract the DOI?
+                if (identifier != null && RoCrateController.isDoi(identifier.toString())) {
+                    publications.add(pub);
+                }
             });
-        });
+        }
 
         return publications;
     }
 
-    public List<Resource> listCreativeWorks() {
-        return infModel
-                .listStatements(null, RDF.type, SchemaVocab.CreativeWork)
-                .toList()
-                .stream()
-                .map(s -> s.getSubject())
-                .filter(s -> s.getURI() == null // Blank nodes have a null URI
-                        || !s.getURI().contains("ro-crate-metadata.json"))
-                .collect(Collectors.toList());
-    }
+    public Entity<PublishedData> validatePublication(Resource publication) throws ValidationException {
+        Map<String, Object> foundProperties = validateProperties(publication,
+                Map.ofEntries(
+                        Map.entry(SchemaDO.identifier, new PropertyRequirements(true)),
+                        Map.entry(SchemaDO.creator, new PropertyRequirements(true, true, true)),
+                        Map.entry(SchemaDO.title, new PropertyRequirements(true)),
+                        Map.entry(SchemaDO.publisher, new PropertyRequirements(true, true)),
+                        Map.entry(SchemaDO.dateCreated, new PropertyRequirements(true)),
+                        Map.entry(SchemaDO.datePublished, new PropertyRequirements(true)),
+                        Map.entry(SchemaDO.dateModified, new PropertyRequirements(true)),
+                        Map.entry(StaticEntities.SchemaDOAbstract, new PropertyRequirements(true)),
+                        Map.entry(SchemaDO.description, new PropertyRequirements(false)),
+                        // NOTE: License is required even though SciCat doesn't process it?
+                        Map.entry(SchemaDO.license, new PropertyRequirements(true, true))
+                // Map.entry(SchemaDO.additionalType, new PropertyRequirements(false, true)),
+                // Map.entry(SchemaDO.sdDatePublished, new PropertyRequirements(false, true)),
+                // Map.entry(SchemaDO.creativeWorkStatus, new PropertyRequirements(false,
+                // true)),
+                // Map.entry(SchemaDO.description, new PropertyRequirements(false, true))
+                ));
 
-    public Optional<PublishedData> tryIntoPublishedData(Resource creativeWork) {
         PublishedDataBuilder builder = new PublishedDataBuilder();
-        // builder.doi(extractDoi(creativeWork))
-        // .creator(extractCreators(creativeWork))
-        // .publisher(extractPublisherInfo(creativeWork))
-        // .publicationYear(extractPublicationYear(creativeWork))
-        // .title(extractTitle(creativeWork))
-        // ._abstract(extractAbstract(creativeWork))
-        // .dataDescription(extractDataDescription(creativeWork))
-        // .pidArray(extractPidArray(creativeWork));
-        extractDoi(creativeWork).ifPresent(doi -> builder.doi(doi));
-        builder.creator(extractCreators(creativeWork));
-        extractPublisherInfo(creativeWork).ifPresent(publisher -> builder.publisher(publisher));
-        extractPublicationYear(creativeWork).ifPresent(publicationYear -> builder.publicationYear(publicationYear));
-        extractTitle(creativeWork).ifPresent(title -> builder.title(title));
-        extractAbstract(creativeWork).ifPresent(abstract_ -> builder._abstract(abstract_));
-        extractDataDescription(creativeWork).ifPresent(dataDescription -> builder.dataDescription(dataDescription));
+        ValidationException errors = new ValidationException();
+
+        builder.doi(foundProperties.get(SchemaDO.identifier.getLocalName()).toString());
+        builder.title(foundProperties.get(SchemaDO.title.getLocalName()).toString());
+        builder._abstract(foundProperties.get(StaticEntities.SchemaDOAbstract.getLocalName()).toString());
+        builder.dataDescription(foundProperties.get(SchemaDO.description.getLocalName()).toString());
+
+        List<Resource> creatorList = (List<Resource>) foundProperties.get(SchemaDO.creator.getLocalName());
+        for (Resource creator : creatorList) {
+            try {
+                Map<String, Object> creatorProperties = validateProperties(creator,
+                        Map.ofEntries(Map.entry(SchemaDO.name, new PropertyRequirements(true))));
+                builder.addCreator(creatorProperties.get(SchemaDO.name.getLocalName()).toString());
+            } catch (ValidationException e) {
+                errors.addError(e);
+            }
+        }
 
         try {
-            return Optional.of(builder.build());
-        } catch (IllegalStateException e) {
-            LOG.error(e);
-            return Optional.empty();
-        }
-    }
+            Resource publisher = (Resource) foundProperties.get(SchemaDO.publisher.getLocalName());
 
-    public Optional<String> extractDoi(Resource subject) {
-        Optional<Literal> literal = extractLiteralProperty(subject, SchemaVocab.identifier_PROP);
-        return literal.map(Literal::getString);
-    }
-
-    public Optional<Literal> extractLiteralProperty(Resource subject, Property property) {
-        // We assume the subject is valid but might be from the non inferred model
-        Statement s;
-        if (!subject.getModel().equals(infModel)) {
-            s = (subject.isURIResource()
-                    ? infModel.getResource(subject.getURI())
-                    : infModel.getResource(subject.getId()))
-                    .getProperty(property);
-        } else {
-            s = subject.getProperty(property);
+            Map<String, Object> publisherProperties = validateProperties(publisher,
+                    Map.ofEntries(Map.entry(SchemaDO.name, new PropertyRequirements(true))));
+            builder.publisher(publisherProperties.get(SchemaDO.name.getLocalName()).toString());
+        } catch (ValidationException e) {
+            errors.addError(e);
         }
 
-        if (s != null) {
-            RDFNode o = s.getObject();
-            if (o.isLiteral()) {
-                return Optional.of(o.asLiteral());
-            } else {
-                LOG.warnf("Ignoring non-literal property %s of subject %s", property.toString(),
-                        subject.toString());
-                return Optional.empty();
-            }
+        try {
+            Literal datePublished = (Literal) foundProperties.get(SchemaDO.datePublished.getLocalName());
+            builder.publicationYear(parseDateLiteral(datePublished).getYear());
+        } catch (ParseException e) {
+            errors.addError(new PropertyError(publication.getURI(), SchemaDO.datePublished.toString(),
+                    "Failed to parse date, make sure it is ISO-8601 compliant"));
         }
 
-        LOG.warnf("Resource %s has no property %s", subject.toString(), property.toString());
-        return Optional.empty();
-    }
-
-    public Optional<Resource> extractResourceProperty(Resource subject, Property property) {
-        Statement s;
-        if (!subject.getModel().equals(infModel)) {
-            s = (subject.isURIResource()
-                    ? infModel.getResource(subject.getURI())
-                    : infModel.getResource(subject.getId()))
-                    .getProperty(property);
-        } else {
-            s = subject.getProperty(property);
+        try {
+            Literal dateCreated = (Literal) foundProperties.get(SchemaDO.dateCreated.getLocalName());
+            builder.createdAt(parseDateLiteral(dateCreated).format(formatter));
+        } catch (ParseException e) {
+            errors.addError(new PropertyError(publication.getURI(), SchemaDO.datePublished.toString(),
+                    "Failed to parse date, make sure it is ISO-8601 compliant"));
         }
 
-        if (s != null) {
-            RDFNode o = s.getObject();
-            if (o.isResource()) {
-                return Optional.of(o.asResource());
-            } else {
-                LOG.warnf("Ignoring non-resource property %s of subject %s", property.toString(), subject.toString());
-                return Optional.empty();
-            }
-        }
-        LOG.warnf("Resource %s has no property %s", subject.toString(), property.toString());
-
-        return Optional.empty();
-    }
-
-    public List<String> extractCreators(Resource subject) {
-        List<String> creator = new ArrayList<>();
-
-        StmtIterator creatorIterator = subject.listProperties(SchemaVocab.creator);
-        if (!creatorIterator.hasNext()) {
-            LOG.errorf("Resource %s has no property %", subject.toString(), SchemaVocab.creator.toString());
-            return creator;
+        try {
+            Literal dateModified = (Literal) foundProperties.get(SchemaDO.dateModified.getLocalName());
+            builder.updatedAt(parseDateLiteral(dateModified).format(formatter));
+        } catch (ParseException e) {
+            errors.addError(new PropertyError(publication.getURI(), SchemaDO.datePublished.toString(),
+                    "Failed to parse date, make sure it is ISO-8601 compliant"));
         }
 
-        creatorIterator.forEach(s -> {
-            if (s.getObject().isResource()) {
-                Resource creatorResource = s.getObject().asResource();
-                LOG.infof("Found creator with id: %s", creatorResource);
-                extractCreatorInfo(creatorResource).ifPresent(c -> creator.add(c));
-            } else {
-                // TODO: error message
-            }
-        });
-
-        return creator;
-    }
-
-    public Optional<String> extractCreatorInfo(Resource creator) {
-        Optional<Literal> name = extractLiteralProperty(creator, SchemaVocab.name);
-        if (name.isPresent()) {
-            String creatorName = name.get().toString();
-            LOG.infof("Found name %s", creatorName);
-            return Optional.of(creatorName);
+        if (!errors.isEmpty()) {
+            throw errors;
         }
 
-        Optional<Literal> givenName = extractLiteralProperty(creator, SchemaVocab.givenName);
-        Optional<Literal> familyName = extractLiteralProperty(creator, SchemaVocab.familyName);
-        String creatorName = Stream.of(givenName, familyName)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(Object::toString)
-                .collect(Collectors.joining(" "));
-        if (!creatorName.isEmpty()) {
-            LOG.infof("Found name %s", creatorName);
-            return Optional.of(creatorName);
+        return new Entity<PublishedData>(publication.getURI(), builder.build());
+    }
+
+    private Query buildValidationQuery(Resource subject, Map<Property, PropertyRequirements> properties) {
+        StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append("SELECT ");
+        properties.keySet()
+                .forEach(p -> queryBuilder.append(String.format("?%s ", p.getLocalName())));
+        queryBuilder.append("\nWHERE {\n");
+        properties.keySet()
+                .forEach(p -> queryBuilder.append(
+                        String.format("\tOPTIONAL { <%s> <%s> ?%s . }\n",
+                                subject.getURI(), p.getURI(), p.getLocalName())));
+        queryBuilder.append("}");
+
+        LOG.debugf("Query generated:\n%s", queryBuilder.toString());
+
+        return QueryFactory.create(queryBuilder.toString());
+    }
+
+    private Map<String, Object> validateProperties(Resource subject, Map<Property, PropertyRequirements> properties)
+            throws ValidationException {
+        Query query = buildValidationQuery(subject, properties);
+        Map<String, Object> validProperties = new HashMap<>();
+        ValidationException errors = new ValidationException();
+
+        try (QueryExecution qexec = QueryExecutionFactory.create(query, infModel)) {
+            ResultSet results = qexec.execSelect();
+            results.forEachRemaining(row -> {
+                properties.forEach((p, req) -> {
+                    if (!row.contains(p.getLocalName()) && req.isRequired()) {
+                        errors.addError(new PropertyError(subject.getURI(), p.getURI(), "Missing required property"));
+                    } else if (req.isResource() != row.get(p.getLocalName()).isResource()) {
+                        String first = req.isResource() ? "Resource" : "Literal";
+                        String second = !req.isResource() ? "Resource" : "Literal";
+                        errors.addError(new PropertyError(subject.getURI(), p.getURI(),
+                                String.format("Expected a %s but got a %s", first, second)));
+                    } else {
+                        Object value = req.isResource() ? row.getResource(p.getLocalName())
+                                : row.getLiteral(p.getLocalName());
+                        if (req.isMultivalued()) {
+                            if (validProperties.containsKey(p.getLocalName())) {
+                                ((List<Object>) validProperties.get(p.getLocalName())).add(value);
+                            } else {
+                                List<Object> l = new ArrayList<>();
+                                l.add(value);
+                                validProperties.put(p.getLocalName(), l);
+                            }
+                        } else {
+                            // NOTE: We override properties, maybe should log it
+                            validProperties.put(p.getLocalName(), value);
+                        }
+                    }
+                });
+            });
         }
 
-        return Optional.empty();
-    }
-
-    public Optional<String> extractPublisherInfo(Resource subject) {
-        Optional<Resource> publisher = extractResourceProperty(subject, SchemaVocab.publisher);
-        if (publisher.isPresent()) {
-            return extractLiteralProperty(publisher.get(), SchemaVocab.name)
-                    .map(Literal::toString);
+        if (!errors.isEmpty()) {
+            throw errors;
         }
 
-        return Optional.empty();
+        return validProperties;
     }
 
-    public Optional<Integer> extractPublicationYear(Resource subject) {
-        Optional<Literal> publicationYear = extractLiteralProperty(subject, SchemaVocab.datePublished);
-        if (publicationYear.isPresent()) {
-            // TODO: We should use typed literals
-            try {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z");
-                OffsetDateTime dateTime = OffsetDateTime.parse(publicationYear.get().toString(), formatter);
-                return Optional.of(dateTime.getYear());
-            } catch (DateTimeParseException e) {
-                LOG.errorf("Failed to parse date: %s", e);
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    // TODO: for now this return URLs instead of PIDs
-    public List<String> extractPidArray(Resource subject) throws PropertyNotFoundException {
-        return subject
-                .listProperties(SchemaVocab.hasPart)
-                .toList()
-                .stream()
-                .map(Statement::getObject)
-                .map(RDFNode::toString)
-                .collect(Collectors.toList());
-    }
-
-    public String extractStringProperty(Resource subject, Property property)
-            throws PropertyNotFoundException {
-        return subject
-                .getRequiredProperty(property)
-                .getObject()
-                .asLiteral()
-                .getString();
-    }
-
-    public Optional<String> extractTitle(Resource subject) {
-        return extractLiteralProperty(subject, SchemaVocab.title_PROP)
-                .map(Literal::getString);
-    }
-
-    public Optional<String> extractAbstract(Resource subject) {
-        return extractLiteralProperty(subject, SchemaVocab.abstract_)
-                .map(Literal::getString);
-    }
-
-    public Optional<String> extractDataDescription(Resource subject) {
-        return extractLiteralProperty(subject, SchemaVocab.description_PROP)
-                .map(Literal::getString);
+    private OffsetDateTime parseDateLiteral(Literal l) throws ParseException {
+        Date d = new StdDateFormat().parse(l.toString());
+        return d.toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime();
     }
 }
