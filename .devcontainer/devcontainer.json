@@ -19,12 +19,16 @@
 		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": { },
 		"ghcr.io/devcontainers-extra/features/quarkus-sdkman:2": {
 			"jdkVersion": "21"
-		}
+		},
+		"ghcr.io/devcontainers-extra/features/pre-commit:2": { }
 	},
 	"customizations": {
 		"vscode": {
 			"extensions": [ "redhat.vscode-xml" ]
 		}
 	},
-	"postCreateCommand": "sudo -E chown -R $(id -u):$(id -g) ~/.m2"
+	"postCreateCommand": "sudo -E chown -R $(id -u):$(id -g) ~/.m2",
+	"onCreateCommand": {
+		"install pre-commit hooks": "cd ${containerWorkspaceFolder} && pre-commit install"
+	}
 }
