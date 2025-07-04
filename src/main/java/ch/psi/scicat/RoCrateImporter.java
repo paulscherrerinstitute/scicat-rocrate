@@ -20,6 +20,7 @@ import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ReasonerRegistry;
@@ -42,13 +43,13 @@ public class RoCrateImporter {
 
     private Model model = ModelFactory.createOntologyModel();
     private Reasoner reasoner = ReasonerRegistry.getOWLReasoner();
-    private InfModel infModel = ModelFactory.createInfModel(reasoner, model);
+    private InfModel inferredModel = ModelFactory.createInfModel(reasoner, model);
     private DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     public void loadModel(Model model) {
         this.model = model;
-        infModel = ModelFactory.createInfModel(reasoner, this.model);
-        infModel.setDerivationLogging(true);
+        inferredModel = ModelFactory.createInfModel(reasoner, this.model);
+        inferredModel.setDerivationLogging(true);
     }
 
     public ValidationReport validate() {
@@ -74,23 +75,21 @@ public class RoCrateImporter {
         List<Resource> publications = new ArrayList<>();
 
         Query query = QueryFactory.create(String.format("""
-                PREFIX schema: <https://schema.org/>
-
                 SELECT ?creativeWork ?identifier
                 WHERE {
                     ?creativeWork a <%s> .
                     ?creativeWork <%s> ?identifier .
                 }
                 """, SchemaDO.CreativeWork.getURI(), SchemaDO.identifier.getURI()));
-        try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+        try (QueryExecution qexec = QueryExecutionFactory.create(query, inferredModel)) {
             ResultSet results = qexec.execSelect();
             results.forEachRemaining(querySolution -> {
-                // TODO: try/catch?
-                Resource pub = querySolution.getResource("creativeWork");
-                Literal identifier = querySolution.getLiteral("identifier");
-                // Note: Should we accept different formats and try to extract the DOI?
-                if (identifier != null && RoCrateController.isDoi(identifier.toString())) {
-                    publications.add(pub);
+                RDFNode pub = querySolution.get("creativeWork");
+                RDFNode identifier = querySolution.get("identifier");
+                if (identifier != null && identifier.isLiteral()
+                        && DoiUtils.extractDoi(identifier.toString()).isPresent()
+                        && pub != null && pub.isResource()) {
+                    publications.add(pub.asResource());
                 }
             });
         }
@@ -202,7 +201,7 @@ public class RoCrateImporter {
         Map<String, Object> validProperties = new HashMap<>();
         ValidationException errors = new ValidationException();
 
-        try (QueryExecution qexec = QueryExecutionFactory.create(query, infModel)) {
+        try (QueryExecution qexec = QueryExecutionFactory.create(query, inferredModel)) {
             ResultSet results = qexec.execSelect();
             results.forEachRemaining(row -> {
                 properties.forEach((p, req) -> {

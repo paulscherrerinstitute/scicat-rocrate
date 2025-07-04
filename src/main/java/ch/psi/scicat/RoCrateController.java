@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
@@ -51,14 +50,6 @@ public class RoCrateController {
 
     private JsonLdOptions jsonLdOptions = new JsonLdOptions();
 
-    private static final Pattern DOI_PATTERN = Pattern
-            .compile("(10[.][0-9]{2,}(?:[.][0-9]+)*/(?:(?![%" + "\"#? ])\\S)+)");
-
-    // TODO: move to a global file?
-    public static boolean isDoi(String input) {
-        return DOI_PATTERN.matcher(input).matches();
-    }
-
     public RoCrateController(RoCrateExporter exporter, RoCrateImporter importer,
             @ConfigProperty(name = "titanium.jsonld.cache.size") int cacheSize) {
         this.exporter = exporter;
@@ -86,9 +77,9 @@ public class RoCrateController {
                     .build();
         }
 
-        if (identifiers.stream().anyMatch(id -> !isDoi(id))) {
+        if (identifiers.stream().anyMatch(id -> DoiUtils.extractDoi(id).isEmpty())) {
             return Response.status(Status.BAD_REQUEST)
-                    .entity("Identifiers other than DOI are not accepted for now")
+                    .entity("Identifiers other than DOI are not implemented yet")
                     .type(MediaType.TEXT_PLAIN)
                     .build();
         }
