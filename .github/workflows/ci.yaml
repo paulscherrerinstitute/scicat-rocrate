@@ -5,7 +5,8 @@ on:
     branches: [ro-crate-java]  # TODO: change to main
 
 jobs:
-  build:
+  unit_tests:
+    name: Unit tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
