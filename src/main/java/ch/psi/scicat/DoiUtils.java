@@ -9,10 +9,13 @@ public class DoiUtils {
             .compile("(10[.][0-9]{2,}(?:[.][0-9]+)*/(?:(?![%" + "\"#? ])\\S)+)");
 
     public static Optional<String> extractDoi(String input) {
-        Matcher matcher = DOI_PATTERN.matcher(input);
-        if (matcher.find()) {
-            return Optional.of(matcher.group());
-        }
-        return Optional.empty();
+        return Optional.ofNullable(input)
+                .map(DOI_PATTERN::matcher)
+                .filter(Matcher::find)
+                .map(Matcher::group);
+    }
+
+    public static boolean isDoi(String input) {
+        return extractDoi(input).isPresent();
     }
 }

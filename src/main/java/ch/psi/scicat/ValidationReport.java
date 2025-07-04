@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ValidationReport {
     private Set<ValidationError> errors;
-    private List<Entity<? extends Object>> entities;
+    private List<Entity<? extends Object>> entities = new ArrayList<>();
 
     @JsonGetter("isValid")
     public boolean isValid() {
@@ -56,10 +56,6 @@ public class ValidationReport {
     }
 
     public void addEntity(Entity<? extends Object> e) {
-        if (entities == null) {
-            entities = new ArrayList<>();
-        }
-
         entities.add(e);
     }
 

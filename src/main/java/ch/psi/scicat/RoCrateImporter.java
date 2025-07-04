@@ -47,9 +47,11 @@ public class RoCrateImporter {
     private DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     public void loadModel(Model model) {
-        this.model = model;
-        inferredModel = ModelFactory.createInfModel(reasoner, this.model);
-        inferredModel.setDerivationLogging(true);
+        if (model != null) {
+            this.model = model;
+            inferredModel = ModelFactory.createInfModel(reasoner, this.model);
+            inferredModel.setDerivationLogging(true);
+        }
     }
 
     public ValidationReport validate() {
@@ -87,7 +89,7 @@ public class RoCrateImporter {
                 RDFNode pub = querySolution.get("creativeWork");
                 RDFNode identifier = querySolution.get("identifier");
                 if (identifier != null && identifier.isLiteral()
-                        && DoiUtils.extractDoi(identifier.toString()).isPresent()
+                        && DoiUtils.isDoi(identifier.toString())
                         && pub != null && pub.isResource()) {
                     publications.add(pub.asResource());
                 }

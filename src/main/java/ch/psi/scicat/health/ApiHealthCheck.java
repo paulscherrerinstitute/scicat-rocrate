@@ -13,5 +13,4 @@ public class ApiHealthCheck implements HealthCheck {
     public HealthCheckResponse call() {
         return HealthCheckResponse.up("scicat-rocrate");
     }
-
 }

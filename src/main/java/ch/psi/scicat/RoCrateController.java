@@ -1,9 +1,11 @@
 package ch.psi.scicat;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
@@ -77,7 +79,7 @@ public class RoCrateController {
                     .build();
         }
 
-        if (identifiers.stream().anyMatch(id -> DoiUtils.extractDoi(id).isEmpty())) {
+        if (identifiers.stream().anyMatch(id -> DoiUtils.isDoi(id))) {
             return Response.status(Status.BAD_REQUEST)
                     .entity("Identifiers other than DOI are not implemented yet")
                     .type(MediaType.TEXT_PLAIN)
@@ -130,17 +132,20 @@ public class RoCrateController {
     @Path("/import")
     @Consumes(ExtraMediaType.APPLICATION_JSONLD)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response importRoCrate(InputStream inputStream) {
-        Model model = RDFParser.create()
-                .source(inputStream)
-                .lang(Lang.JSONLD11)
-                .base("file:///")
-                .context(org.apache.jena.sparql.util.Context.create().set(LangJSONLD11.JSONLD_OPTIONS, jsonLdOptions))
-                .build()
-                .toModel();
+    public Response importRoCrate(InputStream body) {
+        Optional<Response> response = isBodyEmpty(body);
+        if (response.isPresent()) {
+            return response.get();
+        }
 
-        importer.loadModel(model);
+        Optional<Model> model = parseJsonLd(body);
+        if (model.isEmpty()) {
+            return Response.status(Status.BAD_REQUEST).build();
+        }
+
+        importer.loadModel(model.get());
         ValidationReport report = importer.validate();
+
         Map<String, String> importMap = new HashMap<>();
         report.getEntities().forEach(e -> {
             if (e.object() instanceof PublishedData publishedData) {
@@ -150,8 +155,38 @@ public class RoCrateController {
         });
 
         return Response
-                .status(Status.CREATED)
+                .status(importMap.isEmpty() ? Status.OK : Status.CREATED)
                 .entity(importMap)
                 .build();
+    }
+
+    private Optional<Response> isBodyEmpty(InputStream body) {
+        try {
+            if (body.available() == 0)
+                return Optional.of(Response.status(Status.BAD_REQUEST).build());
+        } catch (IOException e) {
+            return Optional.of(Response.serverError().build());
+        }
+
+        return Optional.empty();
+    }
+
+    private Optional<Model> parseJsonLd(InputStream document) {
+        try {
+            Model model = RDFParser.create()
+                    .source(document)
+                    .lang(Lang.JSONLD11)
+                    .base("file:///")
+                    .context(org.apache.jena.sparql.util.Context.create().set(LangJSONLD11.JSONLD_OPTIONS,
+                            jsonLdOptions))
+                    .build()
+                    .toModel();
+
+            return Optional.of(model);
+        } catch (RiotException e) {
+            LOG.error(e);
+        }
+
+        return Optional.empty();
     }
 }
