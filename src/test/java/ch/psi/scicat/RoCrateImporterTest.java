@@ -115,7 +115,16 @@ public class RoCrateImporterTest {
     @DisplayName("ValidatePublication")
     class ValidatePublication {
         @Test
-        @DisplayName("")
+        @DisplayName("todo")
+        public void test01() {
+        }
+    }
+
+    @Nested
+    @DisplayName("ValidatePublication")
+    class ExportPublication {
+        @Test
+        @DisplayName("todo")
         public void test01() {
         }
     }

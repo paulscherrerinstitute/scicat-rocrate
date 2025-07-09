@@ -4,6 +4,10 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -39,8 +43,14 @@ public class ScicatClient {
         return RestResponse.fromResponse(clientResponse);
     }
 
-    public RestResponse<PublishedData> createPublishedData(PublishedData publishedData) {
-        RestResponse<PublishedData> clientResponse = scicatService.createPublishedData("Bearer: TODO", publishedData);
+    public RestResponse<PublishedData> createPublishedData(CreatePublishedDataDto publishedData, String scicatToken) {
+        try {
+            LOG.debug(new ObjectMapper().writeValueAsString(publishedData));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        RestResponse<PublishedData> clientResponse = scicatService.createPublishedData("Bearer " + scicatToken,
+                publishedData);
         return RestResponse.fromResponse(clientResponse);
     }
 

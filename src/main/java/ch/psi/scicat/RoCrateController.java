@@ -17,19 +17,27 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
 import org.jboss.resteasy.reactive.RestHeader;
+import org.jboss.resteasy.reactive.RestResponse;
+import org.modelmapper.ModelMapper;
 
 import com.apicatalog.jsonld.JsonLdOptions;
 import com.apicatalog.jsonld.JsonLdOptions.ProcessingPolicy;
 import com.apicatalog.jsonld.loader.HttpLoader;
 import com.apicatalog.jsonld.loader.LRUDocumentCache;
 import com.apicatalog.jsonld.uri.UriValidationPolicy;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.PublishedData;
+import ch.psi.scicat.model.ValidationReport;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -46,6 +54,11 @@ public class RoCrateController {
 
     @Inject
     RoCrateImporter importer;
+
+    @Inject
+    ScicatClient scicatClient;
+
+    private ModelMapper modelMapper = new ModelMapper();
 
     // Cache JSON-LD remote documents across requests
     LRUDocumentCache documentLoader;
@@ -79,7 +92,7 @@ public class RoCrateController {
                     .build();
         }
 
-        if (identifiers.stream().anyMatch(id -> DoiUtils.isDoi(id))) {
+        if (identifiers.stream().anyMatch(id -> !DoiUtils.isDoi(id))) {
             return Response.status(Status.BAD_REQUEST)
                     .entity("Identifiers other than DOI are not implemented yet")
                     .type(MediaType.TEXT_PLAIN)
@@ -132,7 +145,7 @@ public class RoCrateController {
     @Path("/import")
     @Consumes(ExtraMediaType.APPLICATION_JSONLD)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response importRoCrate(InputStream body) {
+    public Response importRoCrate(@HeaderParam(value = "x-scicat-token") String scicatToken, InputStream body) {
         Optional<Response> response = isBodyEmpty(body);
         if (response.isPresent()) {
             return response.get();
@@ -145,14 +158,32 @@ public class RoCrateController {
 
         importer.loadModel(model.get());
         ValidationReport report = importer.validate();
+        if (!report.isValid()) {
+            return Response
+                    .status(Status.BAD_REQUEST)
+                    .entity(report)
+                    .build();
+        }
 
         Map<String, String> importMap = new HashMap<>();
-        report.getEntities().forEach(e -> {
-            if (e.object() instanceof PublishedData publishedData) {
-                // TODO: create the objects
-                importMap.put(e.id(), "NOT CREATED");
-            }
-        });
+        try {
+            report.getEntities().forEach(entity -> {
+                if (entity.object() instanceof PublishedData publishedData) {
+                    // TODO: create the objects
+                    CreatePublishedDataDto dto = modelMapper.map(publishedData, CreatePublishedDataDto.class);
+                    try {
+                        LOG.debug(new ObjectMapper().writeValueAsString(publishedData));
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+                    RestResponse<PublishedData> created = scicatClient.createPublishedData(dto, scicatToken);
+                    importMap.put(entity.id(), created.getEntity().getDoi());
+                }
+            });
+        } catch (WebApplicationException e) {
+            LOG.error(e);
+            return e.getResponse();
+        }
 
         return Response
                 .status(importMap.isEmpty() ? Status.OK : Status.CREATED)

@@ -8,62 +8,80 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 // TODO: Make sure it doesn't break on big values for 'number' types
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record PublishedData(
-        @JsonProperty(value = "doi", required = true) String doi,
-        @JsonProperty(value = "creator", required = true) List<String> creator,
-        @JsonProperty(value = "publisher", required = true) String publisher,
-        @JsonProperty(value = "publicationYear", required = true) int publicationYear,
-        @JsonProperty(value = "title", required = true) String title,
-        @JsonProperty(value = "abstract", required = true) String _abstract,
-        @JsonProperty(value = "dataDescription", required = true) String dataDescription,
-        @JsonProperty(value = "resourceType", required = true) String resourceType,
-        @JsonProperty(value = "pidArray", required = true) List<String> pidArray,
-        String url,
-        long numberOfFiles,
-        long sizeOfArchive,
-        String registeredTime,
-        String status,
-        String scicatUser,
-        String thumbnail,
-        List<String> relatedPublications,
-        String downloadLink,
-        String updatedBy,
-        String createdAt,
-        String updatedAt) {
+public class PublishedData {
+    @JsonProperty(value = "doi", required = true)
+    String doi;
+    String affiliation;
+    @JsonProperty(value = "creator", required = true)
+    List<String> creator;
+    @JsonProperty(value = "publisher", required = true)
+    String publisher;
+    @JsonProperty(value = "publicationYear", required = true)
+    int publicationYear;
+    @JsonProperty(value = "title", required = true)
+    String title;
+    String url;
+    @JsonProperty(value = "abstract", required = true)
+    String _abstract;
+    @JsonProperty(value = "dataDescription", required = true)
+    String dataDescription;
+    @JsonProperty(value = "resourceType", required = true)
+    String resourceType;
+    long numberOfFiles;
+    long sizeOfArchive;
+    @JsonProperty(value = "pidArray", required = true)
+    List<String> pidArray = new ArrayList<>();
+    List<String> authors;
+    String registeredTime;
+    String status;
+    String scicatUser;
+    String thumbnail;
+    List<String> relatedPublications;
+    String downloadLink;
+    String createdBy;
+    String updatedBy;
+    String createdAt;
+    String updatedAt;
+
+    public PublishedData() {
+    }
 
     private PublishedData(PublishedDataBuilder builder) {
-        this(
-                builder.doi,
-                builder.creator,
-                builder.publisher,
-                builder.publicationYear,
-                builder.title,
-                builder._abstract,
-                builder.dataDescription,
-                builder.resourceType,
-                builder.pidArray,
-                builder.url,
-                builder.numberOfFiles,
-                builder.sizeOfArchive,
-                builder.registeredTime,
-                builder.status,
-                builder.scicatUser,
-                builder.thumbnail,
-                builder.relatedPublications,
-                builder.downloadLink,
-                builder.updatedBy,
-                builder.createdAt,
-                builder.updatedAt);
+        this.doi = builder.doi;
+        this.affiliation = builder.affiliation;
+        this.creator = builder.creator;
+        this.publisher = builder.publisher;
+        this.publicationYear = builder.publicationYear;
+        this.title = builder.title;
+        this.url = builder.url;
+        this._abstract = builder._abstract;
+        this.dataDescription = builder.dataDescription;
+        this.resourceType = builder.resourceType;
+        this.numberOfFiles = builder.numberOfFiles;
+        this.sizeOfArchive = builder.sizeOfArchive;
+        this.pidArray = builder.pidArray;
+        this.authors = builder.authors;
+        this.registeredTime = builder.registeredTime;
+        this.status = builder.status;
+        this.scicatUser = builder.scicatUser;
+        this.thumbnail = builder.thumbnail;
+        this.relatedPublications = builder.relatedPublications;
+        this.downloadLink = builder.downloadLink;
+        this.createdBy = builder.createdBy;
+        this.updatedBy = builder.updatedBy;
+        this.createdAt = builder.createdAt;
+        this.updatedAt = builder.updatedAt;
     }
 
     public static class PublishedDataBuilder {
+        public String affiliation;
+        public List<String> authors;
         private String doi;
         private List<String> creator;
         private String publisher;
         private int publicationYear;
         private String title;
         private String url;
-        @JsonProperty("abstract")
         String _abstract;
         private String dataDescription;
         private String resourceType;
@@ -76,6 +94,7 @@ public record PublishedData(
         private String thumbnail;
         private List<String> relatedPublications;
         private String downloadLink;
+        private String createdBy;
         private String updatedBy;
         private String createdAt;
         private String updatedAt;
@@ -178,6 +197,11 @@ public record PublishedData(
             return this;
         }
 
+        public PublishedDataBuilder createdBy(String createdBy) {
+            this.createdBy = createdBy;
+            return this;
+        }
+
         public PublishedDataBuilder updatedBy(String updatedBy) {
             this.updatedBy = updatedBy;
             return this;
@@ -214,10 +238,211 @@ public record PublishedData(
             // 'pidArray'");
             // } else {
             PublishedData result = new PublishedData(this);
-            System.out.println(result);
 
             return result;
             // }
         }
+
+        public PublishedDataBuilder affiliation(String affiliation) {
+            this.affiliation = affiliation;
+            return this;
+        }
+
+        public PublishedDataBuilder authors(List<String> authors) {
+            this.authors = authors;
+            return this;
+        }
+    }
+
+    public String getDoi() {
+        return doi;
+    }
+
+    public void setDoi(String doi) {
+        this.doi = doi;
+    }
+
+    public String getAffiliation() {
+        return affiliation;
+    }
+
+    public void setAffiliation(String affiliation) {
+        this.affiliation = affiliation;
+    }
+
+    public List<String> getCreator() {
+        return creator;
+    }
+
+    public void setCreator(List<String> creator) {
+        this.creator = creator;
+    }
+
+    public String getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
+
+    public int getPublicationYear() {
+        return publicationYear;
+    }
+
+    public void setPublicationYear(int publicationYear) {
+        this.publicationYear = publicationYear;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String get_abstract() {
+        return _abstract;
+    }
+
+    public void set_abstract(String _abstract) {
+        this._abstract = _abstract;
+    }
+
+    public String getDataDescription() {
+        return dataDescription;
+    }
+
+    public void setDataDescription(String dataDescription) {
+        this.dataDescription = dataDescription;
+    }
+
+    public String getResourceType() {
+        return resourceType;
+    }
+
+    public void setResourceType(String resourceType) {
+        this.resourceType = resourceType;
+    }
+
+    public long getNumberOfFiles() {
+        return numberOfFiles;
+    }
+
+    public void setNumberOfFiles(long numberOfFiles) {
+        this.numberOfFiles = numberOfFiles;
+    }
+
+    public long getSizeOfArchive() {
+        return sizeOfArchive;
+    }
+
+    public void setSizeOfArchive(long sizeOfArchive) {
+        this.sizeOfArchive = sizeOfArchive;
+    }
+
+    public List<String> getPidArray() {
+        return pidArray;
+    }
+
+    public void setPidArray(List<String> pidArray) {
+        this.pidArray = pidArray;
+    }
+
+    public List<String> getAuthors() {
+        return authors;
+    }
+
+    public void setAuthors(List<String> authors) {
+        this.authors = authors;
+    }
+
+    public String getRegisteredTime() {
+        return registeredTime;
+    }
+
+    public void setRegisteredTime(String registeredTime) {
+        this.registeredTime = registeredTime;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getScicatUser() {
+        return scicatUser;
+    }
+
+    public void setScicatUser(String scicatUser) {
+        this.scicatUser = scicatUser;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public List<String> getRelatedPublications() {
+        return relatedPublications;
+    }
+
+    public void setRelatedPublications(List<String> relatedPublications) {
+        this.relatedPublications = relatedPublications;
+    }
+
+    public String getDownloadLink() {
+        return downloadLink;
+    }
+
+    public void setDownloadLink(String downloadLink) {
+        this.downloadLink = downloadLink;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

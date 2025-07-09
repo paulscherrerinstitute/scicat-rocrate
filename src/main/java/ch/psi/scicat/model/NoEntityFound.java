@@ -1,7 +1,5 @@
 package ch.psi.scicat.model;
 
-import ch.psi.scicat.ValidationError;
-
 public class NoEntityFound implements ValidationError {
     @Override
     public String getType() {

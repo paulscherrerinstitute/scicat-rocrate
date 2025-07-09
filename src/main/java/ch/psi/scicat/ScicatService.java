@@ -3,6 +3,7 @@ package ch.psi.scicat;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.resteasy.reactive.RestResponse;
 
+import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
 import jakarta.ws.rs.GET;
@@ -25,7 +26,7 @@ public interface ScicatService {
     @Path("publisheddata")
     RestResponse<PublishedData> createPublishedData(
             @HeaderParam("Authorization") String accessToken,
-            PublishedData publishedData);
+            CreatePublishedDataDto publishedData);
 
     @GET
     @Path("datasets/{pid}")

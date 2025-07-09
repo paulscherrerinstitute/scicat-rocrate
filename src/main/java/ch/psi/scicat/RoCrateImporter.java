@@ -29,12 +29,13 @@ import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 
-import ch.psi.scicat.ValidationReport.Entity;
 import ch.psi.scicat.model.NoEntityFound;
 import ch.psi.scicat.model.PropertyError;
 import ch.psi.scicat.model.PropertyRequirements;
 import ch.psi.scicat.model.PublishedData;
 import ch.psi.scicat.model.PublishedData.PublishedDataBuilder;
+import ch.psi.scicat.model.ValidationReport;
+import ch.psi.scicat.model.ValidationReport.Entity;
 import jakarta.enterprise.context.RequestScoped;
 
 @RequestScoped
@@ -57,6 +58,7 @@ public class RoCrateImporter {
     public ValidationReport validate() {
         ValidationReport report = new ValidationReport();
         List<Resource> potentialPublications = listPublications();
+        LOG.error(potentialPublications);
         if (potentialPublications.isEmpty()) {
             report.addError(new NoEntityFound());
             return report;
@@ -112,7 +114,8 @@ public class RoCrateImporter {
                         Map.entry(StaticEntities.SchemaDOAbstract, new PropertyRequirements(true)),
                         Map.entry(SchemaDO.description, new PropertyRequirements(false)),
                         // NOTE: License is required even though SciCat doesn't process it?
-                        Map.entry(SchemaDO.license, new PropertyRequirements(true, true))
+                        Map.entry(SchemaDO.license, new PropertyRequirements(true, true)),
+                        Map.entry(SchemaDO.hasPart, new PropertyRequirements(true, true, true))
                 // Map.entry(SchemaDO.additionalType, new PropertyRequirements(false, true)),
                 // Map.entry(SchemaDO.sdDatePublished, new PropertyRequirements(false, true)),
                 // Map.entry(SchemaDO.creativeWorkStatus, new PropertyRequirements(false,
@@ -172,6 +175,10 @@ public class RoCrateImporter {
             errors.addError(new PropertyError(publication.getURI(), SchemaDO.datePublished.toString(),
                     "Failed to parse date, make sure it is ISO-8601 compliant"));
         }
+
+        // FIXME:
+        builder.pidArray(List.of("fixme"));
+        builder.resourceType("derived");
 
         if (!errors.isEmpty()) {
             throw errors;

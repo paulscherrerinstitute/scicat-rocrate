@@ -2,7 +2,10 @@ package ch.psi.scicat;
 
 import static io.restassured.RestAssured.given;
 
+import java.io.IOException;
+
 import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,12 +15,19 @@ import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
 public class RoCrateControllerTest {
+    ScicatServiceMock scicatServiceMock;
+
+    @BeforeEach
+    public void setUp() {
+        scicatServiceMock = new ScicatServiceMock();
+        QuarkusMock.installMockForType(scicatServiceMock, ScicatService.class, RestClient.LITERAL);
+    }
+
     @Nested
     class ImportEndpoint {
         @Test
         @DisplayName("No Accept header")
         public void test00() {
-            QuarkusMock.installMockForType(ScicatServiceMock.generate(true), ScicatService.class, RestClient.LITERAL);
             given()
                     .when()
                     .post("/ro-crate/import")
@@ -28,8 +38,6 @@ public class RoCrateControllerTest {
         @Test
         @DisplayName("Empty body")
         public void test01() {
-            QuarkusMock.installMockForType(ScicatServiceMock.generate(true),
-                    ScicatService.class, RestClient.LITERAL);
             given()
                     .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
                     .when()
@@ -41,8 +49,6 @@ public class RoCrateControllerTest {
         @Test
         @DisplayName("Invalid JSON-LD")
         public void test02() {
-            QuarkusMock.installMockForType(ScicatServiceMock.generate(true),
-                    ScicatService.class, RestClient.LITERAL);
             given()
                     .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
                     .body("{")
@@ -55,15 +61,58 @@ public class RoCrateControllerTest {
         @Test
         @DisplayName("Empty JSON-LD")
         public void test03() {
-            QuarkusMock.installMockForType(ScicatServiceMock.generate(true),
-                    ScicatService.class, RestClient.LITERAL);
             given()
                     .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
                     .body("{}")
                     .when()
                     .post("/ro-crate/import")
                     .then()
-                    .statusCode(200);
+                    .statusCode(400);
+        }
+
+        @Test
+        @DisplayName("Unauthenticated")
+        public void test04() throws IOException, Exception {
+            given()
+                    .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
+                    .body(getClass().getClassLoader().getResourceAsStream("one-publication.json"))
+                    .when()
+                    .post("/ro-crate/import")
+                    .then()
+                    .statusCode(401);
+        }
+
+        @Test
+        @DisplayName("One publication")
+        public void test05() {
+            scicatServiceMock.setAuthenticated(true);
+            given()
+                    .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
+                    .body(getClass().getClassLoader().getResourceAsStream("one-publication.json"))
+                    .when()
+                    .post("/ro-crate/import")
+                    .then()
+                    .statusCode(201);
+        }
+
+        @Test
+        @DisplayName("Import existing publication")
+        public void test06() {
+            scicatServiceMock.setAuthenticated(true);
+            given()
+                    .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
+                    .body(getClass().getClassLoader().getResourceAsStream("one-publication.json"))
+                    .when()
+                    .post("/ro-crate/import")
+                    .then()
+                    .statusCode(201);
+            given()
+                    .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
+                    .body(getClass().getClassLoader().getResourceAsStream("one-publication.json"))
+                    .when()
+                    .post("/ro-crate/import")
+                    .then()
+                    .statusCode(409);
         }
     }
 }

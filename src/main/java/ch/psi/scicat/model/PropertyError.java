@@ -4,8 +4,6 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import ch.psi.scicat.ValidationError;
-
 public class PropertyError implements ValidationError {
     @JsonProperty()
     private String nodeId;
