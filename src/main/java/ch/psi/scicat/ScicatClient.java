@@ -1,12 +1,16 @@
 package ch.psi.scicat;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
 
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 @ApplicationScoped
 public class ScicatClient {
@@ -14,13 +18,24 @@ public class ScicatClient {
     @RestClient
     ScicatService scicatService;
 
+    private static final Logger LOG = Logger.getLogger(ScicatClient.class);
+
     public boolean isHealthy() {
-        RestResponse<Void> response = scicatService.isHealthy();
-        return response.getStatus() == 200;
+        try {
+            RestResponse<Void> response = scicatService.isHealthy();
+            return response.getStatus() == 200;
+        } catch (WebApplicationException e) {
+            return false;
+        }
     }
 
     public RestResponse<PublishedData> getPublishedDataById(String doi) {
         RestResponse<PublishedData> clientResponse = scicatService.getPublishedDataById(doi);
+        // Required on backend-next because of this bug:
+        // https://github.com/SciCatProject/scicat-backend-next/issues/2036
+        if (clientResponse.getStatus() == 200 && !clientResponse.hasEntity()) {
+            throw new WebApplicationException(Response.status(Status.NOT_FOUND).build());
+        }
         return RestResponse.fromResponse(clientResponse);
     }
 
