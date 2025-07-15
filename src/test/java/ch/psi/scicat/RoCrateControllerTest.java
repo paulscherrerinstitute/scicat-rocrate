@@ -1,6 +1,7 @@
 package ch.psi.scicat;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasEntry;
 
 import java.io.IOException;
 
@@ -92,7 +93,11 @@ public class RoCrateControllerTest {
                     .when()
                     .post("/ro-crate/import")
                     .then()
-                    .statusCode(201);
+                    .statusCode(201)
+                    .body("$",
+                            hasEntry("https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5",
+                                    "10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"));
+
         }
 
         @Test
@@ -105,7 +110,10 @@ public class RoCrateControllerTest {
                     .when()
                     .post("/ro-crate/import")
                     .then()
-                    .statusCode(201);
+                    .statusCode(201)
+                    .body("$",
+                            hasEntry("https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5",
+                                    "10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"));
             given()
                     .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
                     .body(getClass().getClassLoader().getResourceAsStream("one-publication.json"))

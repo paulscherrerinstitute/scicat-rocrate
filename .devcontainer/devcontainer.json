@@ -24,7 +24,7 @@
 	},
 	"customizations": {
 		"vscode": {
-			"extensions": [ "redhat.vscode-xml" ]
+			"extensions": [ "redhat.vscode-xml", "redhat.vscode-quarkus" ]
 		}
 	},
 	"postCreateCommand": "sudo -E chown -R $(id -u):$(id -g) ~/.m2",
