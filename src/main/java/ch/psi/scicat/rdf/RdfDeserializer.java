@@ -1,0 +1,160 @@
+package ch.psi.scicat.rdf;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.vocabulary.RDF;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ch.psi.scicat.model.PropertyError;
+import ch.psi.scicat.model.ValidationError;
+
+public class RdfDeserializer {
+    private static final Logger logger = LoggerFactory.getLogger(RdfSerializer.class);
+
+    public static class DeserializationReport<T> {
+        private Set<ValidationError> errors = new HashSet<>();
+        private T value;
+
+        public boolean isValid() {
+            return errors.isEmpty();
+        }
+
+        public void addError(ValidationError e) {
+            errors.add(e);
+        }
+
+        public void addErrors(DeserializationReport<?> report) {
+            errors.addAll(report.getErrors());
+        }
+
+        public Set<ValidationError> getErrors() {
+            return errors;
+        }
+
+        public void set(T value) {
+            this.value = value;
+        }
+
+        public T get() {
+            return value;
+        }
+    }
+
+    public static <T> DeserializationReport<T> deserialize(Resource subject, Class<T> clazz) throws Exception {
+        DeserializationReport<T> report = new DeserializationReport<>();
+        T obj = clazz.getDeclaredConstructor().newInstance();
+
+        if (clazz.isAnnotationPresent(RdfClass.class)) {
+            RdfClass rdfClassAnnotation = clazz.getAnnotation(RdfClass.class);
+            checkType(subject, rdfClassAnnotation.typesUri())
+                    .ifPresent(e -> report.addError(e));
+
+            for (Field field : clazz.getDeclaredFields()) {
+                field.setAccessible(true);
+
+                if (field.isAnnotationPresent(RdfProperty.class)) {
+                    RdfProperty rdfPropertyAnnotation = field.getAnnotation(RdfProperty.class);
+                    Property p = ResourceFactory.createProperty(rdfPropertyAnnotation.uri());
+
+                    List<RDFNode> values = subject.listProperties(p)
+                            .mapWith(s -> s.getObject())
+                            .toList();
+                    if (values.size() < rdfPropertyAnnotation.minCardinality()
+                            || values.size() > rdfPropertyAnnotation.maxCardinality()) {
+                        String message = String.format("Expected between %d and %d values but got %d",
+                                rdfPropertyAnnotation.minCardinality(), rdfPropertyAnnotation.maxCardinality(),
+                                values.size());
+                        report.addError(new PropertyError(subject.getURI(), p.getURI(), message));
+                    } else if (Collection.class.isAssignableFrom(field.getType())) {
+                        logger.info("Found a collection");
+                        Collection<Object> collection;
+                        if (field.getType().isAssignableFrom(List.class)) {
+                            collection = new ArrayList<>();
+                            // FIXME: should be safe for Lists?
+                            Class<?> listType = (Class<?>) ((ParameterizedType) field.getGenericType())
+                                    .getActualTypeArguments()[0];
+                            for (RDFNode value : values) {
+                                collection.add(convertValue(listType, value, report));
+                            }
+                            field.set(obj, collection);
+                        } else {
+                            logger.error("Unsupported collection");
+                        }
+                    } else if (values.size() > 0) {
+                        if (values.size() > 1) {
+                            logger.warn("Field {} is not a collection, only the first value will be assigned");
+                        }
+                        RDFNode value = values.getFirst();
+                        field.set(obj, convertValue(field.getType(), value, report));
+                    }
+                }
+            }
+        }
+
+        if (report.isValid()) {
+            report.set(obj);
+        }
+
+        return report;
+    }
+
+    private static Optional<PropertyError> checkType(Resource subject, String[] expectedTypes) {
+        List<String> actualTypes = subject.listProperties(RDF.type)
+                .mapWith(s -> s.getObject().toString())
+                .toList();
+        if (Arrays.stream(expectedTypes).noneMatch(actualTypes::contains)) {
+            String message = "Expected '@type' to be one of [ " + String.join(", ", expectedTypes) + " ] but is [ "
+                    + String.join(", ", actualTypes) + " ]";
+            return Optional.of(new PropertyError(subject.getURI(), "@type", message));
+        }
+        return Optional.empty();
+    }
+
+    private static <T> Object convertValue(Class<?> fieldType, RDFNode value, DeserializationReport<T> report)
+            throws Exception {
+        if (value.isLiteral()) {
+            switch (fieldType.getName()) {
+                case "java.lang.String":
+                    return value.asLiteral().getString();
+                case "java.lang.Integer":
+                case "int":
+                    return value.asLiteral().getInt();
+                case "java.lang.Double":
+                case "double":
+                    return value.asLiteral().getDouble();
+                case "java.lang.Float":
+                case "float":
+                    return value.asLiteral().getFloat();
+                case "java.lang.Boolean":
+                case "boolean":
+                    return value.asLiteral().getBoolean();
+                default:
+                    throw new IllegalStateException(
+                            "Deserializer doesn't support type: " + fieldType.getName());
+            }
+        } else if (value.isResource()) {
+            Resource resourceValue = value.asResource();
+            DeserializationReport<?> subreport = deserialize(resourceValue, fieldType);
+            if (subreport.isValid()) {
+                // Should we set the field if there are errors?
+                return subreport.get();
+            } else {
+                report.addErrors(subreport);
+            }
+        }
+        return null;
+    }
+}
