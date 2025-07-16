@@ -2,7 +2,15 @@ name: CI
 
 on:
   push:
-    branches: [ro-crate-java]  # TODO: change to main
+    branches: main
+    paths:
+      - src/**
+      - pom.xml
+  pull_request:
+    branches: main
+    paths:
+      - src/**
+      - pom.xml
 
 jobs:
   unit_tests:

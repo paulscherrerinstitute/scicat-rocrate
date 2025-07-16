@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  unit_tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+      - name: Get POM project version
+        run: echo "POM_VERSION=$(mvn help:evaluate -Dexpression=project.version --quiet -DforceStdout)" >> "$GITHUB_ENV"
+      - name: Compare tag and POM version
+        run: |
+          if [ "${{ github.ref }}" != "refs/tags/${{ env.POM_VERSION }}" ]; then
+            echo "Error: Tag '${{ github.ref }}' does not match POM project version '${{ env.POM_VERSION }}'."
+            exit 1
+          fi
+      - name: Test
+        uses: devcontainers/ci@v0.3
+        with:
+          push: never
+          runCmd: >
+            ./mvnw install
+                -Dquarkus.container-image.push=true
+                -Dquarkus.container-image.username=${{ github.actor }}
+                -Dquarkus.container-image.username=${{ secrets.GITHUB_TOKEN }}
