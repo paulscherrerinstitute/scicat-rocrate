@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
 
     int minCardinality() default 0;
 
-    int maxCardinality() default 1;
+    int maxCardinality() default Integer.MAX_VALUE;
 
     String[] equivalentProperties() default {};
 }

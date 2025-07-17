@@ -1,11 +1,11 @@
 package ch.psi.scicat.rdf;
 
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.vocabulary.RDF;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +26,10 @@ public class RdfSerdeTest {
     }
 
     public String getTypeUri(Resource r) {
-        return r.getRequiredProperty(RDF.type).getObject().asResource().getURI();
+        return r.getRequiredProperty(RDF.type)
+                .getObject()
+                .asResource()
+                .getURI();
     }
 
     @Test
@@ -37,17 +40,28 @@ public class RdfSerdeTest {
     }
 
     @Test
-    @DisplayName("StrArray class")
+    @DisplayName("Arrays class")
     public void test02() throws Exception {
-        TestClasses.StrArray instance = new TestClasses.StrArray();
-        Resource r = RdfSerializer.serialize(model, instance);
-        Assertions.assertEquals(getTypeUri(r), TestClasses.NS + "StrArray");
-        List<String> strValues = r.listProperties(ResourceFactory.createProperty(TestClasses.NS + "strArray"))
-                .mapWith(s -> s.getObject().asLiteral().getString())
-                .toList();
-        strValues.sort(String::compareTo);
+        TestClasses.Arrays instance = new TestClasses.Arrays();
+        instance.stringArray = List.of("a", "b", "c");
+        instance.integerArray = List.of(1, 2, 3);
+        instance.doubleArray = List.of(4.4, 5.5, 6.6);
+        instance.floatArray = List.of(7.7f, 8.8f, 9.9f);
+        instance.booleanArray = List.of(true, false, true);
 
-        Assertions.assertIterableEquals(strValues, instance.strArray);
+        Resource r = RdfSerializer.serialize(model, instance);
+        Assertions.assertEquals(getTypeUri(r), TestClasses.NS + "Arrays");
+
+        DeserializationReport<TestClasses.Arrays> report = RdfDeserializer.deserialize(r, TestClasses.Arrays.class);
+        Assertions.assertTrue(report.isValid());
+        Assertions.assertNotNull(report.get());
+        // Order is not preserved
+        TestClasses.Arrays deserializedInstance = report.get();
+        Assertions.assertEquals(new HashSet<>(instance.stringArray), new HashSet<>(deserializedInstance.stringArray));
+        Assertions.assertEquals(new HashSet<>(instance.integerArray), new HashSet<>(deserializedInstance.integerArray));
+        Assertions.assertEquals(new HashSet<>(instance.doubleArray), new HashSet<>(deserializedInstance.doubleArray));
+        Assertions.assertEquals(new HashSet<>(instance.floatArray), new HashSet<>(deserializedInstance.floatArray));
+        Assertions.assertEquals(new HashSet<>(instance.booleanArray), new HashSet<>(deserializedInstance.booleanArray));
     }
 
     @Test
@@ -96,6 +110,7 @@ public class RdfSerdeTest {
 
         DeserializationReport<PrimitiveTypes> report = RdfDeserializer.deserialize(r, PrimitiveTypes.class);
         Assertions.assertTrue(report.isValid());
+        Assertions.assertNotNull(report.get());
         Assertions.assertEquals(primitiveTypes, report.get());
     }
 }

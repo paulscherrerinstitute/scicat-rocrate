@@ -54,6 +54,10 @@ public class RdfSerializer {
                             for (Object item : (Iterable<?>) value) {
                                 if (item instanceof String str) {
                                     serializedObject.addProperty(property, str);
+                                } else if (item instanceof Boolean b) {
+                                    serializedObject.addLiteral(property, b);
+                                } else if (item instanceof Number n) {
+                                    serializedObject.addLiteral(property, n);
                                 } else {
                                     Resource nestedObject = serialize(model, item);
                                     serializedObject.addProperty(property, nestedObject);

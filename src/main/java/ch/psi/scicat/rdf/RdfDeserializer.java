@@ -26,10 +26,10 @@ public class RdfDeserializer {
 
     public static class DeserializationReport<T> {
         private Set<ValidationError> errors = new HashSet<>();
-        private T value;
+        private T value = null;
 
         public boolean isValid() {
-            return errors.isEmpty();
+            return errors.isEmpty() && value != null;
         }
 
         public void addError(ValidationError e) {
@@ -37,6 +37,7 @@ public class RdfDeserializer {
         }
 
         public void addErrors(DeserializationReport<?> report) {
+            report.getErrors().forEach(e -> System.err.println(e.getMessage()));
             errors.addAll(report.getErrors());
         }
 
@@ -50,6 +51,21 @@ public class RdfDeserializer {
 
         public T get() {
             return value;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            if (isValid()) {
+                builder.append("Contains: \n  ")
+                        .append(value);
+            } else {
+                for (ValidationError e : errors) {
+                    builder.append(e.getMessage()).append('\n');
+                }
+            }
+
+            return builder.toString();
         }
     }
 
@@ -104,7 +120,7 @@ public class RdfDeserializer {
             }
         }
 
-        if (report.isValid()) {
+        if (report.getErrors().isEmpty()) {
             report.set(obj);
         }
 
@@ -148,13 +164,13 @@ public class RdfDeserializer {
         } else if (value.isResource()) {
             Resource resourceValue = value.asResource();
             DeserializationReport<?> subreport = deserialize(resourceValue, fieldType);
+            report.addErrors(subreport);
+            // Should we set the field if there are errors?
             if (subreport.isValid()) {
-                // Should we set the field if there are errors?
                 return subreport.get();
-            } else {
-                report.addErrors(subreport);
             }
         }
+        // Never reached
         return null;
     }
 }

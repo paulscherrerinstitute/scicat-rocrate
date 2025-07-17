@@ -12,10 +12,24 @@ public class TestClasses {
     public static class Empty {
     }
 
-    @RdfClass(typesUri = NS + "StrArray")
-    public static class StrArray {
-        @RdfProperty(uri = NS + "strArray")
-        List<String> strArray = List.of("a", "b", "c");
+    static final Property PropstringArray = ResourceFactory.createProperty(NS + "stringArray");
+    static final Property PropintegerArray = ResourceFactory.createProperty(NS + "integerArray");
+    static final Property PropdoubleArray = ResourceFactory.createProperty(NS + "doubleArray");
+    static final Property PropfloatArray = ResourceFactory.createProperty(NS + "floatArray");
+    static final Property PropbooleanArray = ResourceFactory.createProperty(NS + "booleanArray");
+
+    @RdfClass(typesUri = NS + "Arrays")
+    public static class Arrays {
+        @RdfProperty(uri = NS + "stringArray")
+        List<String> stringArray;
+        @RdfProperty(uri = NS + "integerArray")
+        List<Integer> integerArray;
+        @RdfProperty(uri = NS + "doubleArray")
+        List<Double> doubleArray;
+        @RdfProperty(uri = NS + "floatArray")
+        List<Float> floatArray;
+        @RdfProperty(uri = NS + "booleanArray")
+        List<Boolean> booleanArray;
     }
 
     @RdfClass(typesUri = NS + "CustomUri")
