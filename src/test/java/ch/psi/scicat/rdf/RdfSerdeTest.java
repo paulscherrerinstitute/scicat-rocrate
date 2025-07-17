@@ -1,5 +1,6 @@
 package ch.psi.scicat.rdf;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 
@@ -33,9 +34,17 @@ public class RdfSerdeTest {
     }
 
     @Test
+    @DisplayName("Bad input")
+    public void test00() throws Exception {
+        Assertions.assertTrue(RdfSerializer.serialize(model, Instant.now()).isEmpty());
+        Assertions.assertTrue(RdfSerializer.serialize(null, new TestClasses.Empty()).isEmpty());
+        Assertions.assertTrue(RdfSerializer.serialize(model, null).isEmpty());
+    }
+
+    @Test
     @DisplayName("Empty class")
     public void test01() throws Exception {
-        Resource r = RdfSerializer.serialize(model, new TestClasses.Empty());
+        Resource r = RdfSerializer.serialize(model, new TestClasses.Empty()).get();
         Assertions.assertEquals(getTypeUri(r), TestClasses.NS + "Empty");
     }
 
@@ -49,7 +58,7 @@ public class RdfSerdeTest {
         instance.floatArray = List.of(7.7f, 8.8f, 9.9f);
         instance.booleanArray = List.of(true, false, true);
 
-        Resource r = RdfSerializer.serialize(model, instance);
+        Resource r = RdfSerializer.serialize(model, instance).get();
         Assertions.assertEquals(getTypeUri(r), TestClasses.NS + "Arrays");
 
         DeserializationReport<TestClasses.Arrays> report = RdfDeserializer.deserialize(r, TestClasses.Arrays.class);
@@ -68,7 +77,7 @@ public class RdfSerdeTest {
     @DisplayName("Custom URI")
     public void test03() throws Exception {
         TestClasses.CustomUri customURI = new TestClasses.CustomUri();
-        Resource r = RdfSerializer.serialize(model, customURI);
+        Resource r = RdfSerializer.serialize(model, customURI).get();
         Assertions.assertEquals(getTypeUri(r), TestClasses.NS + "CustomUri");
         Assertions.assertEquals(customURI.customUri(), r.getURI());
     }
@@ -86,7 +95,7 @@ public class RdfSerdeTest {
         primitiveTypes.g = Float.valueOf(6);
         primitiveTypes.h = false;
         primitiveTypes.i = Boolean.TRUE;
-        Resource r = RdfSerializer.serialize(model, primitiveTypes);
+        Resource r = RdfSerializer.serialize(model, primitiveTypes).get();
         Assertions.assertEquals(getTypeUri(r), TestClasses.NS + "PrimitiveTypes");
 
         Assertions.assertEquals(primitiveTypes.a,

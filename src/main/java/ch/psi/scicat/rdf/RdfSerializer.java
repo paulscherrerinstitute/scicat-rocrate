@@ -16,21 +16,24 @@ import org.slf4j.LoggerFactory;
 public class RdfSerializer {
     private static final Logger logger = LoggerFactory.getLogger(RdfSerializer.class);
 
-    public static Resource serialize(Model model, Object obj) throws Exception {
-        Resource serializedObject = null;
+    public static Optional<Resource> serialize(Model model, Object obj) throws Exception {
+        Optional<Resource> serializedObject = Optional.empty();
+        if (model == null || obj == null) {
+            return serializedObject;
+        }
 
         Class<?> clazz = obj.getClass();
 
         if (clazz.isAnnotationPresent(RdfClass.class)) {
             RdfClass rdfClass = clazz.getAnnotation(RdfClass.class);
             serializedObject = generateResourceUri(obj)
-                    .map(uri -> model.createResource(uri))
-                    .orElseGet(() -> model.createResource());
+                    .map(uri -> Optional.of(model.createResource(uri)))
+                    .orElseGet(() -> Optional.of(model.createResource()));
 
             // NOTE: what to do when types is empty?
             for (String type : rdfClass.typesUri()) {
                 Resource typeResource = model.createResource(type);
-                serializedObject.addProperty(RDF.type, typeResource);
+                serializedObject.get().addProperty(RDF.type, typeResource);
             }
 
             for (Field field : clazz.getDeclaredFields()) {
@@ -41,7 +44,7 @@ public class RdfSerializer {
                     Object value = field.get(obj);
 
                     if (value != null) {
-                        serializeValue(serializedObject, value, property);
+                        serializeValue(serializedObject.get(), value, property);
                     } else {
                         logger.warn("Ignoring field '{}' because it's null", field.getName());
                     }
@@ -76,8 +79,8 @@ public class RdfSerializer {
         } else if (value instanceof Number n) {
             serializedObject.addLiteral(property, n.doubleValue());
         } else if (value.getClass().isAnnotationPresent(RdfClass.class)) {
-            Resource nestedObject = serialize(serializedObject.getModel(), value);
-            serializedObject.addProperty(property, nestedObject);
+            Optional<Resource> nestedObject = serialize(serializedObject.getModel(), value);
+            nestedObject.ifPresent(o -> serializedObject.addProperty(property, o));
         } else if (value instanceof Iterable) {
             for (Object item : (Iterable<?>) value) {
                 serializeValue(serializedObject, item, property);
