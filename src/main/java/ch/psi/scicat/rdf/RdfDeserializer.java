@@ -1,6 +1,7 @@
 package ch.psi.scicat.rdf;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,7 +72,11 @@ public class RdfDeserializer {
 
     public static <T> DeserializationReport<T> deserialize(Resource subject, Class<T> clazz) throws Exception {
         DeserializationReport<T> report = new DeserializationReport<>();
-        T obj = clazz.getDeclaredConstructor().newInstance();
+
+        Optional<T> obj = initInstance(clazz);
+        if (subject == null || clazz == null || obj.isEmpty()) {
+            return report;
+        }
 
         if (clazz.isAnnotationPresent(RdfClass.class)) {
             RdfClass rdfClassAnnotation = clazz.getAnnotation(RdfClass.class);
@@ -105,7 +110,7 @@ public class RdfDeserializer {
                             for (RDFNode value : values) {
                                 collection.add(convertValue(listType, value, report));
                             }
-                            field.set(obj, collection);
+                            field.set(obj.get(), collection);
                         } else {
                             logger.error("Unsupported collection");
                         }
@@ -114,17 +119,30 @@ public class RdfDeserializer {
                             logger.warn("Field {} is not a collection, only the first value will be assigned");
                         }
                         RDFNode value = values.getFirst();
-                        field.set(obj, convertValue(field.getType(), value, report));
+                        field.set(obj.get(), convertValue(field.getType(), value, report));
                     }
                 }
             }
-        }
 
-        if (report.getErrors().isEmpty()) {
-            report.set(obj);
+            if (report.getErrors().isEmpty()) {
+                report.set(obj.get());
+            }
         }
 
         return report;
+    }
+
+    private static <T> Optional<T> initInstance(Class<T> clazz) {
+        return Optional.ofNullable(clazz)
+                .flatMap(c -> {
+                    try {
+                        return Optional.of(c.getDeclaredConstructor().newInstance());
+                    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                            | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+                        logger.error("Failed to instantiate instance of " + clazz.getName(), e);
+                        return Optional.empty();
+                    }
+                });
     }
 
     private static Optional<PropertyError> checkType(Resource subject, String[] expectedTypes) {

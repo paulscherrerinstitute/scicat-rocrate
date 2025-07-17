@@ -39,6 +39,12 @@ public class RdfSerdeTest {
         Assertions.assertTrue(RdfSerializer.serialize(model, Instant.now()).isEmpty());
         Assertions.assertTrue(RdfSerializer.serialize(null, new TestClasses.Empty()).isEmpty());
         Assertions.assertTrue(RdfSerializer.serialize(model, null).isEmpty());
+        Assertions.assertTrue(RdfSerializer.serialize(null, null).isEmpty());
+
+        Assertions.assertFalse(RdfDeserializer.deserialize(model.createResource(), Instant.class).isValid());
+        Assertions.assertFalse(RdfDeserializer.deserialize(null, Instant.class).isValid());
+        Assertions.assertFalse(RdfDeserializer.deserialize(model.createResource(), null).isValid());
+        Assertions.assertFalse(RdfDeserializer.deserialize(null, null).isValid());
     }
 
     @Test
