@@ -23,7 +23,7 @@ public class RdfSerializer {
 
         if (clazz.isAnnotationPresent(RdfClass.class)) {
             RdfClass rdfClass = clazz.getAnnotation(RdfClass.class);
-            serializedObject = generateResourceURI(obj)
+            serializedObject = generateResourceUri(obj)
                     .map(uri -> model.createResource(uri))
                     .orElseGet(() -> model.createResource());
 
@@ -41,31 +41,7 @@ public class RdfSerializer {
                     Object value = field.get(obj);
 
                     if (value != null) {
-                        if (value instanceof String str) {
-                            serializedObject.addProperty(property, str);
-                        } else if (value instanceof Boolean b) {
-                            serializedObject.addLiteral(property, b.booleanValue());
-                        } else if (value instanceof Number n) {
-                            serializedObject.addLiteral(property, n.doubleValue());
-                        } else if (value.getClass().isAnnotationPresent(RdfClass.class)) {
-                            Resource nestedObject = serialize(model, value);
-                            serializedObject.addProperty(property, nestedObject);
-                        } else if (value instanceof Iterable) {
-                            for (Object item : (Iterable<?>) value) {
-                                if (item instanceof String str) {
-                                    serializedObject.addProperty(property, str);
-                                } else if (item instanceof Boolean b) {
-                                    serializedObject.addLiteral(property, b);
-                                } else if (item instanceof Number n) {
-                                    serializedObject.addLiteral(property, n);
-                                } else {
-                                    Resource nestedObject = serialize(model, item);
-                                    serializedObject.addProperty(property, nestedObject);
-                                }
-                            }
-                        } else {
-                            throw new IllegalStateException("Unable to serialize type " + value.getClass().getName());
-                        }
+                        serializeValue(serializedObject, value, property);
                     } else {
                         logger.warn("Ignoring field '{}' because it's null", field.getName());
                     }
@@ -78,7 +54,7 @@ public class RdfSerializer {
 
     }
 
-    public static Optional<String> generateResourceURI(Object obj) {
+    public static Optional<String> generateResourceUri(Object obj) {
         try {
             for (Method method : obj.getClass().getDeclaredMethods()) {
                 if (method.isAnnotationPresent(RdfResourceUri.class)) {
@@ -86,9 +62,28 @@ public class RdfSerializer {
                 }
             }
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            e.printStackTrace();
+            logger.error("URI generation function for class '" + obj.getClass().getName() + "' is not compliant", e);
         }
 
         return Optional.empty();
+    }
+
+    private static void serializeValue(Resource serializedObject, Object value, Property property) throws Exception {
+        if (value instanceof String str) {
+            serializedObject.addProperty(property, str);
+        } else if (value instanceof Boolean b) {
+            serializedObject.addLiteral(property, b.booleanValue());
+        } else if (value instanceof Number n) {
+            serializedObject.addLiteral(property, n.doubleValue());
+        } else if (value.getClass().isAnnotationPresent(RdfClass.class)) {
+            Resource nestedObject = serialize(serializedObject.getModel(), value);
+            serializedObject.addProperty(property, nestedObject);
+        } else if (value instanceof Iterable) {
+            for (Object item : (Iterable<?>) value) {
+                serializeValue(serializedObject, item, property);
+            }
+        } else {
+            throw new IllegalStateException("Unable to serialize type " + value.getClass().getName());
+        }
     }
 }
