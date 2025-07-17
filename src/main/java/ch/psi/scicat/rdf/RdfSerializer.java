@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 public class RdfSerializer {
     private static final Logger logger = LoggerFactory.getLogger(RdfSerializer.class);
 
+    // FIXME: transaction like logic should be implemented on the model
     public static Optional<Resource> serialize(Model model, Object obj) throws Exception {
         Optional<Resource> serializedObject = Optional.empty();
         if (model == null || obj == null) {
@@ -76,8 +77,12 @@ public class RdfSerializer {
             serializedObject.addProperty(property, str);
         } else if (value instanceof Boolean b) {
             serializedObject.addLiteral(property, b.booleanValue());
-        } else if (value instanceof Number n) {
-            serializedObject.addLiteral(property, n.doubleValue());
+        } else if (value instanceof Integer i) {
+            serializedObject.addLiteral(property, i.intValue());
+        } else if (value instanceof Double d) {
+            serializedObject.addLiteral(property, d.doubleValue());
+        } else if (value instanceof Float f) {
+            serializedObject.addLiteral(property, f.floatValue());
         } else if (value.getClass().isAnnotationPresent(RdfClass.class)) {
             Optional<Resource> nestedObject = serialize(serializedObject.getModel(), value);
             nestedObject.ifPresent(o -> serializedObject.addProperty(property, o));
