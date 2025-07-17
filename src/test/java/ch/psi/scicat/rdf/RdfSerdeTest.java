@@ -20,6 +20,8 @@ import io.quarkus.test.junit.QuarkusTest;
 @QuarkusTest
 public class RdfSerdeTest {
     private Model model;
+    private RdfSerializer serializer = new RdfSerializer();
+    private RdfDeserializer deserializer = new RdfDeserializer();
 
     @BeforeEach
     public void setup() {
@@ -36,21 +38,21 @@ public class RdfSerdeTest {
     @Test
     @DisplayName("Bad input")
     public void test00() throws Exception {
-        Assertions.assertTrue(RdfSerializer.serialize(model, Instant.now()).isEmpty());
-        Assertions.assertTrue(RdfSerializer.serialize(null, new TestClasses.Empty()).isEmpty());
-        Assertions.assertTrue(RdfSerializer.serialize(model, null).isEmpty());
-        Assertions.assertTrue(RdfSerializer.serialize(null, null).isEmpty());
+        Assertions.assertTrue(serializer.serialize(model, Instant.now()).isEmpty());
+        Assertions.assertTrue(serializer.serialize(null, new TestClasses.Empty()).isEmpty());
+        Assertions.assertTrue(serializer.serialize(model, null).isEmpty());
+        Assertions.assertTrue(serializer.serialize(null, null).isEmpty());
 
-        Assertions.assertFalse(RdfDeserializer.deserialize(model.createResource(), Instant.class).isValid());
-        Assertions.assertFalse(RdfDeserializer.deserialize(null, Instant.class).isValid());
-        Assertions.assertFalse(RdfDeserializer.deserialize(model.createResource(), null).isValid());
-        Assertions.assertFalse(RdfDeserializer.deserialize(null, null).isValid());
+        Assertions.assertFalse(deserializer.deserialize(model.createResource(), Instant.class).isValid());
+        Assertions.assertFalse(deserializer.deserialize(null, Instant.class).isValid());
+        Assertions.assertFalse(deserializer.deserialize(model.createResource(), null).isValid());
+        Assertions.assertFalse(deserializer.deserialize(null, null).isValid());
     }
 
     @Test
     @DisplayName("Empty class")
     public void test01() throws Exception {
-        Resource r = RdfSerializer.serialize(model, new TestClasses.Empty()).get();
+        Resource r = serializer.serialize(model, new TestClasses.Empty()).get();
         Assertions.assertEquals(getTypeUri(r), TestClasses.NS + "Empty");
     }
 
@@ -64,10 +66,10 @@ public class RdfSerdeTest {
         instance.floatArray = List.of(7.7f, 8.8f, 9.9f);
         instance.booleanArray = List.of(true, false, true);
 
-        Resource r = RdfSerializer.serialize(model, instance).get();
+        Resource r = serializer.serialize(model, instance).get();
         Assertions.assertEquals(getTypeUri(r), TestClasses.NS + "Arrays");
 
-        DeserializationReport<TestClasses.Arrays> report = RdfDeserializer.deserialize(r, TestClasses.Arrays.class);
+        DeserializationReport<TestClasses.Arrays> report = deserializer.deserialize(r, TestClasses.Arrays.class);
         Assertions.assertTrue(report.isValid());
         Assertions.assertNotNull(report.get());
         // Order is not preserved
@@ -83,7 +85,7 @@ public class RdfSerdeTest {
     @DisplayName("Custom URI")
     public void test03() throws Exception {
         TestClasses.CustomUri customURI = new TestClasses.CustomUri();
-        Resource r = RdfSerializer.serialize(model, customURI).get();
+        Resource r = serializer.serialize(model, customURI).get();
         Assertions.assertEquals(getTypeUri(r), TestClasses.NS + "CustomUri");
         Assertions.assertEquals(customURI.customUri(), r.getURI());
     }
@@ -101,7 +103,7 @@ public class RdfSerdeTest {
         primitiveTypes.g = Float.valueOf(6);
         primitiveTypes.h = false;
         primitiveTypes.i = Boolean.TRUE;
-        Resource r = RdfSerializer.serialize(model, primitiveTypes).get();
+        Resource r = serializer.serialize(model, primitiveTypes).get();
         Assertions.assertEquals(getTypeUri(r), TestClasses.NS + "PrimitiveTypes");
 
         Assertions.assertEquals(primitiveTypes.a,
@@ -123,7 +125,7 @@ public class RdfSerdeTest {
         Assertions.assertEquals(primitiveTypes.i,
                 r.getProperty(TestClasses.PropbooleanClass).getObject().asLiteral().getBoolean());
 
-        DeserializationReport<PrimitiveTypes> report = RdfDeserializer.deserialize(r, PrimitiveTypes.class);
+        DeserializationReport<PrimitiveTypes> report = deserializer.deserialize(r, PrimitiveTypes.class);
         Assertions.assertTrue(report.isValid());
         Assertions.assertNotNull(report.get());
         Assertions.assertEquals(primitiveTypes, report.get());

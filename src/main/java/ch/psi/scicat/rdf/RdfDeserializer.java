@@ -70,7 +70,7 @@ public class RdfDeserializer {
         }
     }
 
-    public static <T> DeserializationReport<T> deserialize(Resource subject, Class<T> clazz) throws Exception {
+    public <T> DeserializationReport<T> deserialize(Resource subject, Class<T> clazz) throws Exception {
         DeserializationReport<T> report = new DeserializationReport<>();
 
         Optional<T> obj = initInstance(clazz);
@@ -132,7 +132,7 @@ public class RdfDeserializer {
         return report;
     }
 
-    private static <T> Optional<T> initInstance(Class<T> clazz) {
+    private <T> Optional<T> initInstance(Class<T> clazz) {
         return Optional.ofNullable(clazz)
                 .flatMap(c -> {
                     try {
@@ -145,7 +145,7 @@ public class RdfDeserializer {
                 });
     }
 
-    private static Optional<PropertyError> checkType(Resource subject, String[] expectedTypes) {
+    private Optional<PropertyError> checkType(Resource subject, String[] expectedTypes) {
         List<String> actualTypes = subject.listProperties(RDF.type)
                 .mapWith(s -> s.getObject().toString())
                 .toList();
@@ -157,7 +157,7 @@ public class RdfDeserializer {
         return Optional.empty();
     }
 
-    private static <T> Object convertValue(Class<?> fieldType, RDFNode value, DeserializationReport<T> report)
+    private <T> Object convertValue(Class<?> fieldType, RDFNode value, DeserializationReport<T> report)
             throws Exception {
         if (value.isLiteral()) {
             switch (fieldType.getName()) {

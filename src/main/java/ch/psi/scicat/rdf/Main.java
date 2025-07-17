@@ -13,6 +13,9 @@ import ch.psi.scicat.model.ValidationError;
 import ch.psi.scicat.rdf.RdfDeserializer.DeserializationReport;
 
 public class Main {
+    static RdfSerializer serializer = new RdfSerializer();
+    static RdfDeserializer deserializer = new RdfDeserializer();
+
     @RdfClass(typesUri = SchemaDO.NS + "Person")
     public static class Person {
         @RdfProperty(uri = SchemaDO.NS + "name")
@@ -60,13 +63,13 @@ public class Main {
         System.out.println(bob);
 
         Model model = ModelFactory.createDefaultModel();
-        RdfSerializer.serialize(model, bob);
+        serializer.serialize(model, bob);
         RDFWriter.source(model)
                 .format(RDFFormat.JSONLD11)
                 .output(System.out);
 
         Resource serializedBob = model.listSubjectsWithProperty(SchemaDO.sibling).next();
-        DeserializationReport<Person> report = RdfDeserializer.deserialize(serializedBob, Person.class);
+        DeserializationReport<Person> report = deserializer.deserialize(serializedBob, Person.class);
         if (report.isValid()) {
             Person deserializedPerson = report.get();
             System.out.println(deserializedPerson.test);

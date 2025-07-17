@@ -17,7 +17,7 @@ public class RdfSerializer {
     private static final Logger logger = LoggerFactory.getLogger(RdfSerializer.class);
 
     // FIXME: transaction like logic should be implemented on the model
-    public static Optional<Resource> serialize(Model model, Object obj) throws Exception {
+    public Optional<Resource> serialize(Model model, Object obj) throws Exception {
         Optional<Resource> serializedObject = Optional.empty();
         if (model == null || obj == null) {
             return serializedObject;
@@ -58,7 +58,7 @@ public class RdfSerializer {
 
     }
 
-    public static Optional<String> generateResourceUri(Object obj) {
+    public Optional<String> generateResourceUri(Object obj) {
         try {
             for (Method method : obj.getClass().getDeclaredMethods()) {
                 if (method.isAnnotationPresent(RdfResourceUri.class)) {
@@ -72,7 +72,7 @@ public class RdfSerializer {
         return Optional.empty();
     }
 
-    private static void serializeValue(Resource serializedObject, Object value, Property property) throws Exception {
+    private void serializeValue(Resource serializedObject, Object value, Property property) throws Exception {
         if (value instanceof String str) {
             serializedObject.addProperty(property, str);
         } else if (value instanceof Boolean b) {
