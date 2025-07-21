@@ -5,6 +5,9 @@ on:
     tags:
       - '*'
 
+env:
+  devImage: ghcr.io/${{ github.repository }}-devcontainer
+
 jobs:
   unit_tests:
     name: Unit tests
@@ -24,6 +27,8 @@ jobs:
       - name: Test
         uses: devcontainers/ci@v0.3
         with:
+          imageName: ${{ env.devImage }}
+          cacheFrom: ${{ env.devImage }}
           push: never
           runCmd: >
             ./mvnw install
