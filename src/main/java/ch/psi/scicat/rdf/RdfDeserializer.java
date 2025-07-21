@@ -23,7 +23,7 @@ import ch.psi.scicat.model.PropertyError;
 import ch.psi.scicat.model.ValidationError;
 
 public class RdfDeserializer {
-    private static final Logger logger = LoggerFactory.getLogger(RdfSerializer.class);
+    private static final Logger logger = LoggerFactory.getLogger(RdfDeserializer.class);
 
     public static class DeserializationReport<T> {
         private Set<ValidationError> errors = new HashSet<>();
@@ -93,14 +93,11 @@ public class RdfDeserializer {
                     List<RDFNode> values = subject.listProperties(p)
                             .mapWith(s -> s.getObject())
                             .toList();
-                    if (values.size() < rdfPropertyAnnotation.minCardinality()
-                            || values.size() > rdfPropertyAnnotation.maxCardinality()) {
-                        String message = String.format("Expected between %d and %d values but got %d",
-                                rdfPropertyAnnotation.minCardinality(), rdfPropertyAnnotation.maxCardinality(),
-                                values.size());
-                        report.addError(new PropertyError(subject.getURI(), p.getURI(), message));
-                    } else if (Collection.class.isAssignableFrom(field.getType())) {
-                        logger.info("Found a collection");
+
+                    checkCardinalities(subject, p, rdfPropertyAnnotation, values.size())
+                            .ifPresent(e -> report.addError(e));
+
+                    if (Collection.class.isAssignableFrom(field.getType())) {
                         Collection<Object> collection;
                         if (field.getType().isAssignableFrom(List.class)) {
                             collection = new ArrayList<>();
@@ -130,6 +127,7 @@ public class RdfDeserializer {
         }
 
         return report;
+
     }
 
     private <T> Optional<T> initInstance(Class<T> clazz) {
@@ -157,38 +155,53 @@ public class RdfDeserializer {
         return Optional.empty();
     }
 
+    private Optional<PropertyError> checkCardinalities(Resource subject, Property p, RdfProperty propertyAnnotation,
+            int actualCardinality) {
+        if (actualCardinality < propertyAnnotation.minCardinality()
+                || actualCardinality > propertyAnnotation.maxCardinality()) {
+            String message = String.format("Expected between %d and %d values but got %d",
+                    propertyAnnotation.minCardinality(), propertyAnnotation.maxCardinality(),
+                    actualCardinality);
+            return Optional.of(new PropertyError(subject.getURI(), p.getURI(), message));
+
+        }
+        return Optional.empty();
+    }
+
     private <T> Object convertValue(Class<?> fieldType, RDFNode value, DeserializationReport<T> report)
             throws Exception {
         if (value.isLiteral()) {
-            switch (fieldType.getName()) {
-                case "java.lang.String":
-                    return value.asLiteral().getString();
-                case "java.lang.Integer":
-                case "int":
-                    return value.asLiteral().getInt();
-                case "java.lang.Double":
-                case "double":
-                    return value.asLiteral().getDouble();
-                case "java.lang.Float":
-                case "float":
-                    return value.asLiteral().getFloat();
-                case "java.lang.Boolean":
-                case "boolean":
-                    return value.asLiteral().getBoolean();
-                default:
-                    throw new IllegalStateException(
-                            "Deserializer doesn't support type: " + fieldType.getName());
-            }
-        } else if (value.isResource()) {
-            Resource resourceValue = value.asResource();
-            DeserializationReport<?> subreport = deserialize(resourceValue, fieldType);
-            report.addErrors(subreport);
-            // Should we set the field if there are errors?
-            if (subreport.isValid()) {
-                return subreport.get();
-            }
+            return convertLiteralValue(fieldType, value, report);
+        } else {
+            return convertResourceValue(fieldType, value.asResource(), report);
         }
-        // Never reached
-        return null;
+    }
+
+    private <T> Object convertLiteralValue(Class<?> fieldType, RDFNode value, DeserializationReport<T> report) {
+        switch (fieldType.getName()) {
+            case "java.lang.String":
+                return value.asLiteral().getString();
+            case "java.lang.Integer":
+            case "int":
+                return value.asLiteral().getInt();
+            case "java.lang.Double":
+            case "double":
+                return value.asLiteral().getDouble();
+            case "java.lang.Float":
+            case "float":
+                return value.asLiteral().getFloat();
+            case "java.lang.Boolean":
+            case "boolean":
+                return value.asLiteral().getBoolean();
+            default:
+                throw new IllegalStateException("Deserializer doesn't support type: " + fieldType.getName());
+        }
+    }
+
+    private <T> Object convertResourceValue(Class<?> fieldType, Resource resourceValue, DeserializationReport<T> report)
+            throws Exception {
+        DeserializationReport<?> subreport = deserialize(resourceValue, fieldType);
+        report.addErrors(subreport);
+        return subreport.isValid() ? subreport.get() : null;
     }
 }
