@@ -6,16 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@interface RdfClass {
-    String[] typesUri();
-
-    String[] equivalentClasses() default {};
-}
-
-@Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-@interface RdfProperty {
+public @interface RdfProperty {
     String uri();
 
     int minCardinality() default 0;
@@ -23,9 +15,4 @@ import java.lang.annotation.Target;
     int maxCardinality() default Integer.MAX_VALUE;
 
     String[] equivalentProperties() default {};
-}
-
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-@interface RdfResourceUri {
 }
