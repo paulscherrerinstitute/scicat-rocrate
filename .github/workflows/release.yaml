@@ -9,8 +9,8 @@ env:
   devImage: ghcr.io/${{ github.repository }}-devcontainer
 
 jobs:
-  unit_tests:
-    name: Unit tests
+  release:
+    name: Release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,7 +24,7 @@ jobs:
             echo "Error: Tag '${{ github.ref }}' does not match POM project version '${{ env.POM_VERSION }}'."
             exit 1
           fi
-      - name: Test
+      - name: Build and push image
         uses: devcontainers/ci@v0.3
         with:
           imageName: ${{ env.devImage }}
