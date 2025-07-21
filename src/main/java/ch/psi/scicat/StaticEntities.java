@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.impl.PropertyImpl;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.SchemaDO;
@@ -25,8 +23,6 @@ public class StaticEntities {
     public static final ContextualEntity PSI;
     public static final Collection<DataEntity> PUBLISHEDDATA_SCHEMA = new ArrayList<>();
     public static final String DATACITE_URL = "https://schema.datacite.org/meta/kernel-4/metadata.xsd#";
-    // FIXME: https://github.com/apache/jena/pull/3222
-    public static final Property SchemaDOAbstract = new PropertyImpl(SchemaDO.NS + "abstract");
 
     static {
         CONTEXT_NODE.put("xsd", XSD.NS);

@@ -111,7 +111,7 @@ public class RoCrateImporter {
                         Map.entry(SchemaDO.dateCreated, new PropertyRequirements(true)),
                         Map.entry(SchemaDO.datePublished, new PropertyRequirements(true)),
                         Map.entry(SchemaDO.dateModified, new PropertyRequirements(true)),
-                        Map.entry(StaticEntities.SchemaDOAbstract, new PropertyRequirements(true)),
+                        Map.entry(SchemaDO._abstract, new PropertyRequirements(true)),
                         Map.entry(SchemaDO.description, new PropertyRequirements(false)),
                         // NOTE: License is required even though SciCat doesn't process it?
                         Map.entry(SchemaDO.license, new PropertyRequirements(true, true)),
@@ -128,7 +128,7 @@ public class RoCrateImporter {
 
         builder.doi(foundProperties.get(SchemaDO.identifier.getLocalName()).toString());
         builder.title(foundProperties.get(SchemaDO.title.getLocalName()).toString());
-        builder._abstract(foundProperties.get(StaticEntities.SchemaDOAbstract.getLocalName()).toString());
+        builder._abstract(foundProperties.get(SchemaDO._abstract.getLocalName()).toString());
         builder.dataDescription(foundProperties.get(SchemaDO.description.getLocalName()).toString());
 
         List<Resource> creatorList = (List<Resource>) foundProperties.get(SchemaDO.creator.getLocalName());
