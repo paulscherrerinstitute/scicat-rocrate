@@ -145,7 +145,7 @@ public class RoCrateController {
     @Path("/import")
     @Consumes(ExtraMediaType.APPLICATION_JSONLD)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response importRoCrate(@HeaderParam(value = "x-scicat-token") String scicatToken, InputStream body) {
+    public Response importRoCrate(@HeaderParam(value = "scicat-token") String scicatToken, InputStream body) {
         Optional<Response> response = isBodyEmpty(body);
         if (response.isPresent()) {
             return response.get();
