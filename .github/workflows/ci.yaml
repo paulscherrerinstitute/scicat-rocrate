@@ -3,14 +3,8 @@ name: CI
 on:
   push:
     branches: main
-    paths:
-      - src/**
-      - pom.xml
   pull_request:
     branches: main
-    paths:
-      - src/**
-      - pom.xml
 
 env:
   devImage: ghcr.io/${{ github.repository }}-devcontainer
@@ -19,11 +13,11 @@ jobs:
   check_changes:
     runs-on: ubuntu-latest
     outputs:
-      rebuildDevContainer: ${{ steps.check_changes.outputs.any_changed }}
+      rebuildDevContainer: ${{ steps.check_devcontainer.outputs.any_changed }}
     steps:
       - uses: actions/checkout@v4
       - name: Check for changes in .devcontainer
-        id: check_changes
+        id: check_devcontainer
         uses: tj-actions/changed-files@v46
         with:
           files: .devcontainer/**
