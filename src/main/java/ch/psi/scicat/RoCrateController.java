@@ -120,21 +120,17 @@ public class RoCrateController {
     @Path("/validate")
     @Consumes({ ExtraMediaType.APPLICATION_JSONLD, ExtraMediaType.APPLICATION_ZIP })
     @Produces(MediaType.APPLICATION_JSON)
-    public Response validateRoCrate(InputStream inputStream) {
-        Model model;
-        try {
-            model = RDFParser.create()
-                    .source(inputStream)
-                    .lang(Lang.JSONLD11)
-                    .base("file:///")
-                    .context(org.apache.jena.sparql.util.Context.create().set(LangJSONLD11.JSONLD_OPTIONS,
-                            jsonLdOptions))
-                    .build()
-                    .toModel();
-            importer.loadModel(model);
-        } catch (RiotException e) {
+    public Response validateRoCrate(InputStream body) {
+        Optional<Response> response = isBodyEmpty(body);
+        if (response.isPresent()) {
+            return response.get();
+        }
+
+        Optional<Model> model = parseJsonLd(body);
+        if (model.isEmpty()) {
             return Response.status(Status.BAD_REQUEST).build();
         }
+        importer.loadModel(model.get());
 
         ValidationReport report = importer.validate();
 
