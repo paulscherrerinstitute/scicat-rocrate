@@ -4,10 +4,11 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DoiUtils {
-    private static final Logger LOG = Logger.getLogger(DoiUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(DoiUtils.class);
 
     private static final Pattern DOI_PATTERN = Pattern
             .compile("(10[.][0-9]{2,}(?:[.][0-9]+)*/(?:(?![%" + "\"#? ])\\S)+)");
@@ -26,7 +27,7 @@ public class DoiUtils {
     public static String buildStandardUrl(String doi) {
         Optional<String> extractedDoi = extractDoi(doi);
         if (extractedDoi.isEmpty()) {
-            LOG.warnf("Constructing DOI standard URL with an invalid DOI: %s", doi);
+            logger.warn("Constructing DOI standard URL with an invalid DOI: {}", doi);
         }
         return String.format("https://doi.org/%s", extractedDoi.orElse(doi));
     }

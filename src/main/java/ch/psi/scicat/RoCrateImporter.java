@@ -25,7 +25,8 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ReasonerRegistry;
 import org.apache.jena.vocabulary.SchemaDO;
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 
@@ -40,7 +41,7 @@ import jakarta.enterprise.context.RequestScoped;
 
 @RequestScoped
 public class RoCrateImporter {
-    private static final Logger LOG = Logger.getLogger(RoCrateImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(RoCrateImporter.class);
 
     private Model model = ModelFactory.createOntologyModel();
     private Reasoner reasoner = ReasonerRegistry.getOWLReasoner();
@@ -58,7 +59,6 @@ public class RoCrateImporter {
     public ValidationReport validate() {
         ValidationReport report = new ValidationReport();
         List<Resource> potentialPublications = listPublications();
-        LOG.error(potentialPublications);
         if (potentialPublications.isEmpty()) {
             report.addError(new NoEntityFound());
             return report;
@@ -199,7 +199,7 @@ public class RoCrateImporter {
                                 subject.getURI(), p.getURI(), p.getLocalName())));
         queryBuilder.append("}");
 
-        LOG.debugf("Query generated:\n%s", queryBuilder.toString());
+        logger.debug("Query generated:\n{}", queryBuilder.toString());
 
         return QueryFactory.create(queryBuilder.toString());
     }

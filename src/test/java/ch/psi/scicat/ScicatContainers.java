@@ -5,7 +5,8 @@ import static java.util.Map.entry;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -21,7 +22,7 @@ public class ScicatContainers
     private MongoDBContainer mongoDBContainer;
     private GenericContainer<?> scicatBackendContainer;
 
-    private static final Logger LOG = Logger.getLogger(ScicatContainers.class);
+    private static final Logger logger = LoggerFactory.getLogger(ScicatContainers.class);
 
     private static final Map<String, String> ScicatBackendEnv = Map.ofEntries(
             entry("SITE", "CI"),
@@ -36,7 +37,7 @@ public class ScicatContainers
     public void setIntegrationTestContext(DevServicesContext context) {
         context.containerNetworkId().ifPresent(id -> {
             this.integrationTestNetworkId = id;
-            LOG.infof("Container network name: %s", integrationTestNetworkId);
+            logger.info("Container network name: {}", integrationTestNetworkId);
         });
     }
 
@@ -55,7 +56,7 @@ public class ScicatContainers
         mongoDBContainer.getCurrentContainerInfo().getConfig().getHostName();
         env.put("MONGODB_URI", String.format("mongodb://%s:27017/scicat-ci",
                 mongoDBContainer.getCurrentContainerInfo().getConfig().getHostName()));
-        LOG.infof("Mongo URI: %s", env.get("MONGODB_URI"));
+        logger.info("Mongo URI: {}", env.get("MONGODB_URI"));
         scicatBackendContainer = new GenericContainer<>(
                 "ghcr.io/scicatproject/backend-next:v4.12.2")
                 .withNetworkMode(integrationTestNetworkId)
@@ -74,7 +75,7 @@ public class ScicatContainers
                 .get(integrationTestNetworkId)
                 .getIpAddress();
         String backendUrl = String.format("http://%s:%d/api/v3", scicatIp, 3000);
-        LOG.infof("Backend URL: %s", backendUrl);
+        logger.info("Backend URL: {}", backendUrl);
         Map<String, String> config = new HashMap<>();
         config.put("quarkus.rest-client.scicat-api.url", backendUrl);
         // config.put("test.url", "http://host.docker.internal:8081");

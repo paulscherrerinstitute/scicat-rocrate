@@ -14,11 +14,12 @@ import org.apache.jena.riot.RiotException;
 import org.apache.jena.riot.lang.LangJSONLD11;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
 import org.jboss.resteasy.reactive.RestHeader;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.apicatalog.jsonld.JsonLdOptions;
 import com.apicatalog.jsonld.JsonLdOptions.ProcessingPolicy;
@@ -47,7 +48,7 @@ import jakarta.ws.rs.core.Response.Status;
 public class RoCrateController {
     private int cacheSize = 0;
 
-    private static final Logger LOG = Logger.getLogger(RoCrateController.class);
+    private static final Logger logger = LoggerFactory.getLogger(RoCrateController.class);
 
     @Inject
     RoCrateExporter exporter;
@@ -168,7 +169,7 @@ public class RoCrateController {
                     // TODO: create the objects
                     CreatePublishedDataDto dto = modelMapper.map(publishedData, CreatePublishedDataDto.class);
                     try {
-                        LOG.debug(new ObjectMapper().writeValueAsString(publishedData));
+                        logger.debug(new ObjectMapper().writeValueAsString(publishedData));
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
                     }
@@ -177,7 +178,7 @@ public class RoCrateController {
                 }
             });
         } catch (WebApplicationException e) {
-            LOG.error(e);
+            logger.error("", e);
             return e.getResponse();
         }
 
@@ -211,7 +212,7 @@ public class RoCrateController {
 
             return Optional.of(model);
         } catch (RiotException e) {
-            LOG.error(e);
+            logger.error("", e);
         }
 
         return Optional.empty();

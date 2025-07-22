@@ -1,8 +1,9 @@
 package ch.psi.scicat;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,7 +23,7 @@ public class ScicatClient {
     @RestClient
     ScicatService scicatService;
 
-    private static final Logger LOG = Logger.getLogger(ScicatClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(ScicatClient.class);
 
     public boolean isHealthy() {
         try {
@@ -45,7 +46,7 @@ public class ScicatClient {
 
     public RestResponse<PublishedData> createPublishedData(CreatePublishedDataDto publishedData, String scicatToken) {
         try {
-            LOG.debug(new ObjectMapper().writeValueAsString(publishedData));
+            logger.debug(new ObjectMapper().writeValueAsString(publishedData));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
