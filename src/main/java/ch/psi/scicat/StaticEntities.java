@@ -42,12 +42,8 @@ public class StaticEntities {
                 SchemaDO.about, SchemaDO.title,
                 SchemaDO.additionalType, SchemaDO.sdDatePublished, SchemaDO.creativeWorkStatus,
                 SchemaDO.dateCreated, SchemaDO.dateModified, SchemaDO.description,
-                SchemaDO.domainIncludes, SchemaDO.rangeIncludes)
+                SchemaDO.domainIncludes, SchemaDO.rangeIncludes, SchemaDO._abstract)
                 .forEach(p -> CONTEXT_NODE.put(p.getLocalName(), p.getURI()));
-
-        // FIXME: https://github.com/apache/jena/pull/3222
-        CONTEXT_NODE.put(SchemaDO._abstract.getLocalName().replace("_", ""),
-                SchemaDO._abstract.getURI().replace("_", ""));
     }
 
     static {
