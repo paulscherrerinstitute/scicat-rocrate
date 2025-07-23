@@ -8,3 +8,10 @@ repos:
       - id: check-json
       - id: check-xml
       - id: check-added-large-files
+  - repo: local
+    hooks:
+      - id: chekc_format
+        name: Format Java source files
+        language: system
+        entry: ./mvnw spotless:check
+        pass_filenames: false

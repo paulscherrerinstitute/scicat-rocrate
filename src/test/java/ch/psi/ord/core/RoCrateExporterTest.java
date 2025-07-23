@@ -5,6 +5,5 @@ import jakarta.inject.Inject;
 
 @QuarkusTest
 public class RoCrateExporterTest {
-    @Inject
-    RoCrateExporter exporter;
+  @Inject RoCrateExporter exporter;
 }

@@ -8,11 +8,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface RdfProperty {
-    String uri();
+  String uri();
 
-    int minCardinality() default 0;
+  int minCardinality() default 0;
 
-    int maxCardinality() default Integer.MAX_VALUE;
+  int maxCardinality() default Integer.MAX_VALUE;
 
-    String[] equivalentProperties() default {};
+  String[] equivalentProperties() default {};
 }

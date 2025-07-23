@@ -1,197 +1,208 @@
 package ch.psi.scicat.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class CreatePublishedDataDto {
-    @JsonProperty(value = "doi", required = true)
-    private String doi;
-    private String affiliation;
-    @JsonProperty(value = "creator", required = true)
-    private List<String> creator;
-    @JsonProperty(value = "publisher", required = true)
-    private String publisher;
-    @JsonProperty(value = "publicationYear", required = true)
-    private int publicationYear;
-    private String title;
-    @JsonProperty(value = "abstract", required = true)
-    private String _abstract;
-    private String url;
-    @JsonProperty(value = "dataDescription", required = true)
-    private String dataDescription;
-    @JsonProperty(value = "resourceType", required = true)
-    private String resourceType;
-    private int numberOfFiles;
-    private double sizeOfArchive;
-    @JsonProperty(value = "pidArray", required = true)
-    private List<String> pidArray = new ArrayList<>();
-    private List<String> authors;
-    private String registeredTime;
-    private String status;
-    private String scicatUser;
-    private String thumbnail;
-    private List<String> relatedPublications;
-    private String downloadLink;
+  @JsonProperty(value = "doi", required = true)
+  private String doi;
 
-    public String getDoi() {
-        return doi;
-    }
+  private String affiliation;
 
-    public void setDoi(String doi) {
-        this.doi = doi;
-    }
+  @JsonProperty(value = "creator", required = true)
+  private List<String> creator;
 
-    public String getAffiliation() {
-        return affiliation;
-    }
+  @JsonProperty(value = "publisher", required = true)
+  private String publisher;
 
-    public void setAffiliation(String affiliation) {
-        this.affiliation = affiliation;
-    }
+  @JsonProperty(value = "publicationYear", required = true)
+  private int publicationYear;
 
-    public List<String> getCreator() {
-        return creator;
-    }
+  private String title;
 
-    public void setCreator(List<String> creator) {
-        this.creator = creator;
-    }
+  @JsonProperty(value = "abstract", required = true)
+  private String _abstract;
 
-    public String getPublisher() {
-        return publisher;
-    }
+  private String url;
 
-    public void setPublisher(String publisher) {
-        this.publisher = publisher;
-    }
+  @JsonProperty(value = "dataDescription", required = true)
+  private String dataDescription;
 
-    public int getPublicationYear() {
-        return publicationYear;
-    }
+  @JsonProperty(value = "resourceType", required = true)
+  private String resourceType;
 
-    public void setPublicationYear(int publicationYear) {
-        this.publicationYear = publicationYear;
-    }
+  private int numberOfFiles;
+  private double sizeOfArchive;
 
-    public String getTitle() {
-        return title;
-    }
+  @JsonProperty(value = "pidArray", required = true)
+  private List<String> pidArray = new ArrayList<>();
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+  private List<String> authors;
+  private String registeredTime;
+  private String status;
+  private String scicatUser;
+  private String thumbnail;
+  private List<String> relatedPublications;
+  private String downloadLink;
 
-    public String get_abstract() {
-        return _abstract;
-    }
+  public String getDoi() {
+    return doi;
+  }
 
-    public void set_abstract(String _abstract) {
-        this._abstract = _abstract;
-    }
+  public void setDoi(String doi) {
+    this.doi = doi;
+  }
 
-    public String getUrl() {
-        return url;
-    }
+  public String getAffiliation() {
+    return affiliation;
+  }
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
+  public void setAffiliation(String affiliation) {
+    this.affiliation = affiliation;
+  }
 
-    public String getDataDescription() {
-        return dataDescription;
-    }
+  public List<String> getCreator() {
+    return creator;
+  }
 
-    public void setDataDescription(String dataDescription) {
-        this.dataDescription = dataDescription;
-    }
+  public void setCreator(List<String> creator) {
+    this.creator = creator;
+  }
 
-    public String getResourceType() {
-        return resourceType;
-    }
+  public String getPublisher() {
+    return publisher;
+  }
 
-    public void setResourceType(String resourceType) {
-        this.resourceType = resourceType;
-    }
+  public void setPublisher(String publisher) {
+    this.publisher = publisher;
+  }
 
-    public int getNumberOfFiles() {
-        return numberOfFiles;
-    }
+  public int getPublicationYear() {
+    return publicationYear;
+  }
 
-    public void setNumberOfFiles(int numberOfFiles) {
-        this.numberOfFiles = numberOfFiles;
-    }
+  public void setPublicationYear(int publicationYear) {
+    this.publicationYear = publicationYear;
+  }
 
-    public double getSizeOfArchive() {
-        return sizeOfArchive;
-    }
+  public String getTitle() {
+    return title;
+  }
 
-    public void setSizeOfArchive(double sizeOfArchive) {
-        this.sizeOfArchive = sizeOfArchive;
-    }
+  public void setTitle(String title) {
+    this.title = title;
+  }
 
-    public List<String> getPidArray() {
-        return pidArray;
-    }
+  public String get_abstract() {
+    return _abstract;
+  }
 
-    public void setPidArray(List<String> pidArray) {
-        this.pidArray = pidArray;
-    }
+  public void set_abstract(String _abstract) {
+    this._abstract = _abstract;
+  }
 
-    public List<String> getAuthors() {
-        return authors;
-    }
+  public String getUrl() {
+    return url;
+  }
 
-    public void setAuthors(List<String> authors) {
-        this.authors = authors;
-    }
+  public void setUrl(String url) {
+    this.url = url;
+  }
 
-    public String getRegisteredTime() {
-        return registeredTime;
-    }
+  public String getDataDescription() {
+    return dataDescription;
+  }
 
-    public void setRegisteredTime(String registeredTime) {
-        this.registeredTime = registeredTime;
-    }
+  public void setDataDescription(String dataDescription) {
+    this.dataDescription = dataDescription;
+  }
 
-    public String getStatus() {
-        return status;
-    }
+  public String getResourceType() {
+    return resourceType;
+  }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+  public void setResourceType(String resourceType) {
+    this.resourceType = resourceType;
+  }
 
-    public String getScicatUser() {
-        return scicatUser;
-    }
+  public int getNumberOfFiles() {
+    return numberOfFiles;
+  }
 
-    public void setScicatUser(String scicatUser) {
-        this.scicatUser = scicatUser;
-    }
+  public void setNumberOfFiles(int numberOfFiles) {
+    this.numberOfFiles = numberOfFiles;
+  }
 
-    public String getThumbnail() {
-        return thumbnail;
-    }
+  public double getSizeOfArchive() {
+    return sizeOfArchive;
+  }
 
-    public void setThumbnail(String thumbnail) {
-        this.thumbnail = thumbnail;
-    }
+  public void setSizeOfArchive(double sizeOfArchive) {
+    this.sizeOfArchive = sizeOfArchive;
+  }
 
-    public List<String> getRelatedPublications() {
-        return relatedPublications;
-    }
+  public List<String> getPidArray() {
+    return pidArray;
+  }
 
-    public void setRelatedPublications(List<String> relatedPublications) {
-        this.relatedPublications = relatedPublications;
-    }
+  public void setPidArray(List<String> pidArray) {
+    this.pidArray = pidArray;
+  }
 
-    public String getDownloadLink() {
-        return downloadLink;
-    }
+  public List<String> getAuthors() {
+    return authors;
+  }
 
-    public void setDownloadLink(String downloadLink) {
-        this.downloadLink = downloadLink;
-    }
+  public void setAuthors(List<String> authors) {
+    this.authors = authors;
+  }
+
+  public String getRegisteredTime() {
+    return registeredTime;
+  }
+
+  public void setRegisteredTime(String registeredTime) {
+    this.registeredTime = registeredTime;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
+  public String getScicatUser() {
+    return scicatUser;
+  }
+
+  public void setScicatUser(String scicatUser) {
+    this.scicatUser = scicatUser;
+  }
+
+  public String getThumbnail() {
+    return thumbnail;
+  }
+
+  public void setThumbnail(String thumbnail) {
+    this.thumbnail = thumbnail;
+  }
+
+  public List<String> getRelatedPublications() {
+    return relatedPublications;
+  }
+
+  public void setRelatedPublications(List<String> relatedPublications) {
+    this.relatedPublications = relatedPublications;
+  }
+
+  public String getDownloadLink() {
+    return downloadLink;
+  }
+
+  public void setDownloadLink(String downloadLink) {
+    this.downloadLink = downloadLink;
+  }
 }
