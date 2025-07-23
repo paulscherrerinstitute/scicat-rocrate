@@ -150,6 +150,38 @@
 | [4.a publisherIdentifier](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/publisher/#a-publisheridentifier)             | `publisher.@id`                                  | x                 |                          |                   |         |
 | [4.b publisherIdentifierScheme](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/publisher/#b-publisheridentifierscheme) | N/A                                              | x                 |                          |                   |         |
 | [4.c schemeURI](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/publisher/#c-schemeuri)                                 | N/A                                              | x                 |                          |                   |         |
+<table>
+<tr>
+<td> DataCite </td> <td> Schema.org </td> <td> SciCat </td>
+</tr>
+<tr>
+<td>
+
+```xml
+<publisher xml:lang="en" publisherIdentifier="https://ror.org/04z8jg394" publisherIdentifierScheme="ROR" schemeURI="https://ror.org/">Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences</publisher>
+```
+
+</td>
+<td>
+
+```json
+"publisher": {
+  "@id": "https://ror.org/04z8jg394",
+  "@type": "Organization",
+  "@name": "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences"
+}
+```
+
+</td>
+<td>
+
+```json
+"publisher": "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences"
+```
+
+</td>
+</tr>
+</table>
 
 | Datacite                                                                                                | Schema.org                                          | Required (API-03) | `CreatePublishedDataDto` | Required (Scicat) | Remarks                                                                 |
 |---------------------------------------------------------------------------------------------------------|-----------------------------------------------------|-------------------|--------------------------|-------------------|-------------------------------------------------------------------------|
