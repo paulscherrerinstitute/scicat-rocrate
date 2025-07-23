@@ -24,7 +24,11 @@
 	},
 	"customizations": {
 		"vscode": {
-			"extensions": [ "redhat.vscode-xml", "redhat.vscode-quarkus" ]
+			"extensions": [
+				"redhat.vscode-xml",
+				"redhat.vscode-quarkus",
+				"darkriszty.markdown-table-prettify"
+			]
 		}
 	},
 	"postCreateCommand": "sudo -E chown -R $(id -u):$(id -g) ~/.m2",
