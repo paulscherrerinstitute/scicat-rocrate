@@ -58,7 +58,7 @@ public class RoCrateExporter {
         if (asRootEntity) {
             RootDataEntity root = crate.getRootDataEntity();
             root.addProperty(SchemaDO.name.getLocalName(), publication.getTitle());
-            root.addProperty(SchemaDO.description.getLocalName(), publication.get_abstract());
+            root.addProperty(SchemaDO.description.getLocalName(), publication.getAbstract());
             root.addIdProperty(SchemaDO.license.getLocalName(), StaticEntities.LICENSE.getId());
             root.addProperty(SchemaDO.datePublished.getLocalName(), yearToISO3601(publication.getPublicationYear()));
         }
@@ -83,7 +83,7 @@ public class RoCrateExporter {
         publicationBuilder
                 .addProperty(SchemaDO.datePublished.getLocalName(), Long.toString(publication.getPublicationYear()))
                 .addProperty(SchemaDO.title.getLocalName(), publication.getTitle())
-                .addProperty(SchemaDO._abstract.getLocalName(), publication.get_abstract())
+                .addProperty(SchemaDO._abstract.getLocalName(), publication.getAbstract())
                 .addProperty(SchemaDO.additionalType.getLocalName(), publication.getResourceType())
                 .addProperty(SchemaDO.sdDatePublished.getLocalName(), publication.getRegisteredTime())
                 .addProperty(SchemaDO.creativeWorkStatus.getLocalName(), publication.getStatus())

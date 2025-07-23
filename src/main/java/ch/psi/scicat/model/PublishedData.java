@@ -43,406 +43,219 @@ public class PublishedData {
     String createdAt;
     String updatedAt;
 
-    public PublishedData() {
-    }
-
-    private PublishedData(PublishedDataBuilder builder) {
-        this.doi = builder.doi;
-        this.affiliation = builder.affiliation;
-        this.creator = builder.creator;
-        this.publisher = builder.publisher;
-        this.publicationYear = builder.publicationYear;
-        this.title = builder.title;
-        this.url = builder.url;
-        this._abstract = builder._abstract;
-        this.dataDescription = builder.dataDescription;
-        this.resourceType = builder.resourceType;
-        this.numberOfFiles = builder.numberOfFiles;
-        this.sizeOfArchive = builder.sizeOfArchive;
-        this.pidArray = builder.pidArray;
-        this.authors = builder.authors;
-        this.registeredTime = builder.registeredTime;
-        this.status = builder.status;
-        this.scicatUser = builder.scicatUser;
-        this.thumbnail = builder.thumbnail;
-        this.relatedPublications = builder.relatedPublications;
-        this.downloadLink = builder.downloadLink;
-        this.createdBy = builder.createdBy;
-        this.updatedBy = builder.updatedBy;
-        this.createdAt = builder.createdAt;
-        this.updatedAt = builder.updatedAt;
-    }
-
-    public static class PublishedDataBuilder {
-        public String affiliation;
-        public List<String> authors;
-        private String doi;
-        private List<String> creator;
-        private String publisher;
-        private int publicationYear;
-        private String title;
-        private String url;
-        String _abstract;
-        private String dataDescription;
-        private String resourceType;
-        private long numberOfFiles;
-        private long sizeOfArchive;
-        private List<String> pidArray;
-        private String registeredTime;
-        private String status;
-        private String scicatUser;
-        private String thumbnail;
-        private List<String> relatedPublications;
-        private String downloadLink;
-        private String createdBy;
-        private String updatedBy;
-        private String createdAt;
-        private String updatedAt;
-
-        public PublishedDataBuilder doi(String doi) {
-            this.doi = doi;
-            return this;
-        }
-
-        public PublishedDataBuilder creator(List<String> creator) {
-            this.creator = creator;
-            return this;
-        }
-
-        public void addCreator(String creator) {
-            if (this.creator == null) {
-                this.creator = new ArrayList<>();
-            }
-
-            this.creator.add(creator);
-        }
-
-        public PublishedDataBuilder publisher(String publisher) {
-            this.publisher = publisher;
-            return this;
-        }
-
-        public PublishedDataBuilder publicationYear(int publicationYear) {
-            this.publicationYear = publicationYear;
-            return this;
-        }
-
-        public PublishedDataBuilder title(String title) {
-            this.title = title;
-            return this;
-        }
-
-        public PublishedDataBuilder url(String url) {
-            this.url = url;
-            return this;
-        }
-
-        public PublishedDataBuilder _abstract(String _abstract) {
-            this._abstract = _abstract;
-            return this;
-        }
-
-        public PublishedDataBuilder dataDescription(String dataDescription) {
-            this.dataDescription = dataDescription;
-            return this;
-        }
-
-        public PublishedDataBuilder resourceType(String resourceType) {
-            this.resourceType = resourceType;
-            return this;
-        }
-
-        public PublishedDataBuilder numberOfFiles(long numberOfFiles) {
-            this.numberOfFiles = numberOfFiles;
-            return this;
-        }
-
-        public PublishedDataBuilder sizeOfArchive(long sizeOfArchive) {
-            this.sizeOfArchive = sizeOfArchive;
-            return this;
-        }
-
-        public PublishedDataBuilder pidArray(List<String> pidArray) {
-            this.pidArray = pidArray;
-            return this;
-        }
-
-        public PublishedDataBuilder registeredTime(String registeredTime) {
-            this.registeredTime = registeredTime;
-            return this;
-        }
-
-        public PublishedDataBuilder status(String status) {
-            this.status = status;
-            return this;
-        }
-
-        public PublishedDataBuilder scicatUser(String scicatUser) {
-            this.scicatUser = scicatUser;
-            return this;
-        }
-
-        public PublishedDataBuilder thumbnail(String thumbnail) {
-            this.thumbnail = thumbnail;
-            return this;
-        }
-
-        public PublishedDataBuilder relatedPublications(List<String> relatedPublications) {
-            this.relatedPublications = relatedPublications;
-            return this;
-        }
-
-        public PublishedDataBuilder downloadLink(String downloadLink) {
-            this.downloadLink = downloadLink;
-            return this;
-        }
-
-        public PublishedDataBuilder createdBy(String createdBy) {
-            this.createdBy = createdBy;
-            return this;
-        }
-
-        public PublishedDataBuilder updatedBy(String updatedBy) {
-            this.updatedBy = updatedBy;
-            return this;
-        }
-
-        public PublishedDataBuilder createdAt(String createdAt) {
-            this.createdAt = createdAt;
-            return this;
-        }
-
-        public PublishedDataBuilder updatedAt(String updatedAt) {
-            this.updatedAt = updatedAt;
-            return this;
-        }
-
-        public PublishedData build() throws IllegalStateException {
-            // if (doi == null) {
-            // throw new IllegalStateException("PublishedData is missing required property
-            // 'doi'");
-            // } else if (creator == null) {
-            // throw new IllegalStateException("PublishedData is missing required property
-            // 'creator'");
-            // } else if (publisher == null) {
-            // throw new IllegalStateException("PublishedData is missing required property
-            // 'publisher'");
-            // } else if (title == null) {
-            // throw new IllegalStateException("PublishedData is missing required property
-            // 'title'");
-            // } else if (_abstract == null) {
-            // throw new IllegalStateException("PublishedData is missing required property
-            // 'abstract'");
-            // } else if (pidArray == null) {
-            // throw new IllegalStateException("PublishedData is missing required property
-            // 'pidArray'");
-            // } else {
-            PublishedData result = new PublishedData(this);
-
-            return result;
-            // }
-        }
-
-        public PublishedDataBuilder affiliation(String affiliation) {
-            this.affiliation = affiliation;
-            return this;
-        }
-
-        public PublishedDataBuilder authors(List<String> authors) {
-            this.authors = authors;
-            return this;
-        }
-    }
-
     public String getDoi() {
         return doi;
     }
 
-    public void setDoi(String doi) {
+    public PublishedData setDoi(String doi) {
         this.doi = doi;
+        return this;
     }
 
     public String getAffiliation() {
         return affiliation;
     }
 
-    public void setAffiliation(String affiliation) {
+    public PublishedData setAffiliation(String affiliation) {
         this.affiliation = affiliation;
+        return this;
     }
 
     public List<String> getCreator() {
         return creator;
     }
 
-    public void setCreator(List<String> creator) {
+    public PublishedData setCreator(List<String> creator) {
         this.creator = creator;
+        return this;
     }
 
     public String getPublisher() {
         return publisher;
     }
 
-    public void setPublisher(String publisher) {
+    public PublishedData setPublisher(String publisher) {
         this.publisher = publisher;
+        return this;
     }
 
     public int getPublicationYear() {
         return publicationYear;
     }
 
-    public void setPublicationYear(int publicationYear) {
+    public PublishedData setPublicationYear(int publicationYear) {
         this.publicationYear = publicationYear;
+        return this;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    public PublishedData setTitle(String title) {
         this.title = title;
+        return this;
     }
 
     public String getUrl() {
         return url;
     }
 
-    public void setUrl(String url) {
+    public PublishedData setUrl(String url) {
         this.url = url;
+        return this;
     }
 
-    public String get_abstract() {
+    public String getAbstract() {
         return _abstract;
     }
 
-    public void set_abstract(String _abstract) {
+    public PublishedData setAbstract(String _abstract) {
         this._abstract = _abstract;
+        return this;
     }
 
     public String getDataDescription() {
         return dataDescription;
     }
 
-    public void setDataDescription(String dataDescription) {
+    public PublishedData setDataDescription(String dataDescription) {
         this.dataDescription = dataDescription;
+        return this;
     }
 
     public String getResourceType() {
         return resourceType;
     }
 
-    public void setResourceType(String resourceType) {
+    public PublishedData setResourceType(String resourceType) {
         this.resourceType = resourceType;
+        return this;
     }
 
     public long getNumberOfFiles() {
         return numberOfFiles;
     }
 
-    public void setNumberOfFiles(long numberOfFiles) {
+    public PublishedData setNumberOfFiles(long numberOfFiles) {
         this.numberOfFiles = numberOfFiles;
+        return this;
     }
 
     public long getSizeOfArchive() {
         return sizeOfArchive;
     }
 
-    public void setSizeOfArchive(long sizeOfArchive) {
+    public PublishedData setSizeOfArchive(long sizeOfArchive) {
         this.sizeOfArchive = sizeOfArchive;
+        return this;
     }
 
     public List<String> getPidArray() {
         return pidArray;
     }
 
-    public void setPidArray(List<String> pidArray) {
+    public PublishedData setPidArray(List<String> pidArray) {
         this.pidArray = pidArray;
+        return this;
     }
 
     public List<String> getAuthors() {
         return authors;
     }
 
-    public void setAuthors(List<String> authors) {
+    public PublishedData setAuthors(List<String> authors) {
         this.authors = authors;
+        return this;
     }
 
     public String getRegisteredTime() {
         return registeredTime;
     }
 
-    public void setRegisteredTime(String registeredTime) {
+    public PublishedData setRegisteredTime(String registeredTime) {
         this.registeredTime = registeredTime;
+        return this;
     }
 
     public String getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public PublishedData setStatus(String status) {
         this.status = status;
+        return this;
     }
 
     public String getScicatUser() {
         return scicatUser;
     }
 
-    public void setScicatUser(String scicatUser) {
+    public PublishedData setScicatUser(String scicatUser) {
         this.scicatUser = scicatUser;
+        return this;
     }
 
     public String getThumbnail() {
         return thumbnail;
     }
 
-    public void setThumbnail(String thumbnail) {
+    public PublishedData setThumbnail(String thumbnail) {
         this.thumbnail = thumbnail;
+        return this;
     }
 
     public List<String> getRelatedPublications() {
         return relatedPublications;
     }
 
-    public void setRelatedPublications(List<String> relatedPublications) {
+    public PublishedData setRelatedPublications(List<String> relatedPublications) {
         this.relatedPublications = relatedPublications;
+        return this;
     }
 
     public String getDownloadLink() {
         return downloadLink;
     }
 
-    public void setDownloadLink(String downloadLink) {
+    public PublishedData setDownloadLink(String downloadLink) {
         this.downloadLink = downloadLink;
+        return this;
     }
 
     public String getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(String createdBy) {
+    public PublishedData setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+        return this;
     }
 
     public String getUpdatedBy() {
         return updatedBy;
     }
 
-    public void setUpdatedBy(String updatedBy) {
+    public PublishedData setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
+        return this;
     }
 
     public String getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(String createdAt) {
+    public PublishedData setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+        return this;
     }
 
     public String getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(String updatedAt) {
+    public PublishedData setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
+        return this;
     }
 }

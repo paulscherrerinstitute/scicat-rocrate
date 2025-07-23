@@ -35,7 +35,7 @@ public class ZenodoExporter {
         builder.add(SchemaDO.dateModified.getLocalName(), publishedData.getUpdatedAt());
         // FIXME: for now we only support one hardcoded license
         builder.add(SchemaDO.license.getLocalName(), "https://creativecommons.org/licenses/by-sa/4.0/");
-        builder.add(SchemaDO.description.getLocalName(), publishedData.get_abstract());
+        builder.add(SchemaDO.description.getLocalName(), publishedData.getAbstract());
 
         builder.add(SchemaDO.creator.getLocalName(), Json.createArrayBuilder(
                 publishedData

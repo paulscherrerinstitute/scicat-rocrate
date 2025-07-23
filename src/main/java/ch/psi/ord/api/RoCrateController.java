@@ -29,6 +29,7 @@ import com.apicatalog.jsonld.uri.UriValidationPolicy;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ch.psi.ord.core.DoiUtils;
 import ch.psi.ord.core.RoCrateExporter;
 import ch.psi.ord.core.RoCrateImporter;
 import ch.psi.ord.model.Publication;
@@ -98,12 +99,12 @@ public class RoCrateController {
                     .build();
         }
 
-        // if (identifiers.stream().anyMatch(id -> !DoiUtils.isDoi(id))) {
-        // return Response.status(Status.BAD_REQUEST)
-        // .entity("Identifiers other than DOI are not implemented yet")
-        // .type(MediaType.TEXT_PLAIN)
-        // .build();
-        // }
+        if (identifiers.stream().anyMatch(id -> !DoiUtils.isDoi(id))) {
+            return Response.status(Status.BAD_REQUEST)
+                    .entity("Identifiers other than DOI are not implemented yet")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build();
+        }
 
         // FIXME: Will need to add other types
         try {
