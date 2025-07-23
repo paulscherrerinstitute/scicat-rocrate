@@ -1,4 +1,4 @@
-package ch.psi.scicat;
+package ch.psi.ord.api;
 
 import static io.restassured.RestAssured.given;
 
@@ -6,6 +6,8 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import ch.psi.scicat.client.ScicatService;
+import ch.psi.scicat.client.ScicatServiceMock;
 import io.quarkus.test.junit.QuarkusMock;
 import io.quarkus.test.junit.QuarkusTest;
 

@@ -1,4 +1,4 @@
-package ch.psi.scicat.rdf;
+package ch.psi.rdf;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package ch.psi.scicat;
+package ch.psi.ord.api;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.hasEntry;
@@ -11,6 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import ch.psi.scicat.client.ScicatService;
+import ch.psi.scicat.client.ScicatServiceMock;
 import io.quarkus.test.junit.QuarkusMock;
 import io.quarkus.test.junit.QuarkusTest;
 

@@ -1,4 +1,4 @@
-package ch.psi.scicat;
+package ch.psi.ord.core;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;

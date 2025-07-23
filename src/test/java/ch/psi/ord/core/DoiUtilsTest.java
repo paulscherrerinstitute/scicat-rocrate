@@ -1,4 +1,4 @@
-package ch.psi.scicat;
+package ch.psi.ord.core;
 
 import java.util.Optional;
 
@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import ch.psi.scicat.TestData;
 import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest

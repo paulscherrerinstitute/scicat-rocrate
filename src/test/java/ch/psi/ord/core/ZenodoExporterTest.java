@@ -1,10 +1,9 @@
-package ch.psi.scicat.zenodo;
+package ch.psi.ord.core;
 
 import org.apache.jena.vocabulary.SchemaDO;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 
-import ch.psi.scicat.DoiUtils;
 import ch.psi.scicat.TestData;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;

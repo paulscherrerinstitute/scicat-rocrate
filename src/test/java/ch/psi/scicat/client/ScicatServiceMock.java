@@ -1,4 +1,4 @@
-package ch.psi.scicat;
+package ch.psi.scicat.client;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;

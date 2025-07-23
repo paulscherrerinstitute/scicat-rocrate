@@ -1,4 +1,4 @@
-package ch.psi.scicat.zenodo;
+package ch.psi.ord.api;
 
 import io.quarkus.test.junit.QuarkusTest;
 
