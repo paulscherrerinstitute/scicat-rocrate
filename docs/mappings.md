@@ -6,7 +6,6 @@
 |----------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------|--------------------------|-------------------|-----------------------------------------------------------------|
 | [1. identifier](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/identifier)                        | `@id`<br>[`identifier`](https://schema.org/identifier) | x                 | `_id` <br> `doi`         | x (only `doi`)    | Should we make sure the format is valid?                        |
 | [1.a identifierType](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/identifier/#a-identifiertype) | N/A                                                    |                   |                          |                   | Only one possbile value in DataCite so we can assume it's a DOI |
-
 <table>
 <tr>
 <td> DataCite </td> <td> Schema.org </td> <td> SciCat </td>
@@ -38,23 +37,77 @@
 </tr>
 </table>
 
+| Datacite                                                                                                                                      | Schema.org                                                   | Required (API-03) | `CreatePublishedDataDto` | Required (Scicat) | Remarks                                                                          |
+|-----------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------|-------------------|--------------------------|-------------------|----------------------------------------------------------------------------------|
+| [2 creator](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/)                                                       | [`creator`](https://schema.org/creator)                      | x                 | `creator`                | x                 |                                                                                  |
+| [2.1 creatorName](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#creatorname)                                     | [`creator.name`](https://schema.org/name)                    | x                 |                          |                   |                                                                                  |
+| [2.1.a nameType](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#a-nametype)                                       | `creator.@type`                                              | x                 |                          |                   | Can be either a `Person` or an `Organization`, do we want to support the latter? |
+| [2.2 givenName](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#givenname)                                         | [`creator.givenName`](https://schema.org/givenName)          | x                 |                          |                   | :warning: Not in SciCat                                                          |
+| [2.3 familyName](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#familyname)                                       | [`creator.familyName`](https://schema.org/familyName)        | x                 |                          |                   | :warning: Not in SciCat                                                          |
+| [2.4 nameIdentifier](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#nameidentifier)                               | `creator.@id`                                                |                   |                          |                   | Only ORCID supported?                                                            |
+| [2.4.a nameIdentifierScheme](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#a-nameidentifierscheme)               | N/A                                                          |                   |                          |                   |                                                                                  |
+| [2.4.b schemeURI](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#b-schemeuri)                                     | N/A                                                          |                   |                          |                   |                                                                                  |
+| [2.5 affiliation](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#affiliation)                                     | [`creator.affiliation.name`](https://schema.org/affiliation) | x                 |                          |                   | :warning: Not in SciCat                                                          |
+| [2.5.a affiliationIdentifier](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#a-affiliationidentifier)             | `creator.affiliation.@id`                                    |                   |                          |                   | :warning: Not in SciCat                                                          |
+| [2.5.b affiliationIdentifierScheme](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#b-affiliationidentifierscheme) | N/A                                                          |                   |                          |                   |                                                                                  |
+| [2.5.c schemeURI](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#c-schemeuri)                                     | N/A                                                          |                   |                          |                   |                                                                                  |
+<table>
+<tr>
+<td> DataCite </td> <td> Schema.org </td> <td> SciCat </td>
+</tr>
+<tr>
+<td>
 
+```xml
+<creators>
+  <creator>
+    <creatorName nameType="Personal">
+      Garcia, Sofia
+    </creatorName>
+    <givenName>Sofia</givenName>
+    <familyName>Garcia</familyName>
+    <nameIdentifier schemeURI="https://orcid.org/" nameIdentifierScheme="ORCID">
+      0000-0001-5727-2427
+    </nameIdentifier>
+    <affiliation affiliationIdentifier="https://ror.org/03efmqc40" affiliationIdentifierScheme="ROR" schemeURI="https://ror.org">
+      Arizona State University
+    </affiliation>
+  </creator>
+</creators>
+```
 
+</td>
+<td>
 
-| Datacite                                                                                                                                   | Schema.org                                              | Required (API-03) | `CreatePublishedDataDto` | Required (Scicat) | Remarks                                       |
-|--------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------|-------------------|--------------------------|-------------------|-----------------------------------------------|
-| [2 creator](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/)                                                    | [`creator`](https://schema.org/creator)                 | x                 | `creator`                | x                 |                                               |
-| [2.1 creatorName](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#creatorname)                                  | [`creator.name`](https://schema.org/name)               | x                 |                          |                   |                                               |
-| [2.1.a nameType](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#a-nametype)                                    | `creator.@type`                                         | x                 |                          |                   | Can be either a `Person` or an `Organization` |
-| [2.2 givenName](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#givenname)                                      | [`creator.givenName`](https://schema.org/givenName)     | x                 |                          |                   | :warning: Not in SciCat                       |
-| [2.3 familyName](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#familyname)                                    | [`creator.familyName`](https://schema.org/familyName)   | x                 |                          |                   | :warning: Not in SciCat                       |
-| [2.4 nameIdentifier](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#nameidentifier)                            | `creator.@id`                                           |                   |                          |                   | Only ORCID supported?                         |
-| [2.4.a nameIdentifierScheme](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#a-nameidentifierscheme)            | N/A                                                     |                   |                          |                   |                                               |
-| [2.4.b schemeURI](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#b-schemeuri)                                  | N/A                                                     |                   |                          |                   |                                               |
-| [2.5 affiliation](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#affiliation)                                  | [`creator.affiliation`](https://schema.org/affiliation) | x                 |                          |                   |                                               |
-| [2.5.a affiliationIdentifier](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#a-affiliationidentifier)          | `creator.affiliation.@id`                               |                   |                          |                   |                                               |
-| [2.5.b affiliationIdentifierURI](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#b-affiliationidentifierscheme) | N/A                                                     |                   |                          |                   |                                               |
-| [2.5.c schemeURI](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/creator/#c-schemeuri)                                  | N/A                                                     |                   |                          |                   |                                               |
+```json
+"creator": [
+  {
+    "@id": "https://orcid.org/0000-0001-5727-2427",
+    "@type": "Person",
+    "name": "Garcia, Sofia",
+    "givenName": "Sofia",
+    "familyName": "Garcia",
+    "affiliation": {
+      "@id": "https://ror.org/03yrm5c26",
+      "@type": "Organization",
+      "name": "Arizona State University"
+    }
+  }
+]
+```
+
+</td>
+<td>
+
+```json
+"creator": [
+  "Garcia, Sofia"
+]
+```
+
+</td>
+</tr>
+</table>
 
 | Datacite                                                                                              | Schema.org                          | Required (API-03) | `CreatePublishedDataDto` | Required (Scicat) | Remarks |
 |-------------------------------------------------------------------------------------------------------|-------------------------------------|-------------------|--------------------------|-------------------|---------|
