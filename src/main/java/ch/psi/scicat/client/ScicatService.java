@@ -1,4 +1,4 @@
-package ch.psi.scicat;
+package ch.psi.scicat.client;
 
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.resteasy.reactive.RestResponse;

@@ -1,4 +1,4 @@
-package ch.psi.scicat;
+package ch.psi.ord.api;
 
 import jakarta.ws.rs.core.MediaType;
 

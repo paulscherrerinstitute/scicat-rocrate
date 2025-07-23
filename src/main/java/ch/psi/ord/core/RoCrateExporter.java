@@ -1,4 +1,4 @@
-package ch.psi.scicat;
+package ch.psi.ord.core;
 
 import java.time.Year;
 import java.util.List;
@@ -7,6 +7,7 @@ import org.apache.jena.vocabulary.SchemaDO;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
 
+import ch.psi.scicat.client.ScicatClient;
 import ch.psi.scicat.model.PublishedData;
 import edu.kit.datamanager.ro_crate.RoCrate;
 import edu.kit.datamanager.ro_crate.context.RoCrateMetadataContext;
@@ -28,7 +29,7 @@ public class RoCrateExporter {
     ScicatClient scicatClient;
 
     @Inject
-    @ConfigProperty(name = "quarkus.rest-client.\"ch.psi.scicat.ScicatService\".url")
+    @ConfigProperty(name = "quarkus.rest-client.\"ch.psi.scicat.client.ScicatService\".url")
     String scicatServiceUrl;
 
     public RoCrateExporter() {

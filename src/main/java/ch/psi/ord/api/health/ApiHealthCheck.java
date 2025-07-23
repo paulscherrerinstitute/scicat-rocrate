@@ -1,4 +1,4 @@
-package ch.psi.scicat.health;
+package ch.psi.ord.api.health;
 
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;

@@ -1,4 +1,4 @@
-package ch.psi.scicat;
+package ch.psi.ord.api;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,9 +29,13 @@ import com.apicatalog.jsonld.uri.UriValidationPolicy;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ch.psi.ord.core.RoCrateExporter;
+import ch.psi.ord.core.RoCrateImporter;
+import ch.psi.ord.model.Publication;
+import ch.psi.ord.model.ValidationReport;
+import ch.psi.scicat.client.ScicatClient;
 import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.PublishedData;
-import ch.psi.scicat.model.ValidationReport;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.HeaderParam;
@@ -59,7 +63,8 @@ public class RoCrateController {
     @Inject
     ScicatClient scicatClient;
 
-    private ModelMapper modelMapper = new ModelMapper();
+    @Inject
+    ModelMapper modelMapper;
 
     // Cache JSON-LD remote documents across requests
     LRUDocumentCache documentLoader;
@@ -93,12 +98,12 @@ public class RoCrateController {
                     .build();
         }
 
-        if (identifiers.stream().anyMatch(id -> !DoiUtils.isDoi(id))) {
-            return Response.status(Status.BAD_REQUEST)
-                    .entity("Identifiers other than DOI are not implemented yet")
-                    .type(MediaType.TEXT_PLAIN)
-                    .build();
-        }
+        // if (identifiers.stream().anyMatch(id -> !DoiUtils.isDoi(id))) {
+        // return Response.status(Status.BAD_REQUEST)
+        // .entity("Identifiers other than DOI are not implemented yet")
+        // .type(MediaType.TEXT_PLAIN)
+        // .build();
+        // }
 
         // FIXME: Will need to add other types
         try {
@@ -165,11 +170,11 @@ public class RoCrateController {
         Map<String, String> importMap = new HashMap<>();
         try {
             report.getEntities().forEach(entity -> {
-                if (entity.object() instanceof PublishedData publishedData) {
+                if (entity.object() instanceof Publication publication) {
                     // TODO: create the objects
-                    CreatePublishedDataDto dto = modelMapper.map(publishedData, CreatePublishedDataDto.class);
+                    CreatePublishedDataDto dto = modelMapper.map(publication, CreatePublishedDataDto.class);
                     try {
-                        logger.debug(new ObjectMapper().writeValueAsString(publishedData));
+                        logger.debug(new ObjectMapper().writeValueAsString(dto));
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
                     }

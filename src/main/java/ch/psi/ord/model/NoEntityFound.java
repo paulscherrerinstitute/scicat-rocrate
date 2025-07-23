@@ -1,4 +1,4 @@
-package ch.psi.scicat.model;
+package ch.psi.ord.model;
 
 public class NoEntityFound implements ValidationError {
     @Override

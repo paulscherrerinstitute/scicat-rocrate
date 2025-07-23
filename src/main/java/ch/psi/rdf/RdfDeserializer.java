@@ -1,4 +1,4 @@
-package ch.psi.scicat.rdf;
+package ch.psi.rdf;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -19,8 +19,8 @@ import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.psi.scicat.model.PropertyError;
-import ch.psi.scicat.model.ValidationError;
+import ch.psi.ord.model.PropertyError;
+import ch.psi.ord.model.ValidationError;
 
 public class RdfDeserializer {
     private static final Logger logger = LoggerFactory.getLogger(RdfDeserializer.class);
@@ -38,7 +38,6 @@ public class RdfDeserializer {
         }
 
         public void addErrors(DeserializationReport<?> report) {
-            report.getErrors().forEach(e -> System.err.println(e.getMessage()));
             errors.addAll(report.getErrors());
         }
 
@@ -70,7 +69,7 @@ public class RdfDeserializer {
         }
     }
 
-    public <T> DeserializationReport<T> deserialize(Resource subject, Class<T> clazz) throws Exception {
+    public <T> DeserializationReport<T> deserialize(Resource subject, Class<T> clazz) {
         DeserializationReport<T> report = new DeserializationReport<>();
 
         Optional<T> obj = initInstance(clazz);
@@ -107,7 +106,7 @@ public class RdfDeserializer {
                             for (RDFNode value : values) {
                                 collection.add(convertValue(listType, value, report));
                             }
-                            field.set(obj.get(), collection);
+                            setField(field, obj.get(), collection);
                         } else {
                             logger.error("Unsupported collection");
                         }
@@ -115,8 +114,9 @@ public class RdfDeserializer {
                         if (values.size() > 1) {
                             logger.warn("Field {} is not a collection, only the first value will be assigned");
                         }
-                        RDFNode value = values.getFirst();
-                        field.set(obj.get(), convertValue(field.getType(), value, report));
+                        RDFNode node = values.getFirst();
+                        Object value = convertValue(field.getType(), node, report);
+                        setField(field, obj.get(), value);
                     }
                 }
             }
@@ -168,8 +168,7 @@ public class RdfDeserializer {
         return Optional.empty();
     }
 
-    private <T> Object convertValue(Class<?> fieldType, RDFNode value, DeserializationReport<T> report)
-            throws Exception {
+    private <T> Object convertValue(Class<?> fieldType, RDFNode value, DeserializationReport<T> report) {
         if (value.isLiteral()) {
             return convertLiteralValue(fieldType, value, report);
         } else {
@@ -198,10 +197,24 @@ public class RdfDeserializer {
         }
     }
 
-    private <T> Object convertResourceValue(Class<?> fieldType, Resource resourceValue, DeserializationReport<T> report)
-            throws Exception {
+    private <T> Object convertResourceValue(Class<?> fieldType, Resource resourceValue,
+            DeserializationReport<T> report) {
         DeserializationReport<?> subreport = deserialize(resourceValue, fieldType);
         report.addErrors(subreport);
         return subreport.isValid() ? subreport.get() : null;
+    }
+
+    private void setField(Field field, Object instance, Object value) {
+        if (instance == null)
+            return;
+
+        try {
+            if (value == null) {
+                logger.warn("Setting field {} to a null value", field.getName());
+            }
+            field.set(instance, value);
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            logger.error("Unable to set field {}", field.getName(), e);
+        }
     }
 }

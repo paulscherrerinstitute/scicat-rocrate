@@ -1,9 +1,9 @@
-package ch.psi.scicat.zenodo;
+package ch.psi.ord.api;
 
 import org.jboss.resteasy.reactive.RestResponse;
 
-import ch.psi.scicat.ExtraMediaType;
-import ch.psi.scicat.ScicatClient;
+import ch.psi.ord.core.ZenodoExporter;
+import ch.psi.scicat.client.ScicatClient;
 import ch.psi.scicat.model.PublishedData;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;

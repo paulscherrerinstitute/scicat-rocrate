@@ -1,4 +1,4 @@
-package ch.psi.scicat;
+package ch.psi.ord.core;
 
 import java.util.Optional;
 import java.util.regex.Matcher;

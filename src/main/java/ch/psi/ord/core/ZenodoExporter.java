@@ -1,12 +1,11 @@
-package ch.psi.scicat.zenodo;
+package ch.psi.ord.core;
 
 import java.util.List;
 
 import org.apache.jena.vocabulary.SchemaDO;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import ch.psi.scicat.DoiUtils;
-import ch.psi.scicat.ExtraMediaType;
+import ch.psi.ord.api.ExtraMediaType;
 import ch.psi.scicat.model.PublishedData;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -17,7 +16,7 @@ import jakarta.json.JsonObjectBuilder;
 @ApplicationScoped
 public class ZenodoExporter {
     @Inject
-    @ConfigProperty(name = "quarkus.rest-client.\"ch.psi.scicat.ScicatService\".url")
+    @ConfigProperty(name = "quarkus.rest-client.\"ch.psi.scicat.client.ScicatService\".url")
     String scicatServiceUrl;
 
     public JsonObject toZenodoJsonLd(PublishedData publishedData) {

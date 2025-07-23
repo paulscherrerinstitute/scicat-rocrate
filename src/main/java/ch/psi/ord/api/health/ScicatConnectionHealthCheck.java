@@ -1,10 +1,10 @@
-package ch.psi.scicat.health;
+package ch.psi.ord.api.health;
 
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.Readiness;
 
-import ch.psi.scicat.ScicatClient;
+import ch.psi.scicat.client.ScicatClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
