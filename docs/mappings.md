@@ -109,10 +109,40 @@
 </tr>
 </table>
 
-| Datacite                                                                                              | Schema.org                          | Required (API-03) | `CreatePublishedDataDto` | Required (Scicat) | Remarks |
-|-------------------------------------------------------------------------------------------------------|-------------------------------------|-------------------|--------------------------|-------------------|---------|
-| [3 title](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/title/)                   | [`title`](https://schema.org/title) | x                 | `title`                  |                   |         |
-| [3.1 titleType](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/title/#a-titletype) | N/A                                 |                   |                          |                   |         |
+| Datacite                                                                                              | Schema.org                          | Required (API-03) | `CreatePublishedDataDto` | Required (Scicat) | Remarks                                    |
+|-------------------------------------------------------------------------------------------------------|-------------------------------------|-------------------|--------------------------|-------------------|--------------------------------------------|
+| [3 title](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/title/)                   | [`title`](https://schema.org/title) | x                 | `title`                  |                   | Can we assume title are always in english? |
+| [3.1 titleType](https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/title/#a-titletype) | N/A                                 |                   |                          |                   |                                            |
+<table>
+<tr>
+<td> DataCite </td> <td> Schema.org </td> <td> SciCat </td>
+</tr>
+<tr>
+<td>
+
+```xml
+<titles>
+    <title xml:lang="en">Example title</title>
+</titles>
+```
+
+</td>
+<td>
+
+```json
+"title": "Example title"
+```
+
+</td>
+<td>
+
+```json
+"title": "Example title"
+```
+
+</td>
+</tr>
+</table>
 
 | Datacite                                                                                                                                  | Schema.org                                       | Required (API-03) | `CreatePublishedDataDto` | Required (Scicat) | Remarks |
 |-------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------|-------------------|--------------------------|-------------------|---------|
