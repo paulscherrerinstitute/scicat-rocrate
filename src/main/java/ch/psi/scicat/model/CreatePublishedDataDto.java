@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CreatePublishedDataDto {
+  @JsonProperty(value = "_id")
+  private String _id;
+
   @JsonProperty(value = "doi", required = true)
   private String doi;
 
@@ -51,6 +54,7 @@ public class CreatePublishedDataDto {
   }
 
   public void setDoi(String doi) {
+    this._id = doi;
     this.doi = doi;
   }
 
@@ -94,11 +98,11 @@ public class CreatePublishedDataDto {
     this.title = title;
   }
 
-  public String get_abstract() {
+  public String getAbstract() {
     return _abstract;
   }
 
-  public void set_abstract(String _abstract) {
+  public void setAbstract(String _abstract) {
     this._abstract = _abstract;
   }
 
