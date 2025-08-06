@@ -2,6 +2,7 @@ package ch.psi.ord.model;
 
 import ch.psi.rdf.RdfClass;
 import ch.psi.rdf.RdfProperty;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.jena.vocabulary.SchemaDO;
 
@@ -11,7 +12,7 @@ public class Publication {
   String identifier;
 
   @RdfProperty(uri = SchemaDO.NS + "creator", minCardinality = 1)
-  List<Person> creator;
+  List<Person> creator = new ArrayList<>();
 
   @RdfProperty(uri = SchemaDO.NS + "title", minCardinality = 1)
   String title;
@@ -19,13 +20,13 @@ public class Publication {
   @RdfProperty(uri = SchemaDO.NS + "publisher", minCardinality = 1)
   Organization publisher;
 
-  @RdfProperty(uri = SchemaDO.NS + "dateCreated", minCardinality = 1)
+  @RdfProperty(uri = SchemaDO.NS + "dateCreated", minCardinality = 0)
   String dateCreated;
 
   @RdfProperty(uri = SchemaDO.NS + "datePublished", minCardinality = 1)
   String datePublished;
 
-  @RdfProperty(uri = SchemaDO.NS + "dateModified", minCardinality = 1)
+  @RdfProperty(uri = SchemaDO.NS + "dateModified", minCardinality = 0)
   String dateModified;
 
   @RdfProperty(uri = SchemaDO.NS + "abstract", minCardinality = 1)
@@ -33,6 +34,9 @@ public class Publication {
 
   @RdfProperty(uri = SchemaDO.NS + "description", minCardinality = 1)
   String description;
+
+  @RdfProperty(uri = SchemaDO.NS + "hasPart")
+  List<Object> hasPart = new ArrayList<>();
 
   public String getIdentifier() {
     return identifier;
