@@ -172,7 +172,7 @@ public class RoCrateController {
                       modelMapper.map(publication, CreatePublishedDataDto.class);
                   RestResponse<PublishedData> created =
                       scicatClient.createPublishedData(dto, scicatToken);
-                  importMap.put(entity.id(), created.getEntity().getDoi());
+                  importMap.put(entity.id(), created.getEntity().doi());
                 }
               });
     } catch (WebApplicationException e) {

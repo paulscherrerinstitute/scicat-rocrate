@@ -1,8 +1,10 @@
 package ch.psi.scicat.client;
 
+import ch.psi.ord.core.ScicatModelMapper;
 import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
+import io.quarkus.test.junit.QuarkusTest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -15,8 +17,10 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.RestResponse.Status;
 import org.modelmapper.ModelMapper;
 
+@QuarkusTest
 public class ScicatServiceMock implements ScicatService {
-  private ModelMapper modelMapper = new ModelMapper();
+  // FIXME: inject via annotation
+  ModelMapper modelMapper = new ScicatModelMapper().createPublicationModelMapper();
   private List<PublishedData> publishedDataCollection = new ArrayList<>();
   private boolean isHealthy = true;
   private boolean isAuthenticated = false;
@@ -31,7 +35,7 @@ public class ScicatServiceMock implements ScicatService {
   @Override
   public RestResponse<PublishedData> getPublishedDataById(String doi) {
     Optional<PublishedData> publishedData =
-        publishedDataCollection.stream().filter(p -> p.getDoi().equals(doi)).findFirst();
+        publishedDataCollection.stream().filter(p -> p.doi().equals(doi)).findFirst();
 
     if (publishedData.isPresent()) {
       return RestResponse.ok(publishedData.get(), MediaType.APPLICATION_JSON);
@@ -48,7 +52,7 @@ public class ScicatServiceMock implements ScicatService {
       throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
     }
 
-    if (publishedDataCollection.stream().anyMatch(p -> p.getDoi().equals(dto.getDoi()))) {
+    if (publishedDataCollection.stream().anyMatch(p -> p.doi().equals(dto.doi()))) {
       throw new WebApplicationException(
           Response.status(Status.CONFLICT).type(MediaType.APPLICATION_JSON).build());
     }
@@ -60,8 +64,8 @@ public class ScicatServiceMock implements ScicatService {
     // FIXME: Others attributes should probably be set but they are currently not in
     // backend-next (scicatUser/createdBy/updatedBy/url?)
     String now = DateTimeFormatter.ISO_INSTANT.format(Instant.now());
-    created.setCreatedAt(now);
-    created.setUpdatedAt(now);
+    created.createdAt(now);
+    created.updatedAt(now);
     publishedDataCollection.add(created);
     return RestResponse.status(Status.CREATED, created);
   }
