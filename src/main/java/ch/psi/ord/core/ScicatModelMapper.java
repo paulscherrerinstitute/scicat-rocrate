@@ -7,6 +7,9 @@ import ch.psi.ord.model.Publication;
 import ch.psi.scicat.model.CreatePublishedDataDto;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.modelmapper.Converter;
@@ -33,6 +36,30 @@ public class ScicatModelMapper {
         }
       };
 
+  Converter<String, Integer> dateToYear =
+      new Converter<>() {
+        @Override
+        public Integer convert(MappingContext<String, Integer> context) {
+          DateTimeFormatter openBisFormatter =
+              DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z"); // Pattern used by openBIS
+          List<DateTimeFormatter> supportedFormats =
+              List.of(openBisFormatter, DateTimeFormatter.ISO_ZONED_DATE_TIME);
+
+          String input = context.getSource();
+          if (context.getSource().matches("\\d{4}")) {
+            input += "-01-01T00:00:00Z";
+          }
+          for (DateTimeFormatter format : supportedFormats) {
+            try {
+              OffsetDateTime date = OffsetDateTime.parse(input, format);
+              return date.getYear();
+            } catch (DateTimeParseException e) {
+            }
+          }
+          throw new IllegalArgumentException("Invalid date format: " + input);
+        }
+      };
+
   @Produces
   public ModelMapper createPublicationModelMapper() {
     ModelMapper mapper = new ModelMapper();
@@ -42,23 +69,24 @@ public class ScicatModelMapper {
         .addMappings(
             m -> {
               m.when(isNotNull()).map(Publication::getIdentifier, CreatePublishedDataDto::setDoi);
-              m.when(isNotNull()).map(Publication::getTitle, CreatePublishedDataDto::setTitle);
               m.when(isNotNull())
                   .using(personToStringList)
                   .map(Publication::getCreator, CreatePublishedDataDto::setCreator);
-            });
+              m.when(isNotNull()).map(Publication::getTitle, CreatePublishedDataDto::setTitle);
+              m.when(isNotNull())
+                  .map(src -> src.getPublisher().getName(), CreatePublishedDataDto::setPublisher);
+              m.when(isNotNull())
+                  .map(Publication::getAbstract, CreatePublishedDataDto::setAbstract);
+              m.when(isNotNull())
+                  .map(Publication::getDescription, CreatePublishedDataDto::setDataDescription);
+              m.when(isNotNull())
+                  .using(dateToYear)
+                  .map(Publication::getDatePublished, CreatePublishedDataDto::setPublicationYear);
 
-    mapper
-        .typeMap(CreatePublishedDataDto.class, Publication.class)
-        .addMappings(
-            m -> {
-              m.map(CreatePublishedDataDto::getDoi, Publication::setIdentifier);
-              m.map(CreatePublishedDataDto::getTitle, Publication::setTitle);
-              m.using(stringListToPerson)
-                  .map(CreatePublishedDataDto::getCreator, Publication::setCreator);
+              // Default values
+              m.map(src -> "derived", CreatePublishedDataDto::setResourceType);
+              m.map(src -> "registered", CreatePublishedDataDto::setStatus);
             });
-
-    // mapper.validate();
 
     return mapper;
   }
