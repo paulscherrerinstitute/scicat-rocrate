@@ -53,7 +53,8 @@ public class RoCrateImporter {
     for (Resource p : potentialPublications) {
       var subreport = validatePublication(p);
       if (subreport.isValid()) {
-        report.addEntity(new Entity<>(p.getURI(), subreport.get()));
+        report.addEntity(
+            new Entity<>(p.isURIResource() ? p.getURI() : p.getId().toString(), subreport.get()));
       } else {
         report.getErrors().addAll(subreport.getErrors());
       }
