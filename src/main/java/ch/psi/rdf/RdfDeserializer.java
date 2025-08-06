@@ -107,7 +107,10 @@ public class RdfDeserializer {
             }
           } else if (values.size() > 0) {
             if (values.size() > 1) {
-              logger.warn("Field {} is not a collection, only the first value will be assigned");
+              logger.warn(
+                  "Field '{}' of class '{}' is not a collection, only the first value will be assigned",
+                  field.getName(),
+                  clazz.getName());
             }
             RDFNode node = values.getFirst();
             Object value = convertValue(field.getType(), node, report);
