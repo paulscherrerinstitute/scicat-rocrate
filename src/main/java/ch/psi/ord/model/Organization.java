@@ -10,10 +10,13 @@ public class Organization {
   @RdfProperty(uri = SchemaDO.NS + "name", minCardinality = 1)
   String name;
 
-  public Organization() {}
+  public String getName() {
+    return this.name;
+  }
 
-  public Organization(String name) {
+  public Organization setName(String name) {
     this.name = name;
+    return this;
   }
 
   @RdfResourceUri()
@@ -25,5 +28,5 @@ public class Organization {
     return null;
   }
 
-  public static Organization PSI = new Organization("Paul Scherrer Institute");
+  public static Organization PSI = new Organization().setName("Paul Scherrer Institute");
 }
