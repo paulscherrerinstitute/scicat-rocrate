@@ -13,8 +13,6 @@ import com.apicatalog.jsonld.JsonLdOptions.ProcessingPolicy;
 import com.apicatalog.jsonld.loader.HttpLoader;
 import com.apicatalog.jsonld.loader.LRUDocumentCache;
 import com.apicatalog.jsonld.uri.UriValidationPolicy;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.HeaderParam;
@@ -41,6 +39,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
 import org.jboss.resteasy.reactive.RestHeader;
 import org.jboss.resteasy.reactive.RestResponse;
+import org.modelmapper.MappingException;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -171,11 +170,6 @@ public class RoCrateController {
                   // TODO: create the objects
                   CreatePublishedDataDto dto =
                       modelMapper.map(publication, CreatePublishedDataDto.class);
-                  try {
-                    logger.debug(new ObjectMapper().writeValueAsString(dto));
-                  } catch (JsonProcessingException e) {
-                    e.printStackTrace();
-                  }
                   RestResponse<PublishedData> created =
                       scicatClient.createPublishedData(dto, scicatToken);
                   importMap.put(entity.id(), created.getEntity().getDoi());
@@ -184,6 +178,12 @@ public class RoCrateController {
     } catch (WebApplicationException e) {
       logger.error("", e);
       return e.getResponse();
+    } catch (MappingException e) {
+      logger.error("", e);
+      return Response.status(Status.INTERNAL_SERVER_ERROR)
+          .entity(
+              "{\"message\":\"Failed to build SciCat payload: " + e.getCause().getMessage() + "\"}")
+          .build();
     }
 
     return Response.status(importMap.isEmpty() ? Status.OK : Status.CREATED)
