@@ -27,7 +27,8 @@
 			"extensions": [
 				"redhat.vscode-xml",
 				"redhat.vscode-quarkus",
-				"darkriszty.markdown-table-prettify"
+				"darkriszty.markdown-table-prettify",
+				"josevseb.google-java-format-for-vs-code"
 			]
 		}
 	},
