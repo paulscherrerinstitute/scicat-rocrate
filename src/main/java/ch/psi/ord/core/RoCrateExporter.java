@@ -54,20 +54,20 @@ public class RoCrateExporter {
   public DataEntity addPublication(PublishedData publication, boolean asRootEntity) {
     if (asRootEntity) {
       RootDataEntity root = crate.getRootDataEntity();
-      root.addProperty(SchemaDO.name.getLocalName(), publication.getTitle());
-      root.addProperty(SchemaDO.description.getLocalName(), publication.getAbstract());
+      root.addProperty(SchemaDO.name.getLocalName(), publication.title());
+      root.addProperty(SchemaDO.description.getLocalName(), publication.abstract_());
       root.addIdProperty(SchemaDO.license.getLocalName(), StaticEntities.LICENSE.getId());
       root.addProperty(
-          SchemaDO.datePublished.getLocalName(), yearToISO3601(publication.getPublicationYear()));
+          SchemaDO.datePublished.getLocalName(), yearToISO3601(publication.publicationYear()));
     }
 
     DataEntityBuilder publicationBuilder = new DataEntityBuilder();
     publicationBuilder
         .addTypes(List.of(formatScicatId("PublishedData"), SchemaDO.CreativeWork.getLocalName()))
-        .setId(DoiUtils.buildStandardUrl(publication.getDoi()))
-        .addProperty(SchemaDO.identifier.getLocalName(), publication.getDoi());
+        .setId(DoiUtils.buildStandardUrl(publication.doi()))
+        .addProperty(SchemaDO.identifier.getLocalName(), publication.doi());
     publication
-        .getCreator()
+        .creator()
         .forEach(
             creator -> {
               ContextualEntity creatorEntity = addPerson(creator);
@@ -76,7 +76,7 @@ public class RoCrateExporter {
                   SchemaDO.creator.getLocalName(), creatorEntity.getId());
             });
     // Assuming that PSI publications all have the same Publisher/License
-    if ("PSI".equals(publication.getPublisher().toUpperCase())) {
+    if ("PSI".equals(publication.publisher().toUpperCase())) {
       crate.addContextualEntity(StaticEntities.PSI);
       publicationBuilder.addIdProperty(
           SchemaDO.publisher.getLocalName(), StaticEntities.PSI.getId());
@@ -86,17 +86,17 @@ public class RoCrateExporter {
     }
     publicationBuilder
         .addProperty(
-            SchemaDO.datePublished.getLocalName(), Long.toString(publication.getPublicationYear()))
-        .addProperty(SchemaDO.title.getLocalName(), publication.getTitle())
-        .addProperty(SchemaDO._abstract.getLocalName(), publication.getAbstract())
-        .addProperty(SchemaDO.additionalType.getLocalName(), publication.getResourceType())
-        .addProperty(SchemaDO.sdDatePublished.getLocalName(), publication.getRegisteredTime())
-        .addProperty(SchemaDO.creativeWorkStatus.getLocalName(), publication.getStatus())
-        .addProperty(SchemaDO.dateCreated.getLocalName(), publication.getCreatedAt())
-        .addProperty(SchemaDO.dateModified.getLocalName(), publication.getUpdatedAt())
-        .addProperty(SchemaDO.description.getLocalName(), publication.getDataDescription());
+            SchemaDO.datePublished.getLocalName(), Long.toString(publication.publicationYear()))
+        .addProperty(SchemaDO.title.getLocalName(), publication.title())
+        .addProperty(SchemaDO._abstract.getLocalName(), publication.abstract_())
+        .addProperty(SchemaDO.additionalType.getLocalName(), publication.resourceType())
+        .addProperty(SchemaDO.sdDatePublished.getLocalName(), publication.registeredTime())
+        .addProperty(SchemaDO.creativeWorkStatus.getLocalName(), publication.status())
+        .addProperty(SchemaDO.dateCreated.getLocalName(), publication.createdAt())
+        .addProperty(SchemaDO.dateModified.getLocalName(), publication.updatedAt())
+        .addProperty(SchemaDO.description.getLocalName(), publication.dataDescription());
     publication
-        .getPidArray()
+        .pidArray()
         .forEach(
             pid -> {
               publicationBuilder.addIdProperty(
@@ -104,15 +104,15 @@ public class RoCrateExporter {
                   scicatServiceUrl + "/datasets/" + pid.replace("/", "%2F"));
             });
     publication
-        .getRelatedPublications()
+        .relatedPublications()
         .forEach(
             p -> {
               publicationBuilder.addProperty(formatScicatId("relatedPublications"), p);
             });
     publicationBuilder
-        .addProperty(formatScicatId("numberOfFiles"), publication.getNumberOfFiles())
-        .addProperty(formatScicatId("sizeOfArchive"), publication.getSizeOfArchive())
-        .addProperty(formatScicatId("scicatUser"), publication.getScicatUser());
+        .addProperty(formatScicatId("numberOfFiles"), publication.numberOfFiles())
+        .addProperty(formatScicatId("sizeOfArchive"), publication.sizeOfArchive())
+        .addProperty(formatScicatId("scicatUser"), publication.scicatUser());
 
     DataEntity publicationEntity = publicationBuilder.build();
     crate.addDataEntity(publicationEntity);

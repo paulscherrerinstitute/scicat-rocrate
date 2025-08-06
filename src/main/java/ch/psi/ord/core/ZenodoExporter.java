@@ -23,22 +23,22 @@ public class ZenodoExporter {
     builder.add("@context", SchemaDO.NS);
     builder.add("@type", SchemaDO.Dataset.getURI());
 
-    String doiUrl = String.format(DoiUtils.buildStandardUrl(publishedData.getDoi()));
+    String doiUrl = String.format(DoiUtils.buildStandardUrl(publishedData.doi()));
     builder.add("@id", doiUrl);
     builder.add(SchemaDO.identifier.getLocalName(), doiUrl);
 
-    builder.add(SchemaDO.name.getLocalName(), publishedData.getTitle());
-    builder.add(SchemaDO.dateCreated.getLocalName(), publishedData.getCreatedAt());
-    builder.add(SchemaDO.datePublished.getLocalName(), publishedData.getRegisteredTime());
-    builder.add(SchemaDO.dateModified.getLocalName(), publishedData.getUpdatedAt());
+    builder.add(SchemaDO.name.getLocalName(), publishedData.title());
+    builder.add(SchemaDO.dateCreated.getLocalName(), publishedData.createdAt());
+    builder.add(SchemaDO.datePublished.getLocalName(), publishedData.registeredTime());
+    builder.add(SchemaDO.dateModified.getLocalName(), publishedData.updatedAt());
     // FIXME: for now we only support one hardcoded license
     builder.add(SchemaDO.license.getLocalName(), "https://creativecommons.org/licenses/by-sa/4.0/");
-    builder.add(SchemaDO.description.getLocalName(), publishedData.getAbstract());
+    builder.add(SchemaDO.description.getLocalName(), publishedData.abstract_());
 
     builder.add(
         SchemaDO.creator.getLocalName(),
         Json.createArrayBuilder(
-            publishedData.getCreator().stream()
+            publishedData.creator().stream()
                 .map(
                     creatorName ->
                         Json.createObjectBuilder()
@@ -58,7 +58,7 @@ public class ZenodoExporter {
     builder.add(
         SchemaDO.url.getLocalName(),
         String.format(
-            "%s/publisheddata/%s", scicatServiceUrl, publishedData.getDoi().replace("/", "%2f")));
+            "%s/publisheddata/%s", scicatServiceUrl, publishedData.doi().replace("/", "%2f")));
 
     builder.add(
         SchemaDO.distribution.getLocalName(),

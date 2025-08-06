@@ -4,269 +4,68 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
 // TODO: Make sure it doesn't break on big values for 'number' types
+@Getter
+@Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PublishedData {
   @JsonProperty(value = "doi", required = true)
-  String doi;
+  private String doi;
 
-  String affiliation;
+  private String affiliation;
 
   @JsonProperty(value = "creator", required = true)
-  List<String> creator;
+  private List<String> creator;
 
   @JsonProperty(value = "publisher", required = true)
-  String publisher;
+  private String publisher;
 
   @JsonProperty(value = "publicationYear", required = true)
-  int publicationYear;
+  private int publicationYear;
 
   @JsonProperty(value = "title", required = true)
-  String title;
+  private String title;
 
-  String url;
+  private String url;
 
   @JsonProperty(value = "abstract", required = true)
-  String _abstract;
+  private String abstract_;
 
   @JsonProperty(value = "dataDescription", required = true)
-  String dataDescription;
+  private String dataDescription;
 
   @JsonProperty(value = "resourceType", required = true)
-  String resourceType;
+  private String resourceType;
 
-  long numberOfFiles;
-  long sizeOfArchive;
+  private long numberOfFiles;
+
+  private long sizeOfArchive;
 
   @JsonProperty(value = "pidArray", required = true)
-  List<String> pidArray = new ArrayList<>();
+  private List<String> pidArray = new ArrayList<>();
 
-  List<String> authors;
-  String registeredTime;
-  String status;
-  String scicatUser;
-  String thumbnail;
-  List<String> relatedPublications;
-  String downloadLink;
-  String createdBy;
-  String updatedBy;
-  String createdAt;
-  String updatedAt;
+  private List<String> authors;
 
-  public String getDoi() {
-    return doi;
-  }
+  private String registeredTime;
 
-  public PublishedData setDoi(String doi) {
-    this.doi = doi;
-    return this;
-  }
+  private String status;
 
-  public String getAffiliation() {
-    return affiliation;
-  }
+  private String scicatUser;
 
-  public PublishedData setAffiliation(String affiliation) {
-    this.affiliation = affiliation;
-    return this;
-  }
+  private String thumbnail;
 
-  public List<String> getCreator() {
-    return creator;
-  }
+  private List<String> relatedPublications;
 
-  public PublishedData setCreator(List<String> creator) {
-    this.creator = creator;
-    return this;
-  }
+  private String downloadLink;
 
-  public String getPublisher() {
-    return publisher;
-  }
+  private String createdBy;
 
-  public PublishedData setPublisher(String publisher) {
-    this.publisher = publisher;
-    return this;
-  }
+  private String updatedBy;
 
-  public int getPublicationYear() {
-    return publicationYear;
-  }
+  private String createdAt;
 
-  public PublishedData setPublicationYear(int publicationYear) {
-    this.publicationYear = publicationYear;
-    return this;
-  }
-
-  public String getTitle() {
-    return title;
-  }
-
-  public PublishedData setTitle(String title) {
-    this.title = title;
-    return this;
-  }
-
-  public String getUrl() {
-    return url;
-  }
-
-  public PublishedData setUrl(String url) {
-    this.url = url;
-    return this;
-  }
-
-  public String getAbstract() {
-    return _abstract;
-  }
-
-  public PublishedData setAbstract(String _abstract) {
-    this._abstract = _abstract;
-    return this;
-  }
-
-  public String getDataDescription() {
-    return dataDescription;
-  }
-
-  public PublishedData setDataDescription(String dataDescription) {
-    this.dataDescription = dataDescription;
-    return this;
-  }
-
-  public String getResourceType() {
-    return resourceType;
-  }
-
-  public PublishedData setResourceType(String resourceType) {
-    this.resourceType = resourceType;
-    return this;
-  }
-
-  public long getNumberOfFiles() {
-    return numberOfFiles;
-  }
-
-  public PublishedData setNumberOfFiles(long numberOfFiles) {
-    this.numberOfFiles = numberOfFiles;
-    return this;
-  }
-
-  public long getSizeOfArchive() {
-    return sizeOfArchive;
-  }
-
-  public PublishedData setSizeOfArchive(long sizeOfArchive) {
-    this.sizeOfArchive = sizeOfArchive;
-    return this;
-  }
-
-  public List<String> getPidArray() {
-    return pidArray;
-  }
-
-  public PublishedData setPidArray(List<String> pidArray) {
-    this.pidArray = pidArray;
-    return this;
-  }
-
-  public List<String> getAuthors() {
-    return authors;
-  }
-
-  public PublishedData setAuthors(List<String> authors) {
-    this.authors = authors;
-    return this;
-  }
-
-  public String getRegisteredTime() {
-    return registeredTime;
-  }
-
-  public PublishedData setRegisteredTime(String registeredTime) {
-    this.registeredTime = registeredTime;
-    return this;
-  }
-
-  public String getStatus() {
-    return status;
-  }
-
-  public PublishedData setStatus(String status) {
-    this.status = status;
-    return this;
-  }
-
-  public String getScicatUser() {
-    return scicatUser;
-  }
-
-  public PublishedData setScicatUser(String scicatUser) {
-    this.scicatUser = scicatUser;
-    return this;
-  }
-
-  public String getThumbnail() {
-    return thumbnail;
-  }
-
-  public PublishedData setThumbnail(String thumbnail) {
-    this.thumbnail = thumbnail;
-    return this;
-  }
-
-  public List<String> getRelatedPublications() {
-    return relatedPublications;
-  }
-
-  public PublishedData setRelatedPublications(List<String> relatedPublications) {
-    this.relatedPublications = relatedPublications;
-    return this;
-  }
-
-  public String getDownloadLink() {
-    return downloadLink;
-  }
-
-  public PublishedData setDownloadLink(String downloadLink) {
-    this.downloadLink = downloadLink;
-    return this;
-  }
-
-  public String getCreatedBy() {
-    return createdBy;
-  }
-
-  public PublishedData setCreatedBy(String createdBy) {
-    this.createdBy = createdBy;
-    return this;
-  }
-
-  public String getUpdatedBy() {
-    return updatedBy;
-  }
-
-  public PublishedData setUpdatedBy(String updatedBy) {
-    this.updatedBy = updatedBy;
-    return this;
-  }
-
-  public String getCreatedAt() {
-    return createdAt;
-  }
-
-  public PublishedData setCreatedAt(String createdAt) {
-    this.createdAt = createdAt;
-    return this;
-  }
-
-  public String getUpdatedAt() {
-    return updatedAt;
-  }
-
-  public PublishedData setUpdatedAt(String updatedAt) {
-    this.updatedAt = updatedAt;
-    return this;
-  }
+  private String updatedAt;
 }
