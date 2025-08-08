@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.vocabulary.RDF;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -138,5 +139,13 @@ public class RdfSerdeTest {
     Assertions.assertTrue(report.isValid());
     Assertions.assertNotNull(report.get());
     Assertions.assertEquals(primitiveTypes, report.get());
+  }
+
+  @Test
+  @DisplayName("Https annotation with http type")
+  public void test05() {
+    model.createResource(ResourceFactory.createResource(TestClasses.NS_http + "Empty"));
+    Resource subject = model.listSubjects().toList().getFirst();
+    Assertions.assertTrue(deserializer.deserialize(subject, TestClasses.Empty.class).isValid());
   }
 }
