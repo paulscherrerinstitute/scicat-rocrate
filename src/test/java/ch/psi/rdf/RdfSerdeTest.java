@@ -142,7 +142,7 @@ public class RdfSerdeTest {
   }
 
   @Test
-  @DisplayName("Https annotation with http type")
+  @DisplayName("Type URI scheme mismatch")
   public void test05() {
     model.createResource(ResourceFactory.createResource(TestClasses.NS_http + "Empty"));
     Resource subject = model.listSubjects().toList().getFirst();
