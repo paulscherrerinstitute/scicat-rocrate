@@ -1,0 +1,578 @@
+---
+openapi: 3.1.0
+info:
+  title: RO-Crate API
+  version: 1.0.0
+  description: >
+    Open Research Data | Measure 2 | API 01<br><br>
+    Interoperability between Electronic Laboratory Notebooks and Data Repositories is implemented using [RO-Crate](https://www.researchobject.org/ro-crate/).<br>
+    RO-Crates consumed and produced by this API must comply with this [profile](https://sissource.ethz.ch/sispub/ro-crate/-/blob/main/interoperability/0.1.x/spec.md).<br><br>
+    ⚠️ The schemas provided do not reflect the exact structure of the RO-Crate. The JSON-LD document should be flattened.
+
+tags:
+  - name: ro-crate
+
+paths:
+  /api/v1/ro-crate/import:
+    post:
+      tags:
+        - ro-crate
+      summary: Import a RO-Crate
+      description: |
+        Import the metadata contained in the
+        [RO-Crate Metadata File Descriptor](https://www.researchobject.org/ro-crate/specification/1.1/root-data-entity.html#ro-crate-metadata-file-descriptor)
+        to the system.
+
+        When the 'Content-Type' header is 'application/zip', the data is also imported.
+      requestBody:
+        description: |
+          The RO-Crate to import.
+
+          Depending on the 'Content-Type' header, the payload can either be:
+          - a [RO-Crate Metadata File Descriptor](https://www.researchobject.org/ro-crate/specification/1.1/root-data-entity.html#ro-crate-metadata-file-descriptor) for 'application/ld+json'
+          - a zipped RO-Crate for 'application/zip'
+          - a multipart payload with one of the two precedent items with 'name=ro-crate' and a map of system specific options as 'name=options'
+        content:
+          application/ld+json:
+            schema:
+              $ref: "#/components/schemas/RoCrate"
+          application/zip:
+            schema:
+              type: string
+              format: binary
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                ro-crate:
+                  oneOf:
+                    - $ref: "#/components/schemas/RoCrate"
+                    - type: string
+                      format: binary
+                options:
+                  type: object
+            encoding:
+              ro-crate:
+                contentType: application/ld+json, application/zip
+              options:
+                contentType: application/json
+      responses:
+        "201":
+          description: Map of the JSON-LD identifiers and associated system identifiers created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportResponse"
+              examples:
+                Valid:
+                  $ref: "#/components/examples/importResponseExample"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "422":
+          description: Unacceptable content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationReport"
+              examples:
+                Validation error:
+                  $ref: "#/components/examples/validationErrorExample"
+                No entity found:
+                  $ref: "#/components/examples/emptyCrateExample"
+        "500":
+          description: Internal server error
+
+  /api/v1/ro-crate/export:
+    post:
+      tags:
+        - ro-crate
+      summary: Export resources to a RO-Crate
+      description: |
+        Export resources from the system to a RO-Crate.
+
+        When the 'Accept' header is 'application/zip', the data is also exported
+        either in the produced zip file or as remote URLs referenced in the RO-Crate metadata descriptor.
+
+        When the 'Content-Type' header is 'multipart/form-data' a map of system-specific options can be supplied in addition to the RO-Crate.
+      requestBody:
+        description: List of Digital Object Identifiers [DOIs](https://www.doi.org) or system specific identifiers
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+            examples:
+              List DOIs:
+                $ref: "#/components/examples/doiList"
+              System specific identifiers:
+                $ref: "#/components/examples/idList"
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                ro-crate:
+                  oneOf:
+                    - $ref: "#/components/schemas/RoCrate"
+                    - type: string
+                      format: binary
+                options:
+                  type: object
+            encoding:
+              ro-crate:
+                contentType: application/ld+json, application/zip
+              options:
+                contentType: application/json
+      responses:
+        "200":
+          description: OK
+          content:
+            application/ld+json:
+              schema:
+                $ref: "#/components/schemas/RoCrate"
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+        "500":
+          description: Internal server error
+
+  /api/v1/ro-crate/validate:
+    post:
+      tags:
+        - ro-crate
+      summary: Validate a RO-Crate
+      description: |
+        Checks if the system can import a given RO-Crate.
+
+        Depending on the flexibility of the system, the validation process can differ, the metadata can be checked against:
+        - the schema bundled in the RO-Crate
+        - a fixed list of schemas that the system can interpret
+
+        When the 'Content-Type' header is 'application/zip', the presence of the data in the zip archive is also checked.
+      requestBody:
+        description: |
+          The RO-Crate to validate.
+
+          Depending on the 'Content-Type' header, the payload can either be:
+          - a [RO-Crate Metadata File Descriptor](https://www.researchobject.org/ro-crate/specification/1.1/root-data-entity.html#ro-crate-metadata-file-descriptor) for 'application/ld+json'
+          - a zipped RO-Crate for 'application/zip'
+          - a multipart payload with one of the two precedent items with 'name=ro-crate' and a map of system specific options as 'name=options'
+        content:
+          application/ld+json:
+            schema:
+              $ref: "#/components/schemas/RoCrate"
+          application/zip:
+            schema:
+              type: string
+              format: binary
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                ro-crate:
+                  oneOf:
+                    - $ref: "#/components/schemas/RoCrate"
+                    - type: string
+                      format: binary
+                options:
+                  type: object
+            encoding:
+              ro-crate:
+                contentType: application/ld+json, application/zip
+              options:
+                contentType: application/json
+      responses:
+        "200":
+          description: Result of the validation process
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationReport"
+              examples:
+                Valid:
+                  $ref: "#/components/examples/validCrateResponse"
+                Validation error:
+                  $ref: "#/components/examples/validationErrorExample"
+                No entity found:
+                  $ref: "#/components/examples/emptyCrateExample"
+        "500":
+          description: Internal server error
+
+  /api/v1/publication/validate:
+    post:
+      tags:
+        - profiles
+      requestBody:
+        description: A single Publication in _unflattened_ form.
+        content:
+          application/ld+json:
+            schema:
+              $ref: "#/components/schemas/Publication"
+      responses:
+        "200":
+          description: Result of the validation process
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isValid:
+                    type: boolean
+                if:
+                  properties:
+                    isValid:
+                      const: false
+                then:
+                  properties:
+                    errors:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/PropertyError"
+                  required:
+                    - errors
+        "500":
+          description: Internal server error
+        "501":
+          description: Not implemented
+      summary: Validates a Publication object. The Publication should be flattened before including it in a RO-Crate
+
+# https://github.com/json-ld/json-ld.org/blob/main/schemas/jsonld-schema.json
+components:
+  schemas:
+    RoCrate:
+      type: object
+      properties:
+        "@context":
+          type:
+            - string
+            - array
+            - object
+            - "null"
+        "@graph":
+          type: array
+          minItems: 2
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/RoCrateMetadata"
+              - $ref: "#/components/schemas/RootDataset"
+              - $ref: "#/components/schemas/JsonLDEntity"
+
+    RoCrateMetadata:
+      type: object
+      additionalProperties: true
+      properties:
+        "@type":
+          type: string
+          const: "CreativeWork"
+        "@id":
+          type: string
+          const: "ro-crate-metadata.json"
+        conformsTo:
+          type: object
+          properties:
+            "@id":
+              type: string
+              const: "https://w3id.org/ro/crate/1.1"
+        about:
+          type: object
+          properties:
+            "@id":
+              type: string
+              const: "./"
+      required:
+        - "@type"
+        - "@id"
+        - conformsTo
+        - about
+
+    RootDataset:
+      type: object
+      additionalProperties: true
+      properties:
+        "@type":
+          type: string
+          enum:
+            - "Dataset"
+        "@id":
+          type: string
+          enum:
+            - "./"
+        name:
+          type: string
+        description:
+          type: string
+        datePublished:
+          type: string
+          format: date-time
+        license:
+          type: object
+      required:
+        - "@type"
+        - "@id"
+        - name
+        - description
+        - datePublished
+        - license
+
+    Dataset:
+      type: object
+      additionalProperties: true
+      properties:
+        "@type":
+          type: string
+          const: "Dataset"
+        "@id":
+          type: string
+        name:
+          type: string
+        dateCreated:
+          type: string
+          format: date-time
+      required:
+        - "@id"
+        - "@type"
+        - name
+        - dateCreated
+
+    Publication:
+      type: object
+      additionalProperties: true
+      properties:
+        "@type":
+          type: string
+          const: "CreativeWork"
+        "@id":
+          type: string
+        identifer:
+          type: string
+        title:
+          type: string
+        publisher:
+          $ref: "#/components/schemas/Organization"
+        datePublished:
+          type: string
+          format: date-time
+        creator:
+          type: array
+          items:
+            $ref: "#/components/schemas/Person"
+        license:
+          type: object
+          properties:
+            "@id":
+              type: string
+          required:
+            - "@id"
+        description:
+          type: string
+      required:
+        - "@id"
+        - "@type"
+        - identifier
+        - title
+        - publisher
+        - datePublished
+        - creator
+        - description
+        - license
+
+    Person:
+      type: object
+      additionalProperties: true
+      properties:
+        "@type":
+          type: string
+        "@id":
+          type: string
+        name:
+          type: string
+        givenName:
+          type: string
+        familyName:
+          type: string
+        affiliation:
+          $ref: "#/components/schemas/Organization"
+      required:
+        - "@type"
+        - "@id"
+        - name
+        - givenName
+        - familyName
+
+    Organization:
+      type: object
+      additionalProperties: true
+      properties:
+        "@type":
+          type: string
+          const: "Organization"
+        "@id":
+          type: string
+        name:
+          type: string
+        url:
+          type: string
+      required:
+        - "@type"
+        - "@id"
+        - name
+
+    JsonLDEntity:
+      type: object
+      additionalProperties: true
+      properties:
+        "@type":
+          type: string
+        "@id":
+          type: string
+      required:
+        - "@type"
+        - "@id"
+
+    ImportResponse:
+      type: object
+      description: Map of JSON-LD identifiers (key) and their corresponding system specific identifiers (value)
+      additionalProperties:
+        type: string
+
+    ValidationReport:
+      type: object
+      required:
+        - isValid
+      properties:
+        isValid:
+          type: boolean
+      if:
+        properties:
+          isValid:
+            const: true
+      then:
+        properties:
+          entities:
+            type: array
+            items:
+              type: string
+        required:
+          - entities
+      else:
+        properties:
+          errors:
+            type: array
+            items:
+              oneOf:
+                - $ref: "#/components/schemas/NoEntityFound"
+                - $ref: "#/components/schemas/ValidationError"
+              discriminator:
+                propertyName: errorType
+
+        required:
+          - errors
+
+    ValidationError:
+      oneOf:
+        - $ref: "#/components/schemas/PropertyError"
+        - $ref: "#/components/schemas/MissingDataError"
+
+    NoEntityFound:
+      type: object
+      properties:
+        errorType:
+          type: string
+          const: "NoEntityFound"
+        message:
+          type: string
+          const: "No suitable entity found in the graph"
+          description: The system could not identify any data to import
+
+    MissingDataError:
+      type: object
+      description: A file or directory was referenced in the ro-crate-metadata.json but is not present in the zip archive. (Can only occur when the RO-Crate is submitted as a zip)
+      properties:
+        errorType:
+          type: string
+          const: "MissingDataError"
+        "type":
+          type: string
+          description: Type of the missing data in RO-Crate vocabulary
+          enum:
+            - File
+            - Dataset
+        path:
+          description: Path of the missing data inside the zip archive
+          type: string
+      required:
+        - type
+        - path
+
+    PropertyError:
+      type: object
+      properties:
+        errorType:
+          type: string
+          const: "PropertyError"
+        nodeId:
+          type: string
+        property:
+          type: string
+        message:
+          type: string
+      required:
+        - nodeId
+        - property
+        - message
+
+  examples:
+    validCrateResponse:
+      value:
+        isValid: true
+        entities:
+          - publication-01
+          - dataset-01
+
+    emptyCrateExample:
+      value:
+        isValid: false
+        errors:
+          - errorType: "NoEntityFound"
+            message: "No suitable entity found in the graph"
+
+    validationErrorExample:
+      value:
+        isValid: false
+        errors:
+          - errorType: PropertyError
+            nodeId: "./"
+            property: "http://schema.org/datePublished"
+            message: "Cardinality error: expected exactly 1 value"
+          - errorType: PropertyError
+            nodeId: "publication_1234"
+            property: "http://schema.org/creator"
+            message: "Type error: expected 'creator-01' to be a 'http://schema.org/Person' or a 'http://schema.org/Organization' but is a 'http://schema.org/Dataset'"
+          - errorType: MissingDataError
+            type: File
+            path: "./dataset/file-1"
+
+    importResponseExample:
+      value:
+        publication-01: "10.16907/808de0df-a9d3-4698-8e9f-d6e091516650"
+        dataset-01: "20.500.11935/44e91ab9-9ed5-4742-8a73-7834fbd0535e"
+
+    doiList:
+      value:
+        - 10.16907/808de0df-a9d3-4698-8e9f-d6e091516650
+        - 10.16907/f1285417-f190-4563-a8ee-04ebd9246a21
+
+    idList:
+      value:
+        - publication-01
+        - dataset-abc
+        - dataset-xyz
