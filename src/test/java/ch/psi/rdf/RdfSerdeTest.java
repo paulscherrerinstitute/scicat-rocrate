@@ -156,4 +156,20 @@ public class RdfSerdeTest {
     Resource subject = model.listSubjects().toList().getFirst();
     Assertions.assertTrue(deserializer.deserialize(subject, TestClasses.EmptyHttp.class).isValid());
   }
+
+  @Test
+  @DisplayName("Property URI scheme mismatch")
+  public void test07() {
+    model
+        .createResource(TestClasses.ResPrimitiveTypes)
+        .addLiteral(
+            ResourceFactory.createProperty(
+                TestClasses.NS_http + TestClasses.Propdouble.getLocalName()),
+            12.0);
+
+    Resource subject = model.listSubjects().toList().getFirst();
+    var report = deserializer.deserialize(subject, TestClasses.PrimitiveTypes.class);
+    Assertions.assertTrue(report.isValid());
+    Assertions.assertEquals(12.0, report.get().d);
+  }
 }

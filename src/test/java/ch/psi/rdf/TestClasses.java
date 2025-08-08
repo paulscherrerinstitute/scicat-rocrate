@@ -2,6 +2,7 @@ package ch.psi.rdf;
 
 import java.util.List;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 
 public class TestClasses {
@@ -46,6 +47,7 @@ public class TestClasses {
     }
   }
 
+  static final Resource ResPrimitiveTypes = ResourceFactory.createProperty(NS + "PrimitiveTypes");
   static final Property Propstring = ResourceFactory.createProperty(NS + "string");
   static final Property Propinteger = ResourceFactory.createProperty(NS + "integer");
   static final Property Propdouble = ResourceFactory.createProperty(NS + "double");
