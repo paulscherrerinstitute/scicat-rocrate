@@ -142,10 +142,18 @@ public class RdfSerdeTest {
   }
 
   @Test
-  @DisplayName("Type URI scheme mismatch")
+  @DisplayName("Type URI scheme mismatch (http instead of https)")
   public void test05() {
     model.createResource(ResourceFactory.createResource(TestClasses.NS_http + "Empty"));
     Resource subject = model.listSubjects().toList().getFirst();
     Assertions.assertTrue(deserializer.deserialize(subject, TestClasses.Empty.class).isValid());
+  }
+
+  @Test
+  @DisplayName("Type URI scheme mismatch (https instead of http)")
+  public void test06() throws Exception {
+    serializer.serialize(model, new TestClasses.Empty());
+    Resource subject = model.listSubjects().toList().getFirst();
+    Assertions.assertTrue(deserializer.deserialize(subject, TestClasses.EmptyHttp.class).isValid());
   }
 }

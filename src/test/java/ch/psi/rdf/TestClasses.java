@@ -11,6 +11,9 @@ public class TestClasses {
   @RdfClass(typesUri = NS + "Empty")
   public static class Empty {}
 
+  @RdfClass(typesUri = NS_http + "Empty")
+  public static class EmptyHttp {}
+
   static final Property PropstringArray = ResourceFactory.createProperty(NS + "stringArray");
   static final Property PropintegerArray = ResourceFactory.createProperty(NS + "integerArray");
   static final Property PropdoubleArray = ResourceFactory.createProperty(NS + "doubleArray");
