@@ -6,7 +6,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -85,7 +84,7 @@ public class RdfDeserializer {
           RdfProperty rdfPropertyAnnotation = field.getAnnotation(RdfProperty.class);
           Property p = ResourceFactory.createProperty(rdfPropertyAnnotation.uri());
 
-          List<RDFNode> values = subject.listProperties(p).mapWith(s -> s.getObject()).toList();
+          List<RDFNode> values = listValues(subject, rdfPropertyAnnotation.uri());
 
           checkCardinalities(subject, p, rdfPropertyAnnotation, values.size())
               .ifPresent(e -> report.addError(e));
@@ -108,7 +107,8 @@ public class RdfDeserializer {
           } else if (values.size() > 0) {
             if (values.size() > 1) {
               logger.warn(
-                  "Field '{}' of class '{}' is not a collection, only the first value will be assigned",
+                  "Field '{}' of class '{}' is not a collection, only the first value will be"
+                      + " assigned",
                   field.getName(),
                   clazz.getName());
             }
@@ -146,9 +146,15 @@ public class RdfDeserializer {
   }
 
   private Optional<PropertyError> checkType(Resource subject, String[] expectedTypes) {
+    List<String> normalizedExpectedTypes = new ArrayList<>();
+    for (String type : expectedTypes) {
+      normalizedExpectedTypes.add(type);
+      normalizedExpectedTypes.add(switchScheme(type));
+    }
+
     List<String> actualTypes =
         subject.listProperties(RDF.type).mapWith(s -> s.getObject().toString()).toList();
-    if (Arrays.stream(expectedTypes).noneMatch(actualTypes::contains)) {
+    if (normalizedExpectedTypes.stream().noneMatch(actualTypes::contains)) {
       String message =
           "Expected '@type' to be one of [ "
               + String.join(", ", expectedTypes)
@@ -225,5 +231,28 @@ public class RdfDeserializer {
     } catch (IllegalArgumentException | IllegalAccessException e) {
       logger.error("Unable to set field {}", field.getName(), e);
     }
+  }
+
+  private List<RDFNode> listValues(Resource subject, String propertyUri) {
+    Property p = ResourceFactory.createProperty(propertyUri);
+    List<RDFNode> values = subject.listProperties(p).mapWith(s -> s.getObject()).toList();
+    if (values.size() == 0) {
+      logger.info("{} has no property {}", subject.toString(), propertyUri);
+      p = ResourceFactory.createProperty(switchScheme(propertyUri));
+      logger.info("Trying to switch property scheme to: '{}' ", p.toString());
+      values = subject.listProperties(p).mapWith(s -> s.getObject()).toList();
+    }
+
+    return values;
+  }
+
+  private String switchScheme(String uri) {
+    if (uri.startsWith("http://")) {
+      return uri.replace("http://", "https://");
+    } else if (uri.startsWith("https://")) {
+      return uri.replace("https://", "http://");
+    }
+    logger.warn("URI scheme was neither http nor https");
+    return uri;
   }
 }
