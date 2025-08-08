@@ -85,8 +85,7 @@ public class RoCrateImporter {
     for (Resource cw : creativeWorks) {
       Statement s = cw.getProperty(SchemaDO.identifier);
       if (s == null && (s = cw.getProperty(identifierHttp)) == null) {
-        logger.info(
-            "{} has no property {}, trying the http version", cw.toString(), SchemaDO.identifier);
+        logger.info("{} has no property {}", cw.toString(), SchemaDO.identifier);
         continue;
       }
       if (s.getObject().isLiteral() && DoiUtils.isDoi(s.getObject().asLiteral().getString())) {
