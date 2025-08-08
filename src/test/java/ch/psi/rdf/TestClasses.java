@@ -5,7 +5,8 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.ResourceFactory;
 
 public class TestClasses {
-  public static final String NS = "http://testclasses.org/";
+  public static final String NS = "https://testclasses.org/";
+  public static final String NS_http = "http://testclasses.org/";
 
   @RdfClass(typesUri = NS + "Empty")
   public static class Empty {}
