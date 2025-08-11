@@ -22,7 +22,7 @@ jobs:
         id: check_changes
         uses: tj-actions/changed-files@v46
         with:
-          files: |
+          files_yaml: |
             devcontainer:
               - .devcontainer/**
             workflow:
