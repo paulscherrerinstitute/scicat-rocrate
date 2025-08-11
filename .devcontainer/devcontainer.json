@@ -1,0 +1,39 @@
+{
+	"name": "Java",
+	"image": "mcr.microsoft.com/devcontainers/java:1-21-bullseye",
+	"runArgs": [ "--network=host" ],
+	"updateRemoteUserUID": true,
+	"mounts": [
+		{
+			"source": "devcontainer-maven-cache-${containerWorkspaceFolderBasename}",
+			"target": "/home/vscode/.m2",
+			"type": "volume"
+		}
+	],
+	"features": {
+		"ghcr.io/devcontainers/features/java:1": {
+			"version": "21",
+			"installMaven": "true",
+			"installGradle": "false"
+		},
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": { },
+		"ghcr.io/devcontainers-extra/features/quarkus-sdkman:2": {
+			"jdkVersion": "21"
+		},
+		"ghcr.io/devcontainers-extra/features/pre-commit:2": { }
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"redhat.vscode-xml",
+				"redhat.vscode-quarkus",
+				"darkriszty.markdown-table-prettify",
+				"josevseb.google-java-format-for-vs-code"
+			]
+		}
+	},
+	"postCreateCommand": "sudo -E chown -R $(id -u):$(id -g) ~/.m2",
+	"onCreateCommand": {
+		"install pre-commit hooks": "cd ${containerWorkspaceFolder} && pre-commit install"
+	}
+}
