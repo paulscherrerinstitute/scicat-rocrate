@@ -18,7 +18,7 @@ jobs:
       runTests: ${{ steps.check_changes.outputs.src_any_changed }}
     steps:
       - uses: actions/checkout@v4
-      - name: Check for changes in .devcontainer
+      - name: Check for changes
         id: check_changes
         uses: tj-actions/changed-files@v46
         with:
