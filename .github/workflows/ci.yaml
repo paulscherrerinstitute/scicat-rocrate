@@ -58,7 +58,8 @@ jobs:
       - build
       - check_changes
     if: |
-      needs.check_changes.outputs.runTests == 'true'
+      always()
+      && needs.check_changes.outputs.runTests == 'true'
       && (needs.build.result == 'skipped' || needs.build.result == 'success')
     runs-on: ubuntu-latest
     steps:
