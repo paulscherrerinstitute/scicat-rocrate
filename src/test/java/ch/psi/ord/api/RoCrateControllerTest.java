@@ -150,6 +150,7 @@ public class RoCrateControllerTest {
     }
   }
 
+  @Nested
   class ValidateEndpoint {
     @Test
     @DisplayName("One publication zipped")
