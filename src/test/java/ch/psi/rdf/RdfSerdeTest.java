@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.vocabulary.RDF;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -138,5 +139,37 @@ public class RdfSerdeTest {
     Assertions.assertTrue(report.isValid());
     Assertions.assertNotNull(report.get());
     Assertions.assertEquals(primitiveTypes, report.get());
+  }
+
+  @Test
+  @DisplayName("Type URI scheme mismatch (http instead of https)")
+  public void test05() {
+    model.createResource(ResourceFactory.createResource(TestClasses.NS_http + "Empty"));
+    Resource subject = model.listSubjects().toList().getFirst();
+    Assertions.assertTrue(deserializer.deserialize(subject, TestClasses.Empty.class).isValid());
+  }
+
+  @Test
+  @DisplayName("Type URI scheme mismatch (https instead of http)")
+  public void test06() throws Exception {
+    serializer.serialize(model, new TestClasses.Empty());
+    Resource subject = model.listSubjects().toList().getFirst();
+    Assertions.assertTrue(deserializer.deserialize(subject, TestClasses.EmptyHttp.class).isValid());
+  }
+
+  @Test
+  @DisplayName("Property URI scheme mismatch")
+  public void test07() {
+    model
+        .createResource(TestClasses.ResPrimitiveTypes)
+        .addLiteral(
+            ResourceFactory.createProperty(
+                TestClasses.NS_http + TestClasses.Propdouble.getLocalName()),
+            12.0);
+
+    Resource subject = model.listSubjects().toList().getFirst();
+    var report = deserializer.deserialize(subject, TestClasses.PrimitiveTypes.class);
+    Assertions.assertTrue(report.isValid());
+    Assertions.assertEquals(12.0, report.get().d);
   }
 }

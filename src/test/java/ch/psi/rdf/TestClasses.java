@@ -2,13 +2,18 @@ package ch.psi.rdf;
 
 import java.util.List;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 
 public class TestClasses {
-  public static final String NS = "http://testclasses.org/";
+  public static final String NS = "https://testclasses.org/";
+  public static final String NS_http = "http://testclasses.org/";
 
   @RdfClass(typesUri = NS + "Empty")
   public static class Empty {}
+
+  @RdfClass(typesUri = NS_http + "Empty")
+  public static class EmptyHttp {}
 
   static final Property PropstringArray = ResourceFactory.createProperty(NS + "stringArray");
   static final Property PropintegerArray = ResourceFactory.createProperty(NS + "integerArray");
@@ -42,6 +47,7 @@ public class TestClasses {
     }
   }
 
+  static final Resource ResPrimitiveTypes = ResourceFactory.createProperty(NS + "PrimitiveTypes");
   static final Property Propstring = ResourceFactory.createProperty(NS + "string");
   static final Property Propinteger = ResourceFactory.createProperty(NS + "integer");
   static final Property Propdouble = ResourceFactory.createProperty(NS + "double");
