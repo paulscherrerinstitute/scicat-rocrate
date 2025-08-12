@@ -17,7 +17,7 @@
         <quarkus.platform.version>3.23.0</quarkus.platform.version>
         <quarkus.container-image.build>false</quarkus.container-image.build>
         <skipITs>true</skipITs>
-        <surefire-plugin.version>3.5.2</surefire-plugin.version>
+        <surefire-plugin.version>3.5.3</surefire-plugin.version>
     </properties>
 
     <dependencyManagement>
