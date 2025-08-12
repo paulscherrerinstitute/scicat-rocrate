@@ -57,7 +57,7 @@ jobs:
     needs:
       - build
       - check_changes
-    if: needs.check_changes.outputs.runTests == 'true'
+    if: ${{ always() }} && needs.check_changes.outputs.runTests == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -84,6 +84,7 @@ jobs:
 
   precommit:
     name: pre-commit
+    if: ${{ always() }}
     needs: build
     runs-on: ubuntu-latest
     steps:
