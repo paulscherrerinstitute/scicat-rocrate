@@ -54,13 +54,8 @@ jobs:
 
   unit_tests:
     name: Unit tests
-    needs:
-      - build
-      - check_changes
-    if: |
-      always()
-      && needs.check_changes.outputs.runTests == 'true'
-      && (needs.build.result == 'skipped' || needs.build.result == 'success')
+    needs: check_changes
+    if: needs.check_changes.outputs.runTests == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -87,13 +82,11 @@ jobs:
 
   precommit:
     name: pre-commit
-    if: ${{ always() }}
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Test
+      - name: pre-commit
         uses: devcontainers/ci@v0.3
         with:
           push: never
