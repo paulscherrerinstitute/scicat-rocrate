@@ -57,7 +57,9 @@ jobs:
     needs:
       - build
       - check_changes
-    if: ${{ always() }} && needs.check_changes.outputs.runTests == 'true'
+    if: |
+      needs.check_changes.outputs.runTests == 'true'
+      && (needs.build.result == 'skipped' || needs.build.result == 'success')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
