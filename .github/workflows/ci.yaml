@@ -54,9 +54,7 @@ jobs:
 
   unit_tests:
     name: Unit tests
-    needs:
-      - build
-      - check_changes
+    needs: check_changes
     if: needs.check_changes.outputs.runTests == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -84,12 +82,11 @@ jobs:
 
   precommit:
     name: pre-commit
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Test
+      - name: pre-commit
         uses: devcontainers/ci@v0.3
         with:
           push: never
