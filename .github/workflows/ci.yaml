@@ -18,11 +18,11 @@ jobs:
       runTests: ${{ steps.check_changes.outputs.src_any_changed }}
     steps:
       - uses: actions/checkout@v4
-      - name: Check for changes in .devcontainer
+      - name: Check for changes
         id: check_changes
         uses: tj-actions/changed-files@v46
         with:
-          files: |
+          files_yaml: |
             devcontainer:
               - .devcontainer/**
             workflow:
@@ -54,9 +54,7 @@ jobs:
 
   unit_tests:
     name: Unit tests
-    needs:
-      - build
-      - check_changes
+    needs: check_changes
     if: needs.check_changes.outputs.runTests == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -84,12 +82,11 @@ jobs:
 
   precommit:
     name: pre-commit
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Test
+      - name: pre-commit
         uses: devcontainers/ci@v0.3
         with:
           push: never
