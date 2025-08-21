@@ -26,7 +26,6 @@ public class CreatePublishedDataDto {
   @JsonProperty(value = "publicationYear", required = true)
   private int publicationYear;
 
-  @JsonProperty(value = "title", required = true)
   private String title;
 
   @JsonProperty(value = "abstract", required = true)
