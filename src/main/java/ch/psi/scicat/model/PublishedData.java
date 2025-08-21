@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 // TODO: Make sure it doesn't break on big values for 'number' types
 @Getter
@@ -31,8 +32,9 @@ public class PublishedData {
 
   private String url;
 
+  @Accessors(prefix = "_")
   @JsonProperty(value = "abstract", required = true)
-  private String abstract_;
+  private String _abstract;
 
   @JsonProperty(value = "dataDescription", required = true)
   private String dataDescription;

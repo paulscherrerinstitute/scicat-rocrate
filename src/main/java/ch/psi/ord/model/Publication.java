@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.jena.vocabulary.SchemaDO;
 
 @Getter
@@ -33,8 +34,9 @@ public class Publication {
   @RdfProperty(uri = SchemaDO.NS + "dateModified", minCardinality = 0)
   private String dateModified;
 
+  @Accessors(prefix = "_")
   @RdfProperty(uri = SchemaDO.NS + "abstract", minCardinality = 1)
-  private String abstract_;
+  private String _abstract;
 
   @RdfProperty(uri = SchemaDO.NS + "description", minCardinality = 1)
   private String description;

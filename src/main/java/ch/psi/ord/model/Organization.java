@@ -23,5 +23,5 @@ public class Organization {
     return null;
   }
 
-  public static Organization PSI = new Organization().name("Paul Scherrer Institute");
+  public static Organization PSI = new Organization().setName("Paul Scherrer Institute");
 }

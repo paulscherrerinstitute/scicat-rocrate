@@ -76,7 +76,7 @@ public class ScicatModelMapper {
               m.when(isNotNull())
                   .map(src -> src.getPublisher().getName(), CreatePublishedDataDto::setPublisher);
               m.when(isNotNull())
-                  .map(Publication::getAbstract, CreatePublishedDataDto::setAbstract);
+                  .map(Publication::getAbstract, CreatePublishedDataDto::setAbstract_);
               m.when(isNotNull())
                   .map(Publication::getDescription, CreatePublishedDataDto::setDataDescription);
               m.when(isNotNull())
