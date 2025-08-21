@@ -3,11 +3,14 @@ package ch.psi.ord.api;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.hasEntry;
 
+import ch.psi.scicat.TestData;
 import ch.psi.scicat.client.ScicatService;
 import ch.psi.scicat.client.ScicatServiceMock;
 import io.quarkus.test.junit.QuarkusMock;
 import io.quarkus.test.junit.QuarkusTest;
+import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
+import java.util.List;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -120,6 +123,25 @@ public class RoCrateControllerTest {
           .post("/ro-crate/import")
           .then()
           .statusCode(409);
+    }
+  }
+
+  @Nested
+  class ExportEndpoint {
+    @Test
+    @DisplayName("Export to zip")
+    public void test00() {
+      scicatServiceMock.setAuthenticated(true);
+      scicatServiceMock.createPublishedData(null, TestData.exampleCreatePublishedDataDto);
+
+      given()
+          .header("Content-Type", MediaType.APPLICATION_JSON)
+          .header("Accept", ExtraMediaType.APPLICATION_ZIP)
+          .body(List.of(TestData.exampleCreatePublishedDataDto.getDoi()))
+          .when()
+          .post("/ro-crate/export")
+          .then()
+          .statusCode(200);
     }
   }
 }
