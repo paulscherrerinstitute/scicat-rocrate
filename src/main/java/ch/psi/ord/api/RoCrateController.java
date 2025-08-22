@@ -37,7 +37,6 @@ import org.apache.jena.riot.lang.LangJSONLD11;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
-import org.jboss.resteasy.reactive.RestHeader;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.modelmapper.MappingException;
 import org.modelmapper.ModelMapper;
@@ -78,27 +77,13 @@ public class RoCrateController {
     jsonLdOptions.setUriValidation(UriValidationPolicy.None);
   }
 
-  @POST
-  @Path("/export")
-  @Consumes({MediaType.APPLICATION_JSON, MediaType.MULTIPART_FORM_DATA})
-  @Produces({ExtraMediaType.APPLICATION_JSONLD, ExtraMediaType.APPLICATION_ZIP})
-  public Response exportPublication(
-      @RestHeader("Accept") List<MediaType> acceptHeader,
-      @RestHeader("Content-Type") MediaType contentTypeHeader,
-      List<String> identifiers) {
-    if (acceptHeader.contains(ExtraMediaType.APPLICATION_ZIP_TYPE)
-        && !acceptHeader.contains(ExtraMediaType.APPLICATION_JSONLD_TYPE)) {
-      return Response.status(Status.NOT_IMPLEMENTED)
-          .entity("Export to ZIP file is not supported yet")
-          .type(MediaType.TEXT_PLAIN)
-          .build();
-    }
-
+  private Optional<Response> export(List<String> identifiers) {
     if (identifiers.stream().anyMatch(id -> !DoiUtils.isDoi(id))) {
-      return Response.status(Status.BAD_REQUEST)
-          .entity("Identifiers other than DOI are not implemented yet")
-          .type(MediaType.TEXT_PLAIN)
-          .build();
+      return Optional.of(
+          Response.status(Status.BAD_REQUEST)
+              .entity("{\"message\": \"Identifiers other than DOI are not implemented yet\"}")
+              .type(MediaType.APPLICATION_JSON)
+              .build());
     }
 
     // FIXME: Will need to add other types
@@ -106,15 +91,47 @@ public class RoCrateController {
       exporter.addPublications(identifiers);
     } catch (ClientWebApplicationException e) {
       Response res = e.getResponse();
-      return Response.status(res.getStatus())
-          .entity(res.getEntity())
-          .type(res.getMediaType())
-          .build();
+      return Optional.of(
+          Response.status(res.getStatus())
+              .entity(res.getEntity())
+              .type(res.getMediaType())
+              .build());
+    }
+
+    return Optional.empty();
+  }
+
+  @POST
+  @Path("/export")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(ExtraMediaType.APPLICATION_JSONLD)
+  public Response exportMetadataDescriptor(List<String> identifiers) {
+    Optional<Response> err = export(identifiers);
+    if (err.isPresent()) {
+      return err.get();
     }
 
     return Response.ok(exporter.getCrateMetadata())
         .type(ExtraMediaType.APPLICATION_JSONLD_TYPE)
         .build();
+  }
+
+  @POST
+  @Path("/export")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(ExtraMediaType.APPLICATION_ZIP)
+  public Response exportZip(List<String> identifiers) {
+    Optional<Response> err = export(identifiers);
+    if (err.isPresent()) {
+      return err.get();
+    }
+
+    Optional<byte[]> zip = exporter.getZip();
+    if (zip.isPresent()) {
+      return Response.ok(zip.get()).type(ExtraMediaType.APPLICATION_ZIP).build();
+    }
+
+    return Response.serverError().build();
   }
 
   @POST
