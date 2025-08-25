@@ -44,7 +44,6 @@ public class StaticEntities {
             SchemaDO.publisher,
             SchemaDO.datePublished,
             SchemaDO.about,
-            SchemaDO.title,
             SchemaDO.additionalType,
             SchemaDO.sdDatePublished,
             SchemaDO.creativeWorkStatus,

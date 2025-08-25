@@ -19,7 +19,7 @@ public class Publication {
   @RdfProperty(uri = SchemaDO.NS + "creator", minCardinality = 1)
   private List<Person> creator = new ArrayList<>();
 
-  @RdfProperty(uri = SchemaDO.NS + "title", minCardinality = 1)
+  @RdfProperty(uri = SchemaDO.NS + "name", minCardinality = 1)
   private String title;
 
   @RdfProperty(uri = SchemaDO.NS + "publisher", minCardinality = 1)

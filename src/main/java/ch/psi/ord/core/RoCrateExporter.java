@@ -93,7 +93,7 @@ public class RoCrateExporter {
     publicationBuilder
         .addProperty(
             SchemaDO.datePublished.getLocalName(), Long.toString(publication.getPublicationYear()))
-        .addProperty(SchemaDO.title.getLocalName(), publication.getTitle())
+        .addProperty(SchemaDO.name.getLocalName(), publication.getTitle())
         .addProperty(SchemaDO._abstract.getLocalName(), publication.getAbstract())
         .addProperty(SchemaDO.additionalType.getLocalName(), publication.getResourceType())
         .addProperty(SchemaDO.sdDatePublished.getLocalName(), publication.getRegisteredTime())
