@@ -3,7 +3,12 @@ package ch.psi.scicat.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
+@Getter
+@Setter
 public class CreatePublishedDataDto {
   @JsonProperty(value = "_id")
   private String _id;
@@ -24,6 +29,7 @@ public class CreatePublishedDataDto {
 
   private String title;
 
+  @Accessors(prefix = "_")
   @JsonProperty(value = "abstract", required = true)
   private String _abstract;
 
@@ -48,165 +54,4 @@ public class CreatePublishedDataDto {
   private String thumbnail;
   private List<String> relatedPublications;
   private String downloadLink;
-
-  public String getDoi() {
-    return doi;
-  }
-
-  public void setDoi(String doi) {
-    this._id = doi;
-    this.doi = doi;
-  }
-
-  public String getAffiliation() {
-    return affiliation;
-  }
-
-  public void setAffiliation(String affiliation) {
-    this.affiliation = affiliation;
-  }
-
-  public List<String> getCreator() {
-    return creator;
-  }
-
-  public void setCreator(List<String> creator) {
-    this.creator = creator;
-  }
-
-  public String getPublisher() {
-    return publisher;
-  }
-
-  public void setPublisher(String publisher) {
-    this.publisher = publisher;
-  }
-
-  public int getPublicationYear() {
-    return publicationYear;
-  }
-
-  public void setPublicationYear(int publicationYear) {
-    this.publicationYear = publicationYear;
-  }
-
-  public String getTitle() {
-    return title;
-  }
-
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
-  public String getAbstract() {
-    return _abstract;
-  }
-
-  public void setAbstract(String _abstract) {
-    this._abstract = _abstract;
-  }
-
-  public String getUrl() {
-    return url;
-  }
-
-  public void setUrl(String url) {
-    this.url = url;
-  }
-
-  public String getDataDescription() {
-    return dataDescription;
-  }
-
-  public void setDataDescription(String dataDescription) {
-    this.dataDescription = dataDescription;
-  }
-
-  public String getResourceType() {
-    return resourceType;
-  }
-
-  public void setResourceType(String resourceType) {
-    this.resourceType = resourceType;
-  }
-
-  public int getNumberOfFiles() {
-    return numberOfFiles;
-  }
-
-  public void setNumberOfFiles(int numberOfFiles) {
-    this.numberOfFiles = numberOfFiles;
-  }
-
-  public double getSizeOfArchive() {
-    return sizeOfArchive;
-  }
-
-  public void setSizeOfArchive(double sizeOfArchive) {
-    this.sizeOfArchive = sizeOfArchive;
-  }
-
-  public List<String> getPidArray() {
-    return pidArray;
-  }
-
-  public void setPidArray(List<String> pidArray) {
-    this.pidArray = pidArray;
-  }
-
-  public List<String> getAuthors() {
-    return authors;
-  }
-
-  public void setAuthors(List<String> authors) {
-    this.authors = authors;
-  }
-
-  public String getRegisteredTime() {
-    return registeredTime;
-  }
-
-  public void setRegisteredTime(String registeredTime) {
-    this.registeredTime = registeredTime;
-  }
-
-  public String getStatus() {
-    return status;
-  }
-
-  public void setStatus(String status) {
-    this.status = status;
-  }
-
-  public String getScicatUser() {
-    return scicatUser;
-  }
-
-  public void setScicatUser(String scicatUser) {
-    this.scicatUser = scicatUser;
-  }
-
-  public String getThumbnail() {
-    return thumbnail;
-  }
-
-  public void setThumbnail(String thumbnail) {
-    this.thumbnail = thumbnail;
-  }
-
-  public List<String> getRelatedPublications() {
-    return relatedPublications;
-  }
-
-  public void setRelatedPublications(List<String> relatedPublications) {
-    this.relatedPublications = relatedPublications;
-  }
-
-  public String getDownloadLink() {
-    return downloadLink;
-  }
-
-  public void setDownloadLink(String downloadLink) {
-    this.downloadLink = downloadLink;
-  }
 }

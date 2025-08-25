@@ -9,10 +9,16 @@ import edu.kit.datamanager.ro_crate.entities.contextual.ContextualEntity.Context
 import edu.kit.datamanager.ro_crate.entities.data.DataEntity;
 import edu.kit.datamanager.ro_crate.entities.data.DataEntity.DataEntityBuilder;
 import edu.kit.datamanager.ro_crate.entities.data.RootDataEntity;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.Year;
 import java.util.List;
+import java.util.Optional;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.apache.jena.vocabulary.SchemaDO;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
@@ -87,7 +93,7 @@ public class RoCrateExporter {
     publicationBuilder
         .addProperty(
             SchemaDO.datePublished.getLocalName(), Long.toString(publication.getPublicationYear()))
-        .addProperty(SchemaDO.title.getLocalName(), publication.getTitle())
+        .addProperty(SchemaDO.name.getLocalName(), publication.getTitle())
         .addProperty(SchemaDO._abstract.getLocalName(), publication.getAbstract())
         .addProperty(SchemaDO.additionalType.getLocalName(), publication.getResourceType())
         .addProperty(SchemaDO.sdDatePublished.getLocalName(), publication.getRegisteredTime())
@@ -131,6 +137,22 @@ public class RoCrateExporter {
 
   public String getCrateMetadata() {
     return crate.getJsonMetadata();
+  }
+
+  public Optional<byte[]> getZip() {
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    try (ZipOutputStream zipStream = new ZipOutputStream(outputStream)) {
+      ZipEntry entry = new ZipEntry("ro-crate-metadata.json");
+      zipStream.putNextEntry(entry);
+      byte[] metadataDescriptor = getCrateMetadata().getBytes();
+      zipStream.write(metadataDescriptor, 0, metadataDescriptor.length);
+      zipStream.closeEntry();
+    } catch (IOException e) {
+      Log.error(e);
+      return Optional.empty();
+    }
+
+    return Optional.of(outputStream.toByteArray());
   }
 
   private String yearToISO3601(int year) {
