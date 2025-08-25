@@ -7,7 +7,6 @@
         "about": "https://schema.org/about",
         "description": "https://schema.org/description",
         "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-        "title": "https://schema.org/title",
         "dateCreated": "https://schema.org/dateCreated",
         "rangeIncludes": "https://schema.org/rangeIncludes",
         "creativeWorkStatus": "https://schema.org/creativeWorkStatus",
@@ -132,7 +131,7 @@
                 "@id": "https://creativecommons.org/licenses/by-sa/4.0/"
             },
             "datePublished": "2023",
-            "title": "A test pub made of 3 ds",
+            "name": "A test pub made of 3 ds",
             "abstract": "3 ds",
             "additionalType": "raw",
             "sdDatePublished": "2023-01-26T13:02:38.341Z",
