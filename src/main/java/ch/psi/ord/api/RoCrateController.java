@@ -23,12 +23,16 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFParser;
@@ -136,7 +140,29 @@ public class RoCrateController {
 
   @POST
   @Path("/validate")
-  @Consumes({ExtraMediaType.APPLICATION_JSONLD, ExtraMediaType.APPLICATION_ZIP})
+  @Consumes(ExtraMediaType.APPLICATION_ZIP)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response validateZippedCrate(InputStream body) {
+    java.nio.file.Path targetDir = null;
+    try {
+      targetDir = Files.createTempDirectory("scicat-rocrate");
+      logger.debug("Extracting crate to {}", targetDir);
+      extractZip(targetDir, body);
+      Optional<Model> model = readMetadataDescriptor(targetDir);
+      if (model.isPresent()) {
+        importer.loadModel(model.get());
+        return Response.ok(importer.validate()).build();
+      }
+    } catch (Exception e) {
+    } finally {
+      deleteDirectory(targetDir);
+    }
+    return Response.ok().build();
+  }
+
+  @POST
+  @Path("/validate")
+  @Consumes(ExtraMediaType.APPLICATION_JSONLD)
   @Produces(MediaType.APPLICATION_JSON)
   public Response validateRoCrate(InputStream body) {
     Optional<Response> response = isBodyEmpty(body);
@@ -219,12 +245,17 @@ public class RoCrateController {
   }
 
   private Optional<Model> parseJsonLd(InputStream document) {
+    return parseJsonLd(document, "");
+  }
+
+  private Optional<Model> parseJsonLd(InputStream document, String base) {
+    StringBuilder sb = new StringBuilder().append("file://").append(base).append('/');
     try {
       Model model =
           RDFParser.create()
               .source(document)
               .lang(Lang.JSONLD11)
-              .base("file:///")
+              .base(sb.toString())
               .context(
                   org.apache.jena.sparql.util.Context.create()
                       .set(LangJSONLD11.JSONLD_OPTIONS, jsonLdOptions))
@@ -234,6 +265,62 @@ public class RoCrateController {
       return Optional.of(model);
     } catch (RiotException e) {
       logger.error("", e);
+    }
+
+    return Optional.empty();
+  }
+
+  private boolean extractZip(java.nio.file.Path targetDir, InputStream body) {
+    boolean success = true;
+    try (ZipInputStream zipIn = new ZipInputStream(body)) {
+      for (ZipEntry entry; (entry = zipIn.getNextEntry()) != null; ) {
+        java.nio.file.Path resolvedPath = targetDir.resolve(entry.getName()).normalize();
+        if (!resolvedPath.startsWith(targetDir)) {
+          // see: https://snyk.io/research/zip-slip-vulnerability
+          throw new RuntimeException("Entry with an illegal path: " + entry.getName());
+        }
+        if (entry.isDirectory()) {
+          Files.createDirectories(resolvedPath);
+          logger.debug("Created directory {}", resolvedPath);
+        } else {
+          Files.createDirectories(resolvedPath.getParent());
+          Files.copy(zipIn, resolvedPath);
+          logger.debug("Wrote file {}", resolvedPath);
+        }
+      }
+    } catch (Exception e) {
+      success = false;
+      logger.error(null, e);
+    }
+
+    return success;
+  }
+
+  private boolean deleteDirectory(java.nio.file.Path directoryPath) {
+    boolean success = true;
+    if (directoryPath != null) {
+      logger.debug("Trying to delete directory: {}", directoryPath);
+      try {
+        // sort in reverse order to delete files before directories
+        var toDelete = Files.walk(directoryPath).sorted((a, b) -> b.compareTo(a)).toList();
+        for (var p : toDelete) {
+          Files.delete(p);
+          logger.debug("Deleted {}", p);
+        }
+      } catch (IOException e) {
+        success = false;
+        logger.error(null, e);
+      }
+    }
+
+    return success;
+  }
+
+  private Optional<Model> readMetadataDescriptor(java.nio.file.Path directoryPath) {
+    try (InputStream metadataDescriptor =
+        new FileInputStream(directoryPath.resolve("ro-crate-metadata.json").toFile())) {
+      return parseJsonLd(metadataDescriptor, directoryPath.toString());
+    } catch (Exception e) {
     }
 
     return Optional.empty();
