@@ -1,5 +1,6 @@
 package ch.psi.scicat.client;
 
+import ch.psi.scicat.TestData;
 import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
@@ -18,6 +19,8 @@ import org.modelmapper.ModelMapper;
 public class ScicatServiceMock implements ScicatService {
   private ModelMapper modelMapper = new ModelMapper();
   private List<PublishedData> publishedDataCollection = new ArrayList<>();
+  private List<Dataset> datasetCollection =
+      List.of(TestData.dataset1, TestData.dataset2, TestData.dataset3);
   private boolean isHealthy = true;
   private boolean isAuthenticated = false;
 
@@ -68,7 +71,15 @@ public class ScicatServiceMock implements ScicatService {
 
   @Override
   public RestResponse<Dataset> getDatasetByPid(String pid) {
-    throw new UnsupportedOperationException("Unimplemented method 'getDatasetByPid'");
+    Optional<Dataset> dataset =
+        datasetCollection.stream().filter(p -> p.getPid().equals(pid)).findFirst();
+
+    if (dataset.isPresent()) {
+      return RestResponse.ok(dataset.get(), MediaType.APPLICATION_JSON);
+    }
+
+    throw new WebApplicationException(
+        Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON).build());
   }
 
   public void setHealthy(boolean b) {
