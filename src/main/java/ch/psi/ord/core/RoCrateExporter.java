@@ -1,6 +1,7 @@
 package ch.psi.ord.core;
 
 import ch.psi.scicat.client.ScicatClient;
+import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
 import edu.kit.datamanager.ro_crate.RoCrate;
 import edu.kit.datamanager.ro_crate.context.RoCrateMetadataContext;
@@ -105,9 +106,17 @@ public class RoCrateExporter {
         .getPidArray()
         .forEach(
             pid -> {
-              publicationBuilder.addIdProperty(
-                  SchemaDO.hasPart.getLocalName(),
-                  scicatServiceUrl + "/datasets/" + pid.replace("/", "%2F"));
+              Dataset dataset = scicatClient.getDatasetByPid(pid).getEntity();
+              String datasetUrl = scicatServiceUrl + "/datasets/" + pid.replace("/", "%2F");
+              DataEntityBuilder datasetBuilder =
+                  new DataEntityBuilder()
+                      .addType(SchemaDO.Dataset.getLocalName())
+                      .setId(datasetUrl)
+                      .addProperty(SchemaDO.name.getLocalName(), dataset.getDatasetName())
+                      .addProperty(SchemaDO.description.getLocalName(), dataset.getDescription());
+              crate.addDataEntity(datasetBuilder.build());
+
+              publicationBuilder.addIdProperty(SchemaDO.hasPart.getLocalName(), datasetUrl);
             });
     publication
         .getRelatedPublications()

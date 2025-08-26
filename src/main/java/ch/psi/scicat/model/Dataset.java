@@ -1,7 +1,14 @@
 package ch.psi.scicat.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Getter;
+import lombok.Setter;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record Dataset(
-    String pid, String datasetName, String description, String size, int numberOfFiles) {}
+@Getter
+@Setter
+public class Dataset {
+  private String pid;
+  private String datasetName;
+  private String description;
+}
