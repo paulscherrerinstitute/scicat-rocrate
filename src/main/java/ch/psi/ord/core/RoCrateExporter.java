@@ -125,8 +125,8 @@ public class RoCrateExporter {
               publicationBuilder.addProperty(formatScicatId("relatedPublications"), p);
             });
     publicationBuilder
-        .addProperty(formatScicatId("numberOfFiles"), publication.getNumberOfFiles())
-        .addProperty(formatScicatId("sizeOfArchive"), publication.getSizeOfArchive())
+        .addProperty(formatScicatId("numberOfFiles"), (int) publication.getNumberOfFiles())
+        .addProperty(formatScicatId("sizeOfArchive"), (int) publication.getSizeOfArchive())
         .addProperty(formatScicatId("scicatUser"), publication.getScicatUser());
 
     DataEntity publicationEntity = publicationBuilder.build();
