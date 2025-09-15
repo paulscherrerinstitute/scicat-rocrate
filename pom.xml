@@ -15,8 +15,8 @@
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.version>3.26.3</quarkus.platform.version>
-        <quarkus.container-image.build>false</quarkus.container-image.build>
         <skipITs>true</skipITs>
+        <quarkus.container-image.push>true</quarkus.container-image.push>
         <surefire-plugin.version>3.5.3</surefire-plugin.version>
     </properties>
 
@@ -180,6 +180,13 @@
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         <maven.home>${maven.home}</maven.home>
                     </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.3</version>
+                <configuration>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>
