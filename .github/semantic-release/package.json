@@ -1,0 +1,11 @@
+{
+  "name": "sematic-release",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/github": "^11.0.6",
+    "@terrestris/maven-semantic-release": "^3.1.0",
+    "semantic-release": "^24.2.8"
+  }
+}

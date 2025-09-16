@@ -2,36 +2,43 @@ name: Release
 
 on:
   push:
-    tags:
-      - '*'
+    branches:
+      - main
 
 env:
   devImage: ghcr.io/${{ github.repository }}-devcontainer
 
 jobs:
   release:
-    name: Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      packages: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v5
         with:
-          ref: ${{ github.ref }}
-      - name: Get POM project version
-        run: echo "POM_VERSION=$(mvn help:evaluate -Dexpression=project.version --quiet -DforceStdout)" >> "$GITHUB_ENV"
-      - name: Compare tag and POM version
-        run: |
-          if [ "${{ github.ref }}" != "refs/tags/${{ env.POM_VERSION }}" ]; then
-            echo "Error: Tag '${{ github.ref }}' does not match POM project version '${{ env.POM_VERSION }}'."
-            exit 1
-          fi
-      - name: Build and push image
+          fetch-depth: 0
+      - name: Release
         uses: devcontainers/ci@v0.3
         with:
+          push: never
           imageName: ${{ env.devImage }}
           cacheFrom: ${{ env.devImage }}
-          push: never
-          runCmd: >
-            ./mvnw install
-                -Dquarkus.container-image.push=true
-                -Dquarkus.container-image.username=${{ github.actor }}
-                -Dquarkus.container-image.username=${{ secrets.GITHUB_TOKEN }}
+          runCmd: |
+            docker login ghcr.io -u $GITHUB_ACTOR --password $GITHUB_TOKEN \
+            && npm install --prefix .github/semantic-release               \
+            && npx --prefix .github/semantic-release semantic-release
+          env: |
+            CI=true
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+            GITHUB_ACTION=${{ github.action }}
+            GITHUB_ACTOR=${{ github.actor }}
+            GITHUB_REPOSITORY=${{ github.repository }}
+            GITHUB_REF=${{ github.ref }}
+            GITHUB_SHA=${{ github.sha }}
+            GITHUB_WORKFLOW=${{ github.workflow }}
+            GITHUB_RUN_ID=${{ github.run_id }}
+            GITHUB_RUN_NUMBER=${{ github.run_number }}

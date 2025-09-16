@@ -8,6 +8,10 @@ updates:
    directory: "/"
    schedule:
      interval: daily
+   commit-message:
+     prefix: fix(deps)
+     prefix-development: chore(deps)
+     include: scope
  - package-ecosystem: "docker"
    directory: "/src/main/docker/"
    schedule:
