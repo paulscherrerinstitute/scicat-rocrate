@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - ci/use-deploy-keys
 
 env:
   devImage: ghcr.io/${{ github.repository }}-devcontainer
