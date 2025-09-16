@@ -31,14 +31,14 @@ jobs:
           cacheFrom: ${{ env.devImage }}
           runCmd: |
             docker login ghcr.io -u $GITHUB_ACTOR --password $GITHUB_TOKEN \
-            && echo ${DEPLOY_KEY} > /tmp/deploy_key                        \
+            && echo $DEPLOY_KEY > /tmp/key && cat /tmp/key \
             && eval $(ssh-agent -s)                                        \
-            && ssh-add /tmp/deploy_key                                     \
+            && echo "$DEPLOY_KEY" | tr -d '\r' | ssh-add -                 \
             && npm install --prefix .github/semantic-release               \
             && npx --prefix .github/semantic-release semantic-release
           env: |
             CI=true
-            DEPLOY_KEY=${{ secrets.DEPLOY_KEY}}
+            DEPLOY_KEY=${{ secrets.DEPLOY_KEY }}
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
             GITHUB_ACTION=${{ github.action }}
             GITHUB_ACTOR=${{ github.actor }}

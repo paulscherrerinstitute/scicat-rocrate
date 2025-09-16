@@ -1,6 +1,6 @@
 {
   "branches": [
-    "main"
+    "main", "ci/use-deploy-keys"
   ],
   "plugins": [
     "@semantic-release/commit-analyzer",
