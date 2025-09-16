@@ -10,8 +10,7 @@
       "@terrestris/maven-semantic-release",
       {
         "mavenTarget": "deploy",
-        "clean": true,
-        "updateSnapshotVersion": true
+        "clean": true
       }
     ],
     [
