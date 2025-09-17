@@ -10,6 +10,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.slf4j.Logger;
@@ -18,6 +19,10 @@ import org.slf4j.LoggerFactory;
 @ApplicationScoped
 public class ScicatClient {
   @Inject @RestClient ScicatService scicatService;
+
+  @Inject
+  @ConfigProperty(name = "scicat.client.use.bearer")
+  boolean preprendBearer;
 
   private static final Logger logger = LoggerFactory.getLogger(ScicatClient.class);
 
@@ -47,8 +52,12 @@ public class ScicatClient {
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
+
+    if (preprendBearer) {
+      scicatToken = "Bearer " + scicatToken;
+    }
     RestResponse<PublishedData> clientResponse =
-        scicatService.createPublishedData("Bearer " + scicatToken, publishedData);
+        scicatService.createPublishedData(scicatToken, publishedData);
     return RestResponse.fromResponse(clientResponse);
   }
 
