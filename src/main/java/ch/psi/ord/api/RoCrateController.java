@@ -161,6 +161,10 @@ public class RoCrateController {
   @Produces(MediaType.APPLICATION_JSON)
   public Response importRoCrate(
       @HeaderParam(value = "scicat-token") String scicatToken, InputStream body) {
+    if (!scicatClient.checkTokenValidity(scicatToken)) {
+      return Response.status(Status.UNAUTHORIZED).build();
+    }
+
     Optional<Response> response = isBodyEmpty(body);
     if (response.isPresent()) {
       return response.get();
