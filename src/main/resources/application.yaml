@@ -10,17 +10,19 @@ quarkus:
   http:
     root-path: /api/v1
   rest-client:
+    logging:
+      scope: request-response
     scicat-api:
       url: http://backend.localhost/api/v3
-    smallrye-openapi:
-      path: /openapi-specs
-    smallrye-health:
-      openapi:
-        include: true
-      root-path: /api/v1/health
-    swagger-ui:
-      path: /explorer
-      always-include: true
+  smallrye-openapi:
+    path: /openapi-specs
+  smallrye-health:
+    openapi:
+      included: true
+    root-path: /api/v1/health
+  swagger-ui:
+    path: /explorer
+    always-include: true
 
 titanium:
   jsonld:
