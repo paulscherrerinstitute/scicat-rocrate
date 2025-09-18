@@ -38,6 +38,7 @@ public class RoCrateControllerTest {
     @Test
     @DisplayName("Empty body")
     public void test01() {
+      scicatServiceMock.setAuthenticated(true);
       given()
           .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
           .when()
@@ -49,6 +50,7 @@ public class RoCrateControllerTest {
     @Test
     @DisplayName("Invalid JSON-LD")
     public void test02() {
+      scicatServiceMock.setAuthenticated(true);
       given()
           .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
           .body("{")
@@ -61,6 +63,7 @@ public class RoCrateControllerTest {
     @Test
     @DisplayName("Empty JSON-LD")
     public void test03() {
+      scicatServiceMock.setAuthenticated(true);
       given()
           .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
           .body("{}")

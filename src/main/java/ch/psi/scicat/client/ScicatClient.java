@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -30,6 +31,20 @@ public class ScicatClient {
     try {
       RestResponse<Void> response = scicatService.isHealthy();
       return response.getStatus() == 200;
+    } catch (WebApplicationException e) {
+      return false;
+    }
+  }
+
+  public boolean checkTokenValidity(@HeaderParam("Authorization") String accessToken) {
+    try {
+      if (preprendBearer) {
+        accessToken = "Bearer " + accessToken;
+
+        return scicatService.myself(accessToken).getStatus() == 200;
+      } else {
+        return scicatService.userInfos(accessToken).getStatus() == 200;
+      }
     } catch (WebApplicationException e) {
       return false;
     }

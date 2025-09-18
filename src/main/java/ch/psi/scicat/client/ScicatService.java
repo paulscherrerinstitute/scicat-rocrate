@@ -17,6 +17,16 @@ public interface ScicatService {
   @Path("health")
   RestResponse<Void> isHealthy();
 
+  /** Only available on backend-next */
+  @GET
+  @Path("users/my/self")
+  RestResponse<Void> myself(@HeaderParam("Authorization") String accessToken);
+
+  /** Only available on legacy backend */
+  @GET
+  @Path("Users/userInfos")
+  RestResponse<Void> userInfos(@HeaderParam("Authorization") String accessToken);
+
   @GET
   @Path("publisheddata/{doi}")
   RestResponse<PublishedData> getPublishedDataById(@PathParam("doi") String doi);
