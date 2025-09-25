@@ -149,7 +149,7 @@ public class RdfDeserializer {
     List<String> normalizedExpectedTypes = new ArrayList<>();
     for (String type : expectedTypes) {
       normalizedExpectedTypes.add(type);
-      normalizedExpectedTypes.add(switchScheme(type));
+      normalizedExpectedTypes.add(RdfUtils.switchScheme(type));
     }
 
     List<String> actualTypes =
@@ -238,21 +238,11 @@ public class RdfDeserializer {
     List<RDFNode> values = subject.listProperties(p).mapWith(s -> s.getObject()).toList();
     if (values.size() == 0) {
       logger.info("{} has no property {}", subject.toString(), propertyUri);
-      p = ResourceFactory.createProperty(switchScheme(propertyUri));
+      p = ResourceFactory.createProperty(RdfUtils.switchScheme(propertyUri));
       logger.info("Trying to switch property scheme to: '{}' ", p.toString());
       values = subject.listProperties(p).mapWith(s -> s.getObject()).toList();
     }
 
     return values;
-  }
-
-  private String switchScheme(String uri) {
-    if (uri.startsWith("http://")) {
-      return uri.replace("http://", "https://");
-    } else if (uri.startsWith("https://")) {
-      return uri.replace("https://", "http://");
-    }
-    logger.warn("URI scheme was neither http nor https");
-    return uri;
   }
 }
