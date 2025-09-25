@@ -89,4 +89,22 @@ public class ScicatServiceMock implements ScicatService {
   public void setAuthenticated(boolean b) {
     isAuthenticated = b;
   }
+
+  @Override
+  public RestResponse<Void> myself(String accessToken) {
+    if (isAuthenticated) {
+      return RestResponse.ok();
+    } else {
+      return RestResponse.status(Status.UNAUTHORIZED);
+    }
+  }
+
+  @Override
+  public RestResponse<Void> userInfos(String accessToken) {
+    if (isAuthenticated) {
+      return RestResponse.ok();
+    } else {
+      return RestResponse.status(Status.UNAUTHORIZED);
+    }
+  }
 }
