@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Model;
@@ -85,7 +86,8 @@ public class RoCrateImporter {
         listResourcesOfType(
             SchemaDO.MediaObject, r -> r.getURI() != null && r.getURI().startsWith("file:///")));
 
-    List<URI> extractedFiles = this.crate.listFiles().stream().map(Path::toUri).toList();
+    Set<URI> extractedFiles =
+        this.crate.listFiles().stream().map(Path::toUri).collect(Collectors.toSet());
     List<MissingDataError> errors = new ArrayList<>();
     referencedDatafiles.forEach(
         r -> {

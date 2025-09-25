@@ -138,9 +138,6 @@ public class RoCrate implements AutoCloseable {
   }
 
   private void parseMetadataDescriptor(InputStream document) throws RiotException {
-    // if (!base.endsWith("/")) {
-    //   base = Path.of(base.toString() + "/");
-    // }
     model =
         RDFParser.create()
             .source(document)
