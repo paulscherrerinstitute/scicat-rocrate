@@ -1,6 +1,8 @@
 {
 	"name": "Java",
-	"image": "mcr.microsoft.com/devcontainers/java:1-21-bullseye",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
 	"runArgs": [ "--network=host" ],
 	"updateRemoteUserUID": true,
 	"mounts": [
@@ -11,17 +13,7 @@
 		}
 	],
 	"features": {
-		"ghcr.io/devcontainers/features/java:1": {
-			"version": "21",
-			"installMaven": "true",
-			"installGradle": "false"
-		},
-		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": { },
-		"ghcr.io/devcontainers-extra/features/quarkus-sdkman:2": {
-			"jdkVersion": "21"
-		},
-		"ghcr.io/devcontainers-extra/features/pre-commit:2": { },
-		"ghcr.io/devcontainers/features/node:1": { }
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": { }
 	},
 	"customizations": {
 		"vscode": {
