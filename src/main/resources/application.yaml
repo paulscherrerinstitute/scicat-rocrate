@@ -1,0 +1,35 @@
+quarkus:
+  container-image:
+    build: true
+    registry: ghcr.io
+    group: paulscherrerinstitute
+    name: scicat-rocrate
+    tag: ${quarkus.application.version:latest}
+  log:
+    level: INFO
+  http:
+    root-path: /api/v1
+  rest-client:
+    logging:
+      scope: request-response
+    scicat-api:
+      url: http://backend.localhost/api/v3
+  smallrye-openapi:
+    path: /openapi-specs
+  smallrye-health:
+    openapi:
+      included: true
+    root-path: /api/v1/health
+  swagger-ui:
+    path: /explorer
+    always-include: true
+
+titanium:
+  jsonld:
+    cache:
+      size: 10
+
+scicat:
+  client:
+    use:
+      bearer: true
