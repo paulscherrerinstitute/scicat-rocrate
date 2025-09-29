@@ -13,12 +13,6 @@
         "clean": true
       }
     ],
-    [
-      "@semantic-release/github",
-      {
-        "successComment": false,
-        "failTitle": false
-      }
-    ]
+    "@semantic-release/github"
   ]
 }
