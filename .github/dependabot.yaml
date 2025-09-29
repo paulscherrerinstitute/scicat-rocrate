@@ -16,3 +16,11 @@ updates:
    directory: "/src/main/docker/"
    schedule:
      interval: daily
+ - package-ecosystem: "npm"
+   directory: "/.github/semantic-release"
+   schedule:
+     interval: daily
+   commit-message:
+     prefix: chore
+     prefix-development: chore
+     include: scope
