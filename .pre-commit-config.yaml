@@ -12,6 +12,7 @@ repos:
     hooks:
       - id: check_format
         name: Check Java source file format
+        files: ".*\\.java"
         language: system
         entry: ./mvnw spotless:check
         pass_filenames: false
