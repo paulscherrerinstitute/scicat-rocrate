@@ -1,8 +1,10 @@
 package ch.psi.ord.api;
 
 import ch.psi.ord.core.DoiUtils;
+import ch.psi.ord.core.RoCrate;
 import ch.psi.ord.core.RoCrateExporter;
 import ch.psi.ord.core.RoCrateImporter;
+import ch.psi.ord.model.NoMetadataDescriptor;
 import ch.psi.ord.model.Publication;
 import ch.psi.ord.model.ValidationReport;
 import ch.psi.scicat.client.ScicatClient;
@@ -23,17 +25,16 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFParser;
+import java.util.zip.ZipException;
+import java.util.zip.ZipInputStream;
 import org.apache.jena.riot.RiotException;
-import org.apache.jena.riot.lang.LangJSONLD11;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
@@ -136,43 +137,90 @@ public class RoCrateController {
 
   @POST
   @Path("/validate")
-  @Consumes({ExtraMediaType.APPLICATION_JSONLD, ExtraMediaType.APPLICATION_ZIP})
+  @Consumes(ExtraMediaType.APPLICATION_JSONLD)
   @Produces(MediaType.APPLICATION_JSON)
-  public Response validateRoCrate(InputStream body) {
-    Optional<Response> response = isBodyEmpty(body);
-    if (response.isPresent()) {
-      return response.get();
+  public Response validateCrate(InputStream body) {
+    try (RoCrate crate = new RoCrate(body)) {
+      importer.loadCrate(crate);
+      return Response.ok(importer.validate()).build();
+    } catch (RiotException e) {
+      return Response.status(Status.BAD_REQUEST)
+          .entity("Failed to parse the metadata descriptor")
+          .build();
     }
+  }
 
-    Optional<Model> model = parseJsonLd(body);
-    if (model.isEmpty()) {
-      return Response.status(Status.BAD_REQUEST).build();
+  @POST
+  @Path("/validate")
+  @Consumes(ExtraMediaType.APPLICATION_ZIP)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response validateZippedCrate(InputStream body) {
+    try (ZipInputStream zip = new ZipInputStream(body);
+        RoCrate crate = new RoCrate(zip)) {
+      importer.loadCrate(crate);
+      return Response.ok(importer.validate()).build();
+    } catch (RiotException e) {
+      return Response.status(Status.BAD_REQUEST)
+          .entity("Failed to parse the metadata descriptor")
+          .build();
+    } catch (ZipException e) {
+      return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+    } catch (FileNotFoundException e) {
+      return Response.status(Status.BAD_REQUEST).entity(new NoMetadataDescriptor()).build();
+    } catch (IOException e) {
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
-    importer.loadModel(model.get());
-
-    ValidationReport report = importer.validate();
-
-    return Response.ok(report).build();
   }
 
   @POST
   @Path("/import")
   @Consumes(ExtraMediaType.APPLICATION_JSONLD)
   @Produces(MediaType.APPLICATION_JSON)
-  public Response importRoCrate(
+  public Response importCrate(
       @HeaderParam(value = "scicat-token") String scicatToken, InputStream body) {
-    Optional<Response> response = isBodyEmpty(body);
-    if (response.isPresent()) {
-      return response.get();
+    if (!scicatClient.checkTokenValidity(scicatToken)) {
+      return Response.status(Status.UNAUTHORIZED).build();
     }
 
-    Optional<Model> model = parseJsonLd(body);
-    if (model.isEmpty()) {
-      return Response.status(Status.BAD_REQUEST).build();
+    try (RoCrate crate = new RoCrate(body)) {
+      importer.loadCrate(crate);
+      return doImport(importer.validate(), scicatToken);
+    } catch (RiotException e) {
+      return Response.status(Status.BAD_REQUEST)
+          .entity("Failed to parse the metadata descriptor")
+          .build();
+    }
+  }
+
+  @POST
+  @Path("/import")
+  @Consumes(ExtraMediaType.APPLICATION_ZIP)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response importZippedCrate(
+      @HeaderParam(value = "scicat-token") String scicatToken, InputStream body) {
+    if (!scicatClient.checkTokenValidity(scicatToken)) {
+      return Response.status(Status.UNAUTHORIZED).build();
     }
 
-    importer.loadModel(model.get());
-    ValidationReport report = importer.validate();
+    try (ZipInputStream zip = new ZipInputStream(body);
+        RoCrate crate = new RoCrate(zip)) {
+      importer.loadCrate(crate);
+      return doImport(importer.validate(), scicatToken);
+    } catch (RiotException e) {
+      return Response.status(Status.BAD_REQUEST)
+          .entity("Failed to parse the metadata descriptor")
+          .build();
+    } catch (ZipException e) {
+      return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+    } catch (FileNotFoundException e) {
+      return Response.status(Status.BAD_REQUEST).entity(new NoMetadataDescriptor()).build();
+    } catch (IOException e) {
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+  }
+
+  // TODO: move to RoCrateImporter in another PR
+  private Response doImport(ValidationReport report, String scicatToken) {
     if (!report.isValid()) {
       return Response.status(Status.BAD_REQUEST).entity(report).build();
     }
@@ -184,7 +232,6 @@ public class RoCrateController {
           .forEach(
               entity -> {
                 if (entity.object() instanceof Publication publication) {
-                  // TODO: create the objects
                   CreatePublishedDataDto dto =
                       modelMapper.map(publication, CreatePublishedDataDto.class);
                   RestResponse<PublishedData> created =
@@ -206,36 +253,5 @@ public class RoCrateController {
     return Response.status(importMap.isEmpty() ? Status.OK : Status.CREATED)
         .entity(importMap)
         .build();
-  }
-
-  private Optional<Response> isBodyEmpty(InputStream body) {
-    try {
-      if (body.available() == 0) return Optional.of(Response.status(Status.BAD_REQUEST).build());
-    } catch (IOException e) {
-      return Optional.of(Response.serverError().build());
-    }
-
-    return Optional.empty();
-  }
-
-  private Optional<Model> parseJsonLd(InputStream document) {
-    try {
-      Model model =
-          RDFParser.create()
-              .source(document)
-              .lang(Lang.JSONLD11)
-              .base("file:///")
-              .context(
-                  org.apache.jena.sparql.util.Context.create()
-                      .set(LangJSONLD11.JSONLD_OPTIONS, jsonLdOptions))
-              .build()
-              .toModel();
-
-      return Optional.of(model);
-    } catch (RiotException e) {
-      logger.error("", e);
-    }
-
-    return Optional.empty();
   }
 }
