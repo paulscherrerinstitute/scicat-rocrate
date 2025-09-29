@@ -9,10 +9,18 @@ updates:
    schedule:
      interval: daily
    commit-message:
-     prefix: fix
+     prefix: chore
      prefix-development: chore
      include: scope
  - package-ecosystem: "docker"
    directory: "/src/main/docker/"
    schedule:
      interval: daily
+ - package-ecosystem: "npm"
+   directory: "/.github/semantic-release"
+   schedule:
+     interval: daily
+   commit-message:
+     prefix: chore
+     prefix-development: chore
+     include: scope
