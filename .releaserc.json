@@ -10,7 +10,8 @@
       "@terrestris/maven-semantic-release",
       {
         "mavenTarget": "deploy",
-        "clean": true
+        "clean": true,
+        "mvnw": true
       }
     ],
     "@semantic-release/github"
