@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -29,8 +30,14 @@ public class ScicatClient {
 
   public boolean isHealthy() {
     try {
-      RestResponse<Void> response = scicatService.isHealthy();
-      return response.getStatus() == 200;
+      if (preprendBearer) {
+        RestResponse<Void> response = scicatService.isHealthy();
+        return response.getStatus() == 200;
+      } else {
+        RestResponse<JsonObject> response = scicatService.root();
+        response.getEntity().containsKey("started");
+        return response.getStatus() == 200;
+      }
     } catch (WebApplicationException e) {
       return false;
     }
