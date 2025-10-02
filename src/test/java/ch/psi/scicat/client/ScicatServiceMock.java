@@ -4,6 +4,7 @@ import ch.psi.scicat.TestData;
 import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
+import jakarta.json.JsonObject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -23,6 +24,13 @@ public class ScicatServiceMock implements ScicatService {
       List.of(TestData.dataset1, TestData.dataset2, TestData.dataset3);
   private boolean isHealthy = true;
   private boolean isAuthenticated = false;
+
+  @Override
+  public RestResponse<JsonObject> root() {
+    if (isHealthy) return RestResponse.ok();
+
+    throw new WebApplicationException("Mocked unhealthy SciCat");
+  }
 
   @Override
   public RestResponse<Void> isHealthy() {

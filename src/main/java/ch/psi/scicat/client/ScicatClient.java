@@ -35,7 +35,6 @@ public class ScicatClient {
         return response.getStatus() == 200;
       } else {
         RestResponse<JsonObject> response = scicatService.root();
-        response.getEntity().containsKey("started");
         return response.getStatus() == 200;
       }
     } catch (WebApplicationException e) {
