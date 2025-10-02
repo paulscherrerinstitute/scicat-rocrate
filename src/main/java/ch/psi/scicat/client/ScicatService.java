@@ -3,6 +3,7 @@ package ch.psi.scicat.client;
 import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
+import jakarta.json.JsonObject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
@@ -13,30 +14,35 @@ import org.jboss.resteasy.reactive.RestResponse;
 
 @RegisterRestClient(configKey = "scicat-api")
 public interface ScicatService {
+  /** Only available on legacy backend */
   @GET
-  @Path("health")
+  @Path("/")
+  RestResponse<JsonObject> root();
+
+  @GET
+  @Path("/api/v3/health")
   RestResponse<Void> isHealthy();
 
   /** Only available on backend-next */
   @GET
-  @Path("users/my/self")
+  @Path("/api/v3/users/my/self")
   RestResponse<Void> myself(@HeaderParam("Authorization") String accessToken);
 
   /** Only available on legacy backend */
   @GET
-  @Path("Users/userInfos")
+  @Path("/api/v3/Users/userInfos")
   RestResponse<Void> userInfos(@HeaderParam("Authorization") String accessToken);
 
   @GET
-  @Path("publisheddata/{doi}")
+  @Path("/api/v3/publisheddata/{doi}")
   RestResponse<PublishedData> getPublishedDataById(@PathParam("doi") String doi);
 
   @POST
-  @Path("publisheddata")
+  @Path("/api/v3/publisheddata")
   RestResponse<PublishedData> createPublishedData(
       @HeaderParam("Authorization") String accessToken, CreatePublishedDataDto publishedData);
 
   @GET
-  @Path("datasets/{pid}")
+  @Path("/api/v3/datasets/{pid}")
   RestResponse<Dataset> getDatasetByPid(@PathParam("pid") String pid);
 }

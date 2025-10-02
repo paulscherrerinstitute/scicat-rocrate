@@ -13,7 +13,7 @@ quarkus:
     logging:
       scope: request-response
     scicat-api:
-      url: http://backend.localhost/api/v3
+      url: http://backend.localhost
   smallrye-openapi:
     path: /openapi-specs
   smallrye-health:
