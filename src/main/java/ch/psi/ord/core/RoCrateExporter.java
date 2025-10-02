@@ -28,7 +28,6 @@ import org.jboss.resteasy.reactive.ClientWebApplicationException;
 public class RoCrateExporter {
   private RoCrate crate = new RoCrate();
   private RoCrateMetadataContext context = new RoCrateMetadataContext(StaticEntities.CONTEXT_NODE);
-  private boolean hasPublicationSchema = false;
 
   @Inject ScicatClient scicatClient;
 
@@ -40,17 +39,8 @@ public class RoCrateExporter {
     crate.setMetadataContext(context);
   }
 
-  private String formatScicatId(String s) {
-    return String.format("scicat:%s", s);
-  }
-
   // FIXME: Use ExceptionMapper
   public void addPublications(List<String> dois) throws ClientWebApplicationException {
-    if (!hasPublicationSchema) {
-      hasPublicationSchema = true;
-      StaticEntities.PUBLISHEDDATA_SCHEMA.forEach(entity -> crate.addDataEntity(entity));
-    }
-
     for (int i = 0; i < dois.size(); i++) {
       var res = scicatClient.getPublishedDataById(dois.get(i));
       // NOTE: we make the first DOI in the list the root of the RO-Crate
@@ -70,7 +60,7 @@ public class RoCrateExporter {
 
     DataEntityBuilder publicationBuilder = new DataEntityBuilder();
     publicationBuilder
-        .addTypes(List.of(formatScicatId("PublishedData"), SchemaDO.CreativeWork.getLocalName()))
+        .addType(SchemaDO.CreativeWork.getLocalName())
         .setId(DoiUtils.buildStandardUrl(publication.getDoi()))
         .addProperty(SchemaDO.identifier.getLocalName(), publication.getDoi());
     publication
@@ -118,16 +108,6 @@ public class RoCrateExporter {
 
               publicationBuilder.addIdProperty(SchemaDO.hasPart.getLocalName(), datasetUrl);
             });
-    publication
-        .getRelatedPublications()
-        .forEach(
-            p -> {
-              publicationBuilder.addProperty(formatScicatId("relatedPublications"), p);
-            });
-    publicationBuilder
-        .addProperty(formatScicatId("numberOfFiles"), (int) publication.getNumberOfFiles())
-        .addProperty(formatScicatId("sizeOfArchive"), (int) publication.getSizeOfArchive())
-        .addProperty(formatScicatId("scicatUser"), publication.getScicatUser());
 
     DataEntity publicationEntity = publicationBuilder.build();
     crate.addDataEntity(publicationEntity);

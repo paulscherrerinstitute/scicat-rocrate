@@ -4,10 +4,6 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.kit.datamanager.ro_crate.entities.contextual.ContextualEntity;
 import edu.kit.datamanager.ro_crate.entities.contextual.ContextualEntity.ContextualEntityBuilder;
-import edu.kit.datamanager.ro_crate.entities.data.DataEntity;
-import edu.kit.datamanager.ro_crate.entities.data.DataEntity.DataEntityBuilder;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDFS;
@@ -18,15 +14,11 @@ public class StaticEntities {
   public static ObjectNode CONTEXT_NODE = JsonNodeFactory.instance.objectNode();
   public static final ContextualEntity LICENSE;
   public static final ContextualEntity PSI;
-  public static final Collection<DataEntity> PUBLISHEDDATA_SCHEMA = new ArrayList<>();
-  public static final String DATACITE_URL =
-      "https://schema.datacite.org/meta/kernel-4/metadata.xsd#";
 
   static {
     CONTEXT_NODE.put("xsd", XSD.NS);
     CONTEXT_NODE.put("owl", OWL.NS);
     CONTEXT_NODE.put("rdfs", RDFS.uri);
-    CONTEXT_NODE.put("scicat", "_:scicat");
     CONTEXT_NODE.put("conformsTo", "http://purl.org/dc/terms/conformsTo");
 
     List.of(SchemaDO.Dataset, SchemaDO.CreativeWork, SchemaDO.Person, SchemaDO.Organization)
@@ -76,47 +68,5 @@ public class StaticEntities {
         .addType(SchemaDO.Organization.getLocalName())
         .addProperty(SchemaDO.name.getLocalName(), "Paul Scherrer Institute");
     PSI = psiBuilder.build();
-  }
-
-  static {
-    DataEntityBuilder builder =
-        new DataEntityBuilder()
-            .setId("scicat:PublishedData")
-            .addType("rdfs:Class")
-            .addIdProperty("owl:equivalentClass", SchemaDO.CreativeWork.getURI());
-    PUBLISHEDDATA_SCHEMA.add(builder.build());
-
-    builder =
-        new DataEntityBuilder()
-            .setId("scicat:relatedPublications")
-            .addType("rdfs:Property")
-            .addIdProperty(SchemaDO.rangeIncludes.getLocalName(), "xsd:integer")
-            .addIdProperty(SchemaDO.domainIncludes.getLocalName(), "scicat:PublishedData")
-            .addIdProperty("owl:equivalentProperty", DATACITE_URL + "relatedIdentifer");
-    PUBLISHEDDATA_SCHEMA.add(builder.build());
-
-    builder =
-        new DataEntityBuilder()
-            .setId("scicat:numberOfFiles")
-            .addType("rdfs:Property")
-            .addIdProperty(SchemaDO.rangeIncludes.getLocalName(), "xsd:integer")
-            .addIdProperty(SchemaDO.domainIncludes.getLocalName(), "scicat:PublishedData");
-    PUBLISHEDDATA_SCHEMA.add(builder.build());
-
-    builder =
-        new DataEntityBuilder()
-            .setId("scicat:sizeOfArchive")
-            .addType("rdfs:Property")
-            .addIdProperty(SchemaDO.rangeIncludes.getLocalName(), "xsd:integer")
-            .addIdProperty(SchemaDO.domainIncludes.getLocalName(), "scicat:PublishedData");
-    PUBLISHEDDATA_SCHEMA.add(builder.build());
-
-    builder =
-        new DataEntityBuilder()
-            .setId("scicat:scicatUser")
-            .addType("rdfs:Property")
-            .addIdProperty(SchemaDO.rangeIncludes.getLocalName(), "xsd:string")
-            .addIdProperty(SchemaDO.domainIncludes.getLocalName(), "scicat:PublishedData");
-    PUBLISHEDDATA_SCHEMA.add(builder.build());
   }
 }
