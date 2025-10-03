@@ -32,3 +32,33 @@ services:
       EXPRESS_SESSION_SECRET: secret
     ports:
       - 3000:3000
+    profiles:
+      # Hack to enable by default but disable on legacy
+      - ''
+
+  backend-legacy:
+    image: ghcr.io/scicatproject/backend:latest
+    depends_on:
+      mongodb:
+        condition: service_started
+    healthcheck:
+      test: wget --spider -Y off 'http://127.0.0.1:3000'
+      start_period: 5s
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: on-failure
+    volumes:
+      # This is required by Docker outside of Docker, the value is set in devcontainer.json
+      - ${HOST_WORKSPACE_DIR:-.}/config-devservices/legacy/config.local.js:/home/node/app/server/config.local.js
+      - ${HOST_WORKSPACE_DIR:-.}/config-devservices/legacy/datasources.json:/home/node/app/server/datasources.json
+      - ${HOST_WORKSPACE_DIR:-.}/config-devservices/legacy/providers.json:/home/node/app/server/providers.json
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/scicat
+      SITE: FACILITY
+      JWT_SECRET: secret
+      EXPRESS_SESSION_SECRET: secret
+    ports:
+      - 3000:3000
+    profiles:
+      - legacy
