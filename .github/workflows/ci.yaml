@@ -55,6 +55,9 @@ jobs:
     needs: check_changes
     if: needs.check_changes.outputs.runTests == 'true'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        profile: ['', 'legacy']
     steps:
       - uses: actions/checkout@v4
 
@@ -64,7 +67,7 @@ jobs:
           push: never
           imageName: ${{ env.devImage }}
           cacheFrom: ${{ env.devImage }}
-          runCmd: ./mvnw test
+          runCmd: ./mvnw test -Dquarkus.compose.devservices.profiles=${{ matrix.profile }}
 
   actionlint:
     runs-on: ubuntu-latest
