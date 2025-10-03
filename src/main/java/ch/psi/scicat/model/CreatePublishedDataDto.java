@@ -10,9 +10,6 @@ import lombok.experimental.Accessors;
 @Getter
 @Setter
 public class CreatePublishedDataDto {
-  @JsonProperty(value = "_id")
-  private String _id;
-
   @JsonProperty(value = "doi", required = true)
   private String doi;
 

@@ -13,7 +13,7 @@ quarkus:
     logging:
       scope: request-response
     scicat-api:
-      url: http://backend.localhost
+      url: http://backend.localhost:3000/api/v3
   smallrye-openapi:
     path: /openapi-specs
   smallrye-health:
@@ -23,6 +23,9 @@ quarkus:
   swagger-ui:
     path: /explorer
     always-include: true
+  compose:
+    devservices:
+      reuse-project-for-tests: true
 
 titanium:
   jsonld:

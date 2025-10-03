@@ -1,0 +1,8 @@
+[
+    {
+        "username": "rocrate-ingestor",
+        "password": "rocrate-ingestor",
+        "email": "rocrate-ingestor@psi.ch",
+        "role": "ingestor"
+    }
+]
