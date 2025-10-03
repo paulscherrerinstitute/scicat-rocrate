@@ -5,6 +5,9 @@
 	},
 	"runArgs": [ "--network=host" ],
 	"updateRemoteUserUID": true,
+	"remoteEnv": {
+		"HOST_WORKSPACE_DIR": "${localWorkspaceFolder}"
+	},
 	"mounts": [
 		{
 			"source": "devcontainer-maven-cache-${containerWorkspaceFolderBasename}",
