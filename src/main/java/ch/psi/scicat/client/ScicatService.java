@@ -1,5 +1,7 @@
 package ch.psi.scicat.client;
 
+import ch.psi.scicat.model.CountResponse;
+import ch.psi.scicat.model.CreateDatasetDto;
 import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
@@ -9,6 +11,7 @@ import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.resteasy.reactive.RestResponse;
 
@@ -33,9 +36,19 @@ public interface ScicatService {
   @Path("/api/v3/Users/userInfos")
   RestResponse<Void> userInfos(@HeaderParam("Authorization") String accessToken);
 
+  @POST
+  @Path("/api/v3/datasets")
+  RestResponse<Dataset> createDataset(
+      @HeaderParam("Authorization") String accessToken, CreateDatasetDto datasetDto);
+
   @GET
   @Path("/api/v3/publisheddata/{doi}")
   RestResponse<PublishedData> getPublishedDataById(@PathParam("doi") String doi);
+
+  @GET
+  @Path("/api/v3/publisheddata/count")
+  RestResponse<CountResponse> countPublishedData(
+      @QueryParam("filter") String filter, @HeaderParam("Authorization") String accessToken);
 
   @POST
   @Path("/api/v3/publisheddata")

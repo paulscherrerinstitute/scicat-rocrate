@@ -1,6 +1,8 @@
 package ch.psi.scicat.client;
 
 import ch.psi.scicat.TestData;
+import ch.psi.scicat.model.CountResponse;
+import ch.psi.scicat.model.CreateDatasetDto;
 import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
@@ -13,6 +15,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import lombok.Setter;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.RestResponse.Status;
 import org.modelmapper.ModelMapper;
@@ -22,8 +26,9 @@ public class ScicatServiceMock implements ScicatService {
   private List<PublishedData> publishedDataCollection = new ArrayList<>();
   private List<Dataset> datasetCollection =
       List.of(TestData.dataset1, TestData.dataset2, TestData.dataset3);
-  private boolean isHealthy = true;
-  private boolean isAuthenticated = false;
+  @Setter private boolean isHealthy = true;
+  @Setter private boolean isAuthenticated = false;
+  @Setter private int publicationCount = 0;
 
   @Override
   public RestResponse<JsonObject> root() {
@@ -90,14 +95,6 @@ public class ScicatServiceMock implements ScicatService {
         Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON).build());
   }
 
-  public void setHealthy(boolean b) {
-    isHealthy = b;
-  }
-
-  public void setAuthenticated(boolean b) {
-    isAuthenticated = b;
-  }
-
   @Override
   public RestResponse<Void> myself(String accessToken) {
     if (isAuthenticated) {
@@ -114,5 +111,15 @@ public class ScicatServiceMock implements ScicatService {
     } else {
       return RestResponse.status(Status.UNAUTHORIZED);
     }
+  }
+
+  @Override
+  public RestResponse<Dataset> createDataset(String accessToken, CreateDatasetDto datasetDto) {
+    return RestResponse.status(Status.CREATED, new Dataset().setPid(UUID.randomUUID().toString()));
+  }
+
+  @Override
+  public RestResponse<CountResponse> countPublishedData(String filter, String accessToken) {
+    return RestResponse.ok(new CountResponse().setCount(publicationCount));
   }
 }

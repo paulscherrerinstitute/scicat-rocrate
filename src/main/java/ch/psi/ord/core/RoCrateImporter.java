@@ -8,15 +8,29 @@ import ch.psi.ord.model.ValidationReport.Entity;
 import ch.psi.rdf.RdfDeserializer;
 import ch.psi.rdf.RdfDeserializer.DeserializationReport;
 import ch.psi.rdf.RdfUtils;
+import ch.psi.scicat.client.ScicatClient;
+import ch.psi.scicat.model.CountResponse;
+import ch.psi.scicat.model.CreateDatasetDto;
+import ch.psi.scicat.model.CreatePublishedDataDto;
+import ch.psi.scicat.model.Dataset;
+import ch.psi.scicat.model.DatasetType;
+import ch.psi.scicat.model.PublishedData;
 import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 import java.net.URI;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -27,16 +41,22 @@ import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ReasonerRegistry;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.SchemaDO;
+import org.jboss.resteasy.reactive.RestResponse;
+import org.modelmapper.ModelMapper;
 
 @RequestScoped
 @Slf4j
 public class RoCrateImporter {
-
   private RoCrate crate;
   private Model model = ModelFactory.createOntologyModel();
   private Reasoner reasoner = ReasonerRegistry.getOWLReasoner();
   private InfModel inferredModel = ModelFactory.createInfModel(reasoner, model);
   private RdfDeserializer deserializer = new RdfDeserializer();
+  @Inject private ModelMapper modelMapper;
+  @Inject private ScicatClient scicatClient;
+
+  private static String publicationExistsFilter =
+      "{\"relatedPublications\": {\"inq\": [\"%s (IsIdenticalTo)\"]}}";
 
   public void loadCrate(RoCrate crate) {
     this.crate = crate;
@@ -48,6 +68,55 @@ public class RoCrateImporter {
       this.model = model;
       inferredModel = ModelFactory.createInfModel(reasoner, this.model);
     }
+  }
+
+  public Map<String, String> importCrate(ValidationReport report, String scicatToken) {
+    Map<String, String> importMap = new HashMap<>();
+    for (var entity : report.getEntities()) {
+      if (entity.object() instanceof Publication publication) {
+        importPublication(importMap, publication, scicatToken);
+      } else {
+        throw new NotImplementedException("Only Publications are supported for now");
+      }
+    }
+
+    return importMap;
+  }
+
+  public void importPublication(
+      Map<String, String> importMap, Publication publication, String scicatToken) {
+    CreatePublishedDataDto dto = modelMapper.map(publication, CreatePublishedDataDto.class);
+    CountResponse count =
+        scicatClient
+            .countPublishedData(
+                String.format(
+                    publicationExistsFilter,
+                    DoiUtils.buildStandardUrl(publication.getIdentifier())),
+                scicatToken)
+            .getEntity();
+
+    if (count.getCount() > 0) {
+      throw new WebApplicationException(
+          "This Publication has already been imported", Status.CONFLICT);
+    }
+
+    if (dto.getPidArray().isEmpty()) {
+      CreateDatasetDto datasetDto =
+          new CreateDatasetDto()
+              .setOwnerGroup("ingestor")
+              .setOwner(String.join("; ", dto.getCreator()))
+              .setContactEmail("rocrate-ingestor@psi.ch")
+              .setSourceFolder("/")
+              .setCreationTime(Instant.now())
+              .setType(DatasetType.DERIVED);
+      RestResponse<Dataset> createdDataset = scicatClient.createDataset(scicatToken, datasetDto);
+
+      dto.getPidArray().add(createdDataset.getEntity().getPid());
+      importMap.put(publication.getIdentifier(), createdDataset.getEntity().getPid());
+    }
+
+    RestResponse<PublishedData> created = scicatClient.createPublishedData(dto, scicatToken);
+    importMap.put(publication.getIdentifier(), created.getEntity().getDoi());
   }
 
   public ValidationReport validate() {
