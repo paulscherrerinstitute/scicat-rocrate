@@ -116,6 +116,8 @@ public class RoCrateControllerTest {
           .post("/ro-crate/import")
           .then()
           .statusCode(409);
+
+      scicatServiceMock.setPublicationCount(0);
     }
   }
 

@@ -5,9 +5,11 @@ import ch.psi.scicat.model.CreateDatasetDto;
 import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
+import ch.psi.scicat.model.UpdatePublishedDataDto;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -44,6 +46,13 @@ public interface ScicatService {
   @GET
   @Path("/api/v3/publisheddata/{doi}")
   RestResponse<PublishedData> getPublishedDataById(@PathParam("doi") String doi);
+
+  @PATCH
+  @Path("/api/v3/publisheddata/{doi}")
+  RestResponse<PublishedData> updatePublishedData(
+      @PathParam("doi") String doi,
+      @QueryParam("access_token") String accessToken,
+      UpdatePublishedDataDto dto);
 
   @GET
   @Path("/api/v3/publisheddata/count")
