@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum PublishedDataStatus {
   PENDING_REGISTRATION("pending_registration"),
-  REGISTERED("REGISTERED");
+  REGISTERED("registered");
 
   private final String value;
 
