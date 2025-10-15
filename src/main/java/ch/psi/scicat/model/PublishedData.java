@@ -50,7 +50,10 @@ public class PublishedData {
 
   List<String> authors;
   String registeredTime;
-  String status;
+
+  @JsonProperty("status")
+  PublishedDataStatus status;
+
   String scicatUser;
   String thumbnail;
   List<String> relatedPublications;

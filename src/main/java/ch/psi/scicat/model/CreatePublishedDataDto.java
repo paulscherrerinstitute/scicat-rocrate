@@ -1,19 +1,19 @@
 package ch.psi.scicat.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import lombok.experimental.Accessors;
 
-@Getter
-@Setter
+@Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CreatePublishedDataDto {
   @JsonProperty(value = "_id")
   private String _id;
 
-  @JsonProperty(value = "doi", required = true)
+  @JsonProperty(value = "doi")
   private String doi;
 
   private String affiliation;
@@ -47,11 +47,24 @@ public class CreatePublishedDataDto {
   @JsonProperty(value = "pidArray", required = true)
   private List<String> pidArray = new ArrayList<>();
 
+  @JsonProperty("authors")
   private List<String> authors;
+
+  @JsonProperty("registeredTime")
   private String registeredTime;
+
+  @JsonProperty("status")
   private String status;
+
+  @JsonProperty("scicatUser")
   private String scicatUser;
+
+  @JsonProperty("thumbnail")
   private String thumbnail;
+
+  @JsonProperty("relatedPublications")
   private List<String> relatedPublications;
+
+  @JsonProperty("downloadLink")
   private String downloadLink;
 }
