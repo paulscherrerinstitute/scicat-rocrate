@@ -103,9 +103,9 @@ public class ScicatClient {
   }
 
   public RestResponse<CountResponse> countPublishedData(
-      @QueryParam("filter") String filter, @HeaderParam("Authorization") String accessToken) {
+      @QueryParam("where") String where, @HeaderParam("Authorization") String accessToken) {
     RestResponse<CountResponse> clientResponse =
-        scicatService.countPublishedData(filter, accessToken);
+        scicatService.countPublishedData(where, accessToken);
     return RestResponse.fromResponse(clientResponse);
   }
 
