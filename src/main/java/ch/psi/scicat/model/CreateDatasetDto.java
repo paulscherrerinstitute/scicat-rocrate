@@ -25,4 +25,7 @@ public class CreateDatasetDto {
 
   @JsonProperty("ownerGroup")
   String ownerGroup;
+
+  @JsonProperty("isPublished")
+  boolean isPublished;
 }

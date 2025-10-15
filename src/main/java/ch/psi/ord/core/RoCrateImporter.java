@@ -110,7 +110,8 @@ public class RoCrateImporter {
               .setContactEmail("rocrate-ingestor@psi.ch")
               .setSourceFolder("/")
               .setCreationTime(Instant.now())
-              .setType(DatasetType.DERIVED);
+              .setType(DatasetType.DERIVED)
+              .setPublished(true);
       RestResponse<Dataset> createdDataset = scicatClient.createDataset(scicatToken, datasetDto);
 
       dto.getPidArray().add(createdDataset.getEntity().getPid());
