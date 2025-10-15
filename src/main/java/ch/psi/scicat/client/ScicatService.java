@@ -57,7 +57,7 @@ public interface ScicatService {
   @GET
   @Path("/api/v3/publisheddata/count")
   RestResponse<CountResponse> countPublishedData(
-      @QueryParam("filter") String filter, @HeaderParam("Authorization") String accessToken);
+      @QueryParam("where") String where, @HeaderParam("Authorization") String accessToken);
 
   @POST
   @Path("/api/v3/publisheddata")
