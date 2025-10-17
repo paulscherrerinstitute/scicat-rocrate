@@ -56,7 +56,7 @@ public class RoCrateImporter {
   @Inject private ModelMapper modelMapper;
   @Inject private ScicatClient scicatClient;
 
-  private static String publicationExistsFilter =
+  public static String publicationExistsFilter =
       "{\"relatedPublications\": {\"inq\": [\"%s (IsIdenticalTo)\"]}}";
 
   public void loadCrate(RoCrate crate) {
