@@ -1,7 +1,9 @@
 package ch.psi.scicat.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -49,7 +51,10 @@ public class PublishedData {
   List<String> pidArray = new ArrayList<>();
 
   List<String> authors;
-  String registeredTime;
+
+  @JsonProperty("registeredTime")
+  @JsonFormat(shape = JsonFormat.Shape.STRING)
+  Instant registeredTime;
 
   @JsonProperty("status")
   PublishedDataStatus status;

@@ -48,10 +48,15 @@ public interface ScicatService {
 
   @POST
   @Path("/api/v3/publisheddata/{doi}/resync")
-  RestResponse<PublishedData> updatePublishedData(
+  RestResponse<PublishedData> resyncPublishedData(
       @PathParam("doi") String doi,
       @QueryParam("access_token") String accessToken,
       PublishedData publishedData);
+
+  @POST
+  @Path("/api/v3/publisheddata/{doi}/register")
+  RestResponse<PublishedData> registerPublishedData(
+      @PathParam("doi") String doi, @HeaderParam("Authorization") String accessToken);
 
   @GET
   @Path("/api/v3/publisheddata/count")

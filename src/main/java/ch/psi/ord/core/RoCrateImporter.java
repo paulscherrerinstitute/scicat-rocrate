@@ -15,7 +15,6 @@ import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.DatasetType;
 import ch.psi.scicat.model.PublishedData;
-import ch.psi.scicat.model.PublishedDataStatus;
 import ch.psi.scicat.model.UserInfos;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -111,10 +110,7 @@ public class RoCrateImporter {
     }
 
     RestResponse<PublishedData> created = scicatClient.createPublishedData(dto, scicatToken);
-    scicatClient.updatePublishedData(
-        created.getEntity().getDoi(),
-        scicatToken,
-        created.getEntity().setStatus(PublishedDataStatus.REGISTERED));
+    scicatClient.registerPublishedData(created.getEntity().getDoi(), scicatToken);
     importMap.put(publication.getIdentifier(), created.getEntity().getDoi());
   }
 

@@ -78,12 +78,17 @@ public class ScicatClient {
     return RestResponse.fromResponse(clientResponse);
   }
 
-  public RestResponse<PublishedData> updatePublishedData(
+  public RestResponse<PublishedData> resyncPublishedData(
       @PathParam("doi") String doi,
       @QueryParam("access_token") String accessToken,
       PublishedData publishedData) {
 
-    return scicatService.updatePublishedData(doi, accessToken, publishedData);
+    return scicatService.resyncPublishedData(doi, accessToken, publishedData);
+  }
+
+  public RestResponse<PublishedData> registerPublishedData(
+      @PathParam("doi") String doi, @HeaderParam("Authorization") String accessToken) {
+    return RestResponse.fromResponse(scicatService.registerPublishedData(doi, accessToken));
   }
 
   public RestResponse<PublishedData> createPublishedData(

@@ -6,6 +6,7 @@ import ch.psi.scicat.model.CreateDatasetDto;
 import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
+import ch.psi.scicat.model.PublishedDataStatus;
 import ch.psi.scicat.model.UserInfos;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.WebApplicationException;
@@ -126,7 +127,7 @@ public class ScicatServiceMock implements ScicatService {
   }
 
   @Override
-  public RestResponse<PublishedData> updatePublishedData(
+  public RestResponse<PublishedData> resyncPublishedData(
       String doi, String accessToken, PublishedData updatedPublishedData) {
     if (!isAuthenticated) {
       return RestResponse.status(Status.UNAUTHORIZED);
@@ -141,5 +142,23 @@ public class ScicatServiceMock implements ScicatService {
     publishedDataCollection.put(updatedPublishedData.getDoi(), updatedPublishedData);
 
     return RestResponse.ok(updatedPublishedData);
+  }
+
+  @Override
+  public RestResponse<PublishedData> registerPublishedData(String doi, String accessToken) {
+    if (!isAuthenticated) {
+      return RestResponse.status(Status.UNAUTHORIZED);
+    }
+
+    PublishedData publishedData = publishedDataCollection.get(doi);
+    if (publishedData == null) {
+      throw new WebApplicationException(
+          Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON).build());
+    }
+
+    publishedData.setStatus(PublishedDataStatus.REGISTERED);
+    publishedData.setRegisteredTime(Instant.now());
+
+    return RestResponse.ok(publishedData);
   }
 }
