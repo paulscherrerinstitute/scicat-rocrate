@@ -15,8 +15,7 @@ import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.DatasetType;
 import ch.psi.scicat.model.PublishedData;
-import ch.psi.scicat.model.PublishedDataStatus;
-import ch.psi.scicat.model.UpdatePublishedDataDto;
+import ch.psi.scicat.model.UserInfos;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -103,15 +102,7 @@ public class RoCrateImporter {
     }
 
     if (dto.getPidArray().isEmpty()) {
-      CreateDatasetDto datasetDto =
-          new CreateDatasetDto()
-              .setOwnerGroup("ingestor")
-              .setOwner(String.join("; ", dto.getCreator()))
-              .setContactEmail("rocrate-ingestor@psi.ch")
-              .setSourceFolder("/")
-              .setCreationTime(Instant.now())
-              .setType(DatasetType.DERIVED)
-              .setPublished(true);
+      CreateDatasetDto datasetDto = createPlaceholderDataset(dto, scicatToken);
       RestResponse<Dataset> createdDataset = scicatClient.createDataset(scicatToken, datasetDto);
 
       dto.getPidArray().add(createdDataset.getEntity().getPid());
@@ -119,11 +110,33 @@ public class RoCrateImporter {
     }
 
     RestResponse<PublishedData> created = scicatClient.createPublishedData(dto, scicatToken);
-    scicatClient.updatePublishedData(
-        created.getEntity().getDoi(),
-        scicatToken,
-        new UpdatePublishedDataDto().setStatus(PublishedDataStatus.REGISTERED));
+    scicatClient.registerPublishedData(created.getEntity().getDoi(), scicatToken);
     importMap.put(publication.getIdentifier(), created.getEntity().getDoi());
+  }
+
+  private CreateDatasetDto createPlaceholderDataset(
+      CreatePublishedDataDto publishedDatasetDto, String scicatToken) {
+    CreateDatasetDto datasetDto = new CreateDatasetDto();
+    UserInfos userInfos = scicatClient.userInfos(scicatToken).getEntity();
+
+    publishedDatasetDto.setScicatUser(userInfos.getCurrentUser());
+
+    datasetDto
+        .setOwner(String.join("; ", publishedDatasetDto.getCreator()))
+        .setContactEmail(userInfos.getCurrentUserEmail())
+        .setSourceFolder("/")
+        .setCreationTime(Instant.now())
+        .setType(DatasetType.DERIVED)
+        .setPublished(true);
+    if (userInfos.getCurrentGroups().size() > 0) {
+      datasetDto.setOwnerGroup(userInfos.getCurrentGroups().getFirst());
+    } else {
+      log.error(
+          "User is part of no groups, will not be able to update the PublishedData status to"
+              + " 'registered'");
+    }
+
+    return datasetDto;
   }
 
   public ValidationReport validate() {

@@ -5,7 +5,7 @@ import ch.psi.scicat.model.CreateDatasetDto;
 import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
-import ch.psi.scicat.model.UpdatePublishedDataDto;
+import ch.psi.scicat.model.UserInfos;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -78,12 +78,17 @@ public class ScicatClient {
     return RestResponse.fromResponse(clientResponse);
   }
 
-  public RestResponse<PublishedData> updatePublishedData(
+  public RestResponse<PublishedData> resyncPublishedData(
       @PathParam("doi") String doi,
       @QueryParam("access_token") String accessToken,
-      UpdatePublishedDataDto dto) {
+      PublishedData publishedData) {
 
-    return scicatService.updatePublishedData(doi, accessToken, dto);
+    return scicatService.resyncPublishedData(doi, accessToken, publishedData);
+  }
+
+  public RestResponse<PublishedData> registerPublishedData(
+      @PathParam("doi") String doi, @HeaderParam("Authorization") String accessToken) {
+    return RestResponse.fromResponse(scicatService.registerPublishedData(doi, accessToken));
   }
 
   public RestResponse<PublishedData> createPublishedData(
@@ -112,5 +117,13 @@ public class ScicatClient {
   public RestResponse<Dataset> getDatasetByPid(String pid) {
     RestResponse<Dataset> clientResponse = scicatService.getDatasetByPid(pid);
     return RestResponse.fromResponse(clientResponse);
+  }
+
+  public RestResponse<UserInfos> userInfos(@HeaderParam("Authorization") String accessToken) {
+    if (preprendBearer) {
+      throw new UnsupportedOperationException();
+    }
+
+    return RestResponse.fromResponse(scicatService.userInfos(accessToken));
   }
 }

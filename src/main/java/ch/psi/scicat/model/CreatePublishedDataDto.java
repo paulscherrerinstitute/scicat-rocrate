@@ -1,7 +1,9 @@
 package ch.psi.scicat.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
@@ -51,7 +53,8 @@ public class CreatePublishedDataDto {
   private List<String> authors;
 
   @JsonProperty("registeredTime")
-  private String registeredTime;
+  @JsonFormat(shape = JsonFormat.Shape.STRING)
+  private Instant registeredTime;
 
   @JsonProperty("status")
   private String status;
