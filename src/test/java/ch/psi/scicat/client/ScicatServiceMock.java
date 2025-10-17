@@ -6,7 +6,7 @@ import ch.psi.scicat.model.CreateDatasetDto;
 import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
-import ch.psi.scicat.model.UpdatePublishedDataDto;
+import ch.psi.scicat.model.UserInfos;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
@@ -107,9 +107,9 @@ public class ScicatServiceMock implements ScicatService {
   }
 
   @Override
-  public RestResponse<Void> userInfos(String accessToken) {
+  public RestResponse<UserInfos> userInfos(String accessToken) {
     if (isAuthenticated) {
-      return RestResponse.ok();
+      return RestResponse.ok(new UserInfos().setCurrentGroups(List.of("group")));
     } else {
       return RestResponse.status(Status.UNAUTHORIZED);
     }
@@ -127,19 +127,19 @@ public class ScicatServiceMock implements ScicatService {
 
   @Override
   public RestResponse<PublishedData> updatePublishedData(
-      String doi, String accessToken, UpdatePublishedDataDto dto) {
+      String doi, String accessToken, PublishedData updatedPublishedData) {
     if (!isAuthenticated) {
       return RestResponse.status(Status.UNAUTHORIZED);
     }
 
-    PublishedData publishedData = publishedDataCollection.get(doi);
-    if (publishedData == null) {
+    PublishedData originalPublishedData = publishedDataCollection.get(doi);
+    if (originalPublishedData == null) {
       throw new WebApplicationException(
           Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON).build());
     }
 
-    publishedData.setStatus(dto.getStatus());
+    publishedDataCollection.put(updatedPublishedData.getDoi(), updatedPublishedData);
 
-    return RestResponse.ok(publishedData);
+    return RestResponse.ok(updatedPublishedData);
   }
 }
