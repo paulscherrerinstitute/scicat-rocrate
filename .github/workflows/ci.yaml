@@ -24,7 +24,7 @@ jobs:
             devcontainer:
               - .devcontainer/**
             workflow:
-              - .github/**
+              - .github/workflows/**
             src:
               - src/**
               - pom.xml
