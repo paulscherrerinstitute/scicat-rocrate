@@ -15,7 +15,7 @@ jobs:
       lintWorkflows: ${{ steps.check_changes.outputs.workflow_any_changed }}
       runTests: ${{ steps.check_changes.outputs.src_any_changed }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Check for changes
         id: check_changes
         uses: tj-actions/changed-files@v46
@@ -34,7 +34,7 @@ jobs:
     needs: check_changes
     if: needs.check_changes.outputs.rebuildDevContainer == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -56,7 +56,7 @@ jobs:
     if: needs.check_changes.outputs.runTests == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Test
         uses: devcontainers/ci@v0.3
@@ -71,7 +71,7 @@ jobs:
     needs: check_changes
     if: needs.check_changes.outputs.lintWorkflows == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Lint workflow files
         uses: docker://rhysd/actionlint:latest
         with:
@@ -82,7 +82,7 @@ jobs:
     name: pre-commit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: pre-commit
         uses: devcontainers/ci@v0.3
