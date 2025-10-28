@@ -32,4 +32,4 @@ titanium:
 scicat:
   client:
     use:
-      bearer: true
+      bearer: false

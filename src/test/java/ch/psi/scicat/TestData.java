@@ -3,6 +3,8 @@ package ch.psi.scicat;
 import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
+import ch.psi.scicat.model.PublishedDataStatus;
+import java.time.Instant;
 import java.util.List;
 import org.modelmapper.ModelMapper;
 
@@ -33,8 +35,8 @@ public class TestData {
                 List.of(
                     "20.500.11935/dataset-1", "20.500.11935/dataset-2", "20.500.11935/dataset-3"))
             .setAuthors(List.of("author-1", "author-2"))
-            .setRegisteredTime("2025-05-23T07:29:25.475Z")
-            .setStatus("registered")
+            .setRegisteredTime(Instant.parse("2025-05-23T07:29:25.475Z"))
+            .setStatus(PublishedDataStatus.REGISTERED)
             .setScicatUser("creator-1")
             .setRelatedPublications(List.of())
             .setDownloadLink("")

@@ -1,7 +1,7 @@
 package ch.psi.ord.api;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 
 import ch.psi.scicat.TestData;
@@ -101,29 +101,14 @@ public class RoCrateControllerTest {
           .post("/ro-crate/import")
           .then()
           .statusCode(201)
-          .body(
-              "$",
-              hasEntry(
-                  "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5",
-                  "10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"));
+          .body("$", hasKey("10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"));
     }
 
     @Test
     @DisplayName("Import existing publication")
     public void test06() {
-      scicatServiceMock.setAuthenticated(true);
-      given()
-          .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
-          .body(getClass().getClassLoader().getResourceAsStream("one-publication.json"))
-          .when()
-          .post("/ro-crate/import")
-          .then()
-          .statusCode(201)
-          .body(
-              "$",
-              hasEntry(
-                  "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5",
-                  "10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"));
+      scicatServiceMock.setAuthenticated(true).setPublicationCount(1);
+
       given()
           .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
           .body(getClass().getClassLoader().getResourceAsStream("one-publication.json"))
@@ -131,6 +116,8 @@ public class RoCrateControllerTest {
           .post("/ro-crate/import")
           .then()
           .statusCode(409);
+
+      scicatServiceMock.setPublicationCount(0);
     }
   }
 

@@ -1,29 +1,37 @@
 package ch.psi.scicat.client;
 
 import ch.psi.scicat.TestData;
+import ch.psi.scicat.model.CountResponse;
+import ch.psi.scicat.model.CreateDatasetDto;
 import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
+import ch.psi.scicat.model.PublishedDataStatus;
+import ch.psi.scicat.model.UserInfos;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import lombok.Setter;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.RestResponse.Status;
 import org.modelmapper.ModelMapper;
 
 public class ScicatServiceMock implements ScicatService {
   private ModelMapper modelMapper = new ModelMapper();
-  private List<PublishedData> publishedDataCollection = new ArrayList<>();
+  private Map<String, PublishedData> publishedDataCollection = new HashMap<>();
   private List<Dataset> datasetCollection =
       List.of(TestData.dataset1, TestData.dataset2, TestData.dataset3);
-  private boolean isHealthy = true;
-  private boolean isAuthenticated = false;
+  @Setter private boolean isHealthy = true;
+  @Setter private boolean isAuthenticated = false;
+  @Setter private int publicationCount = 0;
 
   @Override
   public RestResponse<JsonObject> root() {
@@ -41,15 +49,14 @@ public class ScicatServiceMock implements ScicatService {
 
   @Override
   public RestResponse<PublishedData> getPublishedDataById(String doi) {
-    Optional<PublishedData> publishedData =
-        publishedDataCollection.stream().filter(p -> p.getDoi().equals(doi)).findFirst();
+    PublishedData publishedData = publishedDataCollection.get(doi);
 
-    if (publishedData.isPresent()) {
-      return RestResponse.ok(publishedData.get(), MediaType.APPLICATION_JSON);
+    if (publishedData == null) {
+      throw new WebApplicationException(
+          Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON).build());
     }
 
-    throw new WebApplicationException(
-        Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON).build());
+    return RestResponse.ok(publishedData, MediaType.APPLICATION_JSON);
   }
 
   @Override
@@ -59,7 +66,8 @@ public class ScicatServiceMock implements ScicatService {
       throw new WebApplicationException(Response.status(Status.UNAUTHORIZED).build());
     }
 
-    if (publishedDataCollection.stream().anyMatch(p -> p.getDoi().equals(dto.getDoi()))) {
+    PublishedData publishedData = publishedDataCollection.get(dto.getDoi());
+    if (publishedData != null) {
       throw new WebApplicationException(
           Response.status(Status.CONFLICT).type(MediaType.APPLICATION_JSON).build());
     }
@@ -73,7 +81,7 @@ public class ScicatServiceMock implements ScicatService {
     String now = DateTimeFormatter.ISO_INSTANT.format(Instant.now());
     created.setCreatedAt(now);
     created.setUpdatedAt(now);
-    publishedDataCollection.add(created);
+    publishedDataCollection.put(created.getDoi(), created);
     return RestResponse.status(Status.CREATED, created);
   }
 
@@ -90,14 +98,6 @@ public class ScicatServiceMock implements ScicatService {
         Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON).build());
   }
 
-  public void setHealthy(boolean b) {
-    isHealthy = b;
-  }
-
-  public void setAuthenticated(boolean b) {
-    isAuthenticated = b;
-  }
-
   @Override
   public RestResponse<Void> myself(String accessToken) {
     if (isAuthenticated) {
@@ -108,11 +108,57 @@ public class ScicatServiceMock implements ScicatService {
   }
 
   @Override
-  public RestResponse<Void> userInfos(String accessToken) {
+  public RestResponse<UserInfos> userInfos(String accessToken) {
     if (isAuthenticated) {
-      return RestResponse.ok();
+      return RestResponse.ok(new UserInfos().setCurrentGroups(List.of("group")));
     } else {
       return RestResponse.status(Status.UNAUTHORIZED);
     }
+  }
+
+  @Override
+  public RestResponse<Dataset> createDataset(String accessToken, CreateDatasetDto datasetDto) {
+    return RestResponse.status(Status.CREATED, new Dataset().setPid(UUID.randomUUID().toString()));
+  }
+
+  @Override
+  public RestResponse<CountResponse> countPublishedData(String filter, String accessToken) {
+    return RestResponse.ok(new CountResponse().setCount(publicationCount));
+  }
+
+  @Override
+  public RestResponse<PublishedData> resyncPublishedData(
+      String doi, String accessToken, PublishedData updatedPublishedData) {
+    if (!isAuthenticated) {
+      return RestResponse.status(Status.UNAUTHORIZED);
+    }
+
+    PublishedData originalPublishedData = publishedDataCollection.get(doi);
+    if (originalPublishedData == null) {
+      throw new WebApplicationException(
+          Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON).build());
+    }
+
+    publishedDataCollection.put(updatedPublishedData.getDoi(), updatedPublishedData);
+
+    return RestResponse.ok(updatedPublishedData);
+  }
+
+  @Override
+  public RestResponse<PublishedData> registerPublishedData(String doi, String accessToken) {
+    if (!isAuthenticated) {
+      return RestResponse.status(Status.UNAUTHORIZED);
+    }
+
+    PublishedData publishedData = publishedDataCollection.get(doi);
+    if (publishedData == null) {
+      throw new WebApplicationException(
+          Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON).build());
+    }
+
+    publishedData.setStatus(PublishedDataStatus.REGISTERED);
+    publishedData.setRegisteredTime(Instant.now());
+
+    return RestResponse.ok(publishedData);
   }
 }

@@ -10,6 +10,7 @@ import jakarta.inject.Singleton;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.modelmapper.Converter;
@@ -18,6 +19,17 @@ import org.modelmapper.spi.MappingContext;
 
 @Singleton
 public class ScicatModelMapper {
+  Converter<String, List<String>> identifierToRelatedPublications =
+      new Converter<>() {
+        @Override
+        public List<String> convert(MappingContext<String, List<String>> context) {
+          List<String> relatedPublications = new ArrayList<>();
+          relatedPublications.add(
+              String.format("%s (IsIdenticalTo)", DoiUtils.buildStandardUrl(context.getSource())));
+          return relatedPublications;
+        }
+      };
+
   Converter<List<Person>, List<String>> personToStringList =
       new Converter<>() {
         @Override
@@ -68,7 +80,9 @@ public class ScicatModelMapper {
         .typeMap(Publication.class, CreatePublishedDataDto.class)
         .addMappings(
             m -> {
-              m.when(isNotNull()).map(Publication::getIdentifier, CreatePublishedDataDto::setDoi);
+              m.when(isNotNull())
+                  .using(identifierToRelatedPublications)
+                  .map(Publication::getIdentifier, CreatePublishedDataDto::setRelatedPublications);
               m.when(isNotNull())
                   .using(personToStringList)
                   .map(Publication::getCreator, CreatePublishedDataDto::setCreator);

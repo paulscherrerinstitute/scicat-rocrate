@@ -1,14 +1,19 @@
 package ch.psi.scicat.client;
 
+import ch.psi.scicat.model.CountResponse;
+import ch.psi.scicat.model.CreateDatasetDto;
 import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
+import ch.psi.scicat.model.UserInfos;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -56,6 +61,13 @@ public class ScicatClient {
     }
   }
 
+  public RestResponse<Dataset> createDataset(
+      @HeaderParam("Authorization") String accessToken, CreateDatasetDto createDatasetDto) {
+    RestResponse<Dataset> clientResponse =
+        scicatService.createDataset(accessToken, createDatasetDto);
+    return RestResponse.fromResponse(clientResponse);
+  }
+
   public RestResponse<PublishedData> getPublishedDataById(String doi) {
     RestResponse<PublishedData> clientResponse = scicatService.getPublishedDataById(doi);
     // Required on backend-next because of this bug:
@@ -64,6 +76,19 @@ public class ScicatClient {
       throw new WebApplicationException(Response.status(Status.NOT_FOUND).build());
     }
     return RestResponse.fromResponse(clientResponse);
+  }
+
+  public RestResponse<PublishedData> resyncPublishedData(
+      @PathParam("doi") String doi,
+      @QueryParam("access_token") String accessToken,
+      PublishedData publishedData) {
+
+    return scicatService.resyncPublishedData(doi, accessToken, publishedData);
+  }
+
+  public RestResponse<PublishedData> registerPublishedData(
+      @PathParam("doi") String doi, @HeaderParam("Authorization") String accessToken) {
+    return RestResponse.fromResponse(scicatService.registerPublishedData(doi, accessToken));
   }
 
   public RestResponse<PublishedData> createPublishedData(
@@ -82,8 +107,23 @@ public class ScicatClient {
     return RestResponse.fromResponse(clientResponse);
   }
 
+  public RestResponse<CountResponse> countPublishedData(
+      @QueryParam("where") String where, @HeaderParam("Authorization") String accessToken) {
+    RestResponse<CountResponse> clientResponse =
+        scicatService.countPublishedData(where, accessToken);
+    return RestResponse.fromResponse(clientResponse);
+  }
+
   public RestResponse<Dataset> getDatasetByPid(String pid) {
     RestResponse<Dataset> clientResponse = scicatService.getDatasetByPid(pid);
     return RestResponse.fromResponse(clientResponse);
+  }
+
+  public RestResponse<UserInfos> userInfos(@HeaderParam("Authorization") String accessToken) {
+    if (preprendBearer) {
+      throw new UnsupportedOperationException();
+    }
+
+    return RestResponse.fromResponse(scicatService.userInfos(accessToken));
   }
 }
