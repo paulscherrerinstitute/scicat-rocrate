@@ -78,6 +78,7 @@
       ]
     },
     {
+      "@id": "_:sample01",
       "@type": [
         "BioChemEntity",
         "Sample"
