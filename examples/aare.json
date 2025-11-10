@@ -1,0 +1,138 @@
+{
+  "@context": {
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "aare": "https://aare.psi.ch/",
+    "bioschemas": "https://discovery.biothings.io/view/bioschemas/",
+    "rangeIncludes": "https://schema.org/rangeIncludes",
+    "domainIncludes": "https://schema.org/domainIncludes",
+    "PropetyValue": "https://schema.org/PropertyValue",
+    "Dataset": "https://schema.org/Dataset"
+  },
+  "@graph": [
+    {
+      "@id": "aare:Dataset",
+      "@type": "rdfs:Class",
+      "rdfs:subclassOf": { "@id": "Dataset" }
+    },
+    {
+      "@id": "aare:scientificMetadata",
+      "@type": "rdf:Property",
+      "domainIncludes": {
+        "@id": "aare:Dataset"
+      },
+      "rangeIncludes": {
+        "@id": "schema:PropertyValue"
+      }
+    },
+    {
+      "@id": "aare:sample",
+      "@type": "rdf:Property",
+      "domainIncludes": {
+        "@id": "aare:Dataset"
+      },
+      "rangeIncludes": {
+        "@id": "bioschemas:Sample"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": [ "Dataset", "aare:Dataset" ],
+      "sample": { "@id": "_:sample01" },
+      "aare:scientificMetadata": [
+        {
+          "@type": "PropertyValue",
+          "name": "Wavelength",
+          "value": 7.3,
+          "unitText": "angstrom"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Energy",
+          "value": 1.3,
+          "unitText": "keV"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Detector",
+          "value": "name_of_detector"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Detector distance",
+          "value": 10,
+          "unitText": "mm"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Detector resolution at edge",
+          "value": 1.0,
+          "unitText": "angstrom"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Exposure time",
+          "value": 3,
+          "unitText": "seconds"
+        }
+      ]
+    },
+    {
+      "@type": [
+        "BioChemEntity",
+        "Sample"
+      ],
+      "name": "HPSI0617pf-tuji",
+      "description": "Fibroblast cell line HPSI0617pf-tuji from HipSci project",
+      "url": "https://www.ebi.ac.uk/biosamples/sample/SAMEA104383111",
+      "additionalProperty": [
+        {
+          "@type": "PropertyValue",
+          "name": "Material",
+          "value": "cell line",
+          "valueReference": [
+            {
+              "@type": "CategoryCode",
+              "codeValue": "EFO_0000322"
+            }
+          ]
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Organism",
+          "value": "Homo sapiens",
+          "valueReference": [
+            {
+              "@type": "CategoryCode",
+              "url": "http://purl.obolibrary.org/obo/NCBITaxon_9606"
+            }
+          ]
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "cell type",
+          "value": "fibroblast",
+          "valueReference": [
+            {
+              "@type": "CategoryCode",
+              "codeValue": "CL_0000057"
+            }
+          ]
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "project",
+          "value": "HipSci"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "synonym",
+          "value": "8028d635-9921-4e5e-9ce0-cd85b654574e"
+        }
+      ],
+      "identifiers": [
+        "biosamples:SAMEA104383111"
+      ]
+    }
+  ]
+}
