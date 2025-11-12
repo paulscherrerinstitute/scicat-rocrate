@@ -50,21 +50,32 @@ jobs:
           cacheFrom: ${{ env.devImage }}
           push: always
 
-  unit_tests:
-    name: Unit tests
+  tests:
+    name: Unit + Integration tests
     needs: check_changes
     if: needs.check_changes.outputs.runTests == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
-      - name: Test
+      - uses: actions/checkout@v4
+        with:
+          repository: ScicatProject/scicatlive
+          ref: psi/api-01/v3
+          path: scicatlive
+
+      - uses: hoverkraft-tech/compose-action@v2.4.0
+        with:
+          compose-file: ./compose.yaml
+          cwd: ${{ github.workspace }}/scicatlive
+
+      - name: Run test suite
         uses: devcontainers/ci@v0.3
         with:
           push: never
           imageName: ${{ env.devImage }}
           cacheFrom: ${{ env.devImage }}
-          runCmd: ./mvnw test
+          runCmd: ./mvnw verify -DskipITs=false -Dquarkus.container-image.push=false
 
   actionlint:
     runs-on: ubuntu-latest

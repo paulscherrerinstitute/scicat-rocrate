@@ -1,34 +1,29 @@
 package ch.psi.ord.api;
 
 import static io.restassured.RestAssured.given;
+import static org.mockito.Mockito.when;
 
 import ch.psi.scicat.client.ScicatService;
-import ch.psi.scicat.client.ScicatServiceMock;
-import io.quarkus.test.junit.QuarkusMock;
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
+import jakarta.ws.rs.core.Response.Status;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.junit.jupiter.api.BeforeEach;
+import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
 public class ScicatConnectionHealthCheckTest {
-  ScicatServiceMock scicatServiceMock;
-
-  @BeforeEach
-  public void setUp() {
-    scicatServiceMock = new ScicatServiceMock();
-    QuarkusMock.installMockForType(scicatServiceMock, ScicatService.class, RestClient.LITERAL);
-  }
+  @InjectMock @RestClient ScicatService scicatService;
 
   @Test
   public void healthyScicat() {
-    QuarkusMock.installMockForType(scicatServiceMock, ScicatService.class, RestClient.LITERAL);
+    when(scicatService.root()).thenReturn(RestResponse.status(Status.OK));
     given().when().get("health").then().statusCode(200);
   }
 
   @Test
   public void unhealthyScicat() {
-    scicatServiceMock.setHealthy(false);
+    when(scicatService.root()).thenReturn(RestResponse.status(Status.SERVICE_UNAVAILABLE));
     given().when().get("health").then().statusCode(503);
   }
 }

@@ -99,7 +99,7 @@ public class ScicatModelMapper {
 
               // Default values
               m.map(src -> "derived", CreatePublishedDataDto::setResourceType);
-              m.map(src -> "registered", CreatePublishedDataDto::setStatus);
+              m.map(src -> "pending_registration", CreatePublishedDataDto::setStatus);
             });
 
     return mapper;

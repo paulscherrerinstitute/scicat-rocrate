@@ -140,15 +140,6 @@
             "dateModified": "2023-01-26T13:02:13.643Z",
             "description": "3 ds",
             "hasPart": [
-                {
-                    "@id": "http://scicat.development.psi.ch/api/v3/datasets/PID.SAMPLE.PREFIX%2Fsoleil_ds2"
-                },
-                {
-                    "@id": "http://scicat.development.psi.ch/api/v3/datasets/PID.SAMPLE.PREFIX%2Fmaxiv_ds2"
-                },
-                {
-                    "@id": "http://scicat.development.psi.ch/api/v3/datasets/PID.SAMPLE.PREFIX%2Fukri_ds5"
-                }
             ],
             "scicat:numberOfFiles": 0,
             "scicat:sizeOfArchive": 35050000000,

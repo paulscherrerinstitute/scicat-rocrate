@@ -1,4 +1,7 @@
 quarkus:
+  test:
+    container:
+      network: host
   container-image:
     build: true
     registry: ghcr.io
