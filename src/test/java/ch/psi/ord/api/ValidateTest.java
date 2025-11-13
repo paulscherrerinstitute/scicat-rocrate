@@ -222,4 +222,32 @@ public class ValidateTest extends EndpointTest {
         .body("errors[0]", hasEntry("message", "No suitable entity found in the graph"))
         .body("errors[0]", hasEntry("type", "NoEntityFound"));
   }
+
+  @Test
+  @DisplayName("Malformed metadata descriptor (JSON-LD)")
+  public void test10() throws IOException {
+    given()
+        .when()
+        .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
+        .body(getClass().getClassLoader().getResourceAsStream("malformed.json").readAllBytes())
+        .post("/ro-crate/validate")
+        .then()
+        .statusCode(400)
+        .contentType(is(CONTENT_TYPE_JSON_RES))
+        .body(is("Failed to parse the metadata descriptor"));
+  }
+
+  @Test
+  @DisplayName("Malformed metadata descriptor (ZIP)")
+  public void test11() throws IOException {
+    given()
+        .when()
+        .header("Content-Type", ExtraMediaType.APPLICATION_ZIP)
+        .body(zipResource("malformed.json"))
+        .post("/ro-crate/validate")
+        .then()
+        .statusCode(400)
+        .contentType(is(CONTENT_TYPE_JSON_RES))
+        .body(is("Failed to parse the metadata descriptor"));
+  }
 }
