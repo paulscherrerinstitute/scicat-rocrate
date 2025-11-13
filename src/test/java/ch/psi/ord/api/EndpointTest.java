@@ -18,6 +18,8 @@ public abstract class EndpointTest {
   @InjectMock @RestClient protected ScicatService scicatService;
   protected String accessToken = "";
 
+  public static String CONTENT_TYPE_JSON_RES = "application/json;charset=UTF-8";
+
   public EndpointTest() {
     // Running integration tests
     if (scicatService != null) this.accessToken = login();
