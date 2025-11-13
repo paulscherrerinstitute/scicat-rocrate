@@ -140,4 +140,50 @@ public class ValidateTest extends EndpointTest {
             "errors[0]", hasEntry("message", "Expected between 1 and 2147483647 values but got 0"))
         .body("errors[0]", hasEntry("type", "PropertyError"));
   }
+
+  @Test
+  @DisplayName("Mix of valid/invalid publications (JSON-LD)")
+  public void test06() throws IOException {
+    given()
+        .when()
+        .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
+        .body(getClass().getClassLoader().getResourceAsStream("valid-invalid.json").readAllBytes())
+        .post("/ro-crate/validate")
+        .then()
+        .statusCode(200)
+        .contentType(is(CONTENT_TYPE_JSON_RES))
+        .body("isValid", is(false))
+        .body("entities", contains("https://doi.org/10.16907/4b55cbae-ac98-445a-a15e-1534b2a8b01f"))
+        .body("errors", hasSize(1))
+        .body(
+            "errors[0]",
+            hasEntry("nodeId", "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
+        .body("errors[0]", hasEntry("property", "https://schema.org/name"))
+        .body(
+            "errors[0]", hasEntry("message", "Expected between 1 and 2147483647 values but got 0"))
+        .body("errors[0]", hasEntry("type", "PropertyError"));
+  }
+
+  @Test
+  @DisplayName("Mix of valid/invalid publications (ZIP)")
+  public void test07() throws IOException {
+    given()
+        .when()
+        .header("Content-Type", ExtraMediaType.APPLICATION_ZIP)
+        .body(zipResource("valid-invalid.json"))
+        .post("/ro-crate/validate")
+        .then()
+        .statusCode(200)
+        .contentType(is(CONTENT_TYPE_JSON_RES))
+        .body("isValid", is(false))
+        .body("entities", contains("https://doi.org/10.16907/4b55cbae-ac98-445a-a15e-1534b2a8b01f"))
+        .body("errors", hasSize(1))
+        .body(
+            "errors[0]",
+            hasEntry("nodeId", "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
+        .body("errors[0]", hasEntry("property", "https://schema.org/name"))
+        .body(
+            "errors[0]", hasEntry("message", "Expected between 1 and 2147483647 values but got 0"))
+        .body("errors[0]", hasEntry("type", "PropertyError"));
+  }
 }
