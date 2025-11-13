@@ -14,9 +14,9 @@ public class ZenodoExporterTest {
 
   @Test
   public void exportExamplePublication() {
-    JsonObject export = exporter.toZenodoJsonLd(TestData.examplePublishedData);
+    JsonObject export = exporter.toZenodoJsonLd(TestData.psiPub1);
     Assertions.assertEquals(SchemaDO.NS, export.getString("@context"));
     Assertions.assertEquals(
-        DoiUtils.buildStandardUrl(TestData.examplePublishedData.getDoi()), export.getString("@id"));
+        DoiUtils.buildStandardUrl(TestData.psiPub1.getDoi()), export.getString("@id"));
   }
 }
