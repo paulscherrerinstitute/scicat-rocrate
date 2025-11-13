@@ -12,6 +12,7 @@ quarkus:
     level: INFO
   http:
     root-path: /api/v1
+    test-port: 9999
   rest-client:
     logging:
       scope: request-response
