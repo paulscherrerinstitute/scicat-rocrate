@@ -250,4 +250,18 @@ public class ValidateTest extends EndpointTest {
         .contentType(is(CONTENT_TYPE_JSON_RES))
         .body(is("Failed to parse the metadata descriptor"));
   }
+
+  @Test
+  @DisplayName("Malformed zip archive (ZIP)")
+  public void test12() throws IOException {
+    given()
+        .when()
+        .header("Content-Type", ExtraMediaType.APPLICATION_ZIP)
+        .body(new byte[0])
+        .post("/ro-crate/validate")
+        .then()
+        .statusCode(400)
+        .contentType(is(CONTENT_TYPE_JSON_RES))
+        .body(is("Invalid or empty zip archive"));
+  }
 }
