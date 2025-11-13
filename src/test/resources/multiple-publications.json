@@ -1,0 +1,170 @@
+{
+  "@context": {
+    "Organization": "https://schema.org/Organization",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "CreativeWork": "https://schema.org/CreativeWork",
+    "about": "https://schema.org/about",
+    "description": "https://schema.org/description",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "dateCreated": "https://schema.org/dateCreated",
+    "rangeIncludes": "https://schema.org/rangeIncludes",
+    "creativeWorkStatus": "https://schema.org/creativeWorkStatus",
+    "identifier": "https://schema.org/identifier",
+    "creator": "https://schema.org/creator",
+    "hasPart": "https://schema.org/hasPart",
+    "Dataset": "https://schema.org/Dataset",
+    "dateModified": "https://schema.org/dateModified",
+    "abstract": "https://schema.org/abstract",
+    "sdDatePublished": "https://schema.org/sdDatePublished",
+    "domainIncludes": "https://schema.org/domainIncludes",
+    "datePublished": "https://schema.org/datePublished",
+    "license": "https://schema.org/license",
+    "additionalType": "https://schema.org/additionalType",
+    "name": "https://schema.org/name",
+    "publisher": "https://schema.org/publisher",
+    "conformsTo": "http://purl.org/dc/terms/conformsTo",
+    "Person": "https://schema.org/Person"
+  },
+  "@graph": [
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "publish test",
+      "description": "something to publish as a test",
+      "license": {
+        "@id": "https://creativecommons.org/licenses/by-sa/4.0/"
+      },
+      "datePublished": "2023-01-01",
+      "hasPart": [
+        {
+          "@id": "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"
+        },
+        {
+          "@id": "https://doi.org/10.16907/4b55cbae-ac98-445a-a15e-1534b2a8b01f"
+        }
+      ]
+    },
+    {
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      },
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork"
+    },
+    {
+      "name": "files.zip",
+      "description": "",
+      "@id": "http://backend.scicat-development/datasets/PID.SAMPLE.PREFIX%2Fmaxiv_ds2",
+      "@type": "Dataset"
+    },
+    {
+      "identifier": "10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5",
+      "creator": [
+        {
+          "@id": "c2017825-f206-4bd3-bb56-39214ff6ef44"
+        },
+        {
+          "@id": "5d093fa2-0d20-4c12-b8a8-0587004d3d61"
+        },
+        {
+          "@id": "99464514-8918-488d-a392-3d501ba4cea8"
+        }
+      ],
+      "publisher": {
+        "@id": "https://ror.org/03eh3y714"
+      },
+      "license": {
+        "@id": "https://creativecommons.org/licenses/by-sa/4.0/"
+      },
+      "datePublished": "2023",
+      "name": "A test pub made of 3 ds",
+      "abstract": "3 ds",
+      "additionalType": "raw",
+      "sdDatePublished": "2023-01-26T13:02:38.341Z",
+      "creativeWorkStatus": "REGISTERED",
+      "dateCreated": "2023-01-26T13:02:13.639Z",
+      "dateModified": "2023-01-26T13:02:13.643Z",
+      "description": "3 ds",
+      "hasPart": [ ],
+      "@id": "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5",
+      "@type": "CreativeWork"
+    },
+    {
+      "identifier": "10.16907/4b55cbae-ac98-445a-a15e-1534b2a8b01f",
+      "creator": {
+        "@id": "0b4ae813-42a7-4634-a57f-e85070239cce"
+      },
+      "publisher": {
+        "@id": "https://ror.org/03eh3y714"
+      },
+      "license": {
+        "@id": "https://creativecommons.org/licenses/by-sa/4.0/"
+      },
+      "datePublished": "2023",
+      "name": "publish test",
+      "abstract": "something to publish as a test",
+      "additionalType": "raw",
+      "sdDatePublished": "2023-01-26T12:56:49.857Z",
+      "creativeWorkStatus": "REGISTERED",
+      "dateCreated": "2023-01-26T12:56:00.270Z",
+      "dateModified": "2023-01-26T12:56:00.283Z",
+      "description": "All 'hits' in hdf5 files (Cheetah slab format) together with geometries and all CrystFEL .stream files, .hkl files and .mtz files. Also all Phenix .pdb files together with log files. All scripts needed to reproduce the result are also included.",
+      "hasPart": [ ],
+      "@id": "https://doi.org/10.16907/4b55cbae-ac98-445a-a15e-1534b2a8b01f",
+      "@type": "CreativeWork"
+    },
+    {
+      "name": "raw",
+      "description": "",
+      "@id": "http://backend.scicat-development/datasets/PID.SAMPLE.PREFIX%2Fukri_ds5",
+      "@type": "Dataset"
+    },
+    {
+      "name": "Tests_Carto.tar",
+      "description": "",
+      "@id": "http://backend.scicat-development/datasets/PID.SAMPLE.PREFIX%2Fsoleil_ds2",
+      "@type": "Dataset"
+    },
+    {
+      "name": "indexing",
+      "description": "All 'hits' in hdf5 files (Cheetah slab format) together with geometries and all CrystFEL .stream files, .hkl files and .mtz files. Also all Phenix .pdb files together with log files. All scripts needed to reproduce the result are also included.",
+      "@id": "http://backend.scicat-development/datasets/PID.SAMPLE.PREFIX%2Fdesy_ds2",
+      "@type": "Dataset"
+    },
+    {
+      "name": "Maik Kahnt",
+      "@id": "5d093fa2-0d20-4c12-b8a8-0587004d3d61",
+      "@type": "Person"
+    },
+    {
+      "name": "Paul Scherrer Institute",
+      "@id": "https://ror.org/03eh3y714",
+      "@type": "Organization"
+    },
+    {
+      "name": "Oleksandr Yefanov",
+      "@id": "0b4ae813-42a7-4634-a57f-e85070239cce",
+      "@type": "Person"
+    },
+    {
+      "identifier": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "name": "Creative Commons Attribution Share Alike 4.0 International",
+      "@id": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "@type": "CreativeWork"
+    },
+    {
+      "name": "Gabriel Bernardo",
+      "@id": "99464514-8918-488d-a392-3d501ba4cea8",
+      "@type": "Person"
+    },
+    {
+      "name": "Doru Constantin",
+      "@id": "c2017825-f206-4bd3-bb56-39214ff6ef44",
+      "@type": "Person"
+    }
+  ]
+}
