@@ -50,7 +50,7 @@ import org.modelmapper.ModelMapper;
 public class RoCrateImporter {
   private RoCrate crate;
   private Model model = ModelFactory.createOntologyModel();
-  private Reasoner reasoner = ReasonerRegistry.getOWLReasoner();
+  private Reasoner reasoner = ReasonerRegistry.getOWLMicroReasoner();
   private InfModel inferredModel = ModelFactory.createInfModel(reasoner, model);
   private RdfDeserializer deserializer = new RdfDeserializer();
   @Inject private ModelMapper modelMapper;
