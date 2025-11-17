@@ -49,7 +49,7 @@ import org.modelmapper.ModelMapper;
 @Slf4j
 public class RoCrateImporter {
   private RoCrate crate;
-  private Model model = ModelFactory.createOntologyModel();
+  private Model model = ModelFactory.createDefaultModel();
   private Reasoner reasoner = ReasonerRegistry.getOWLReasoner();
   private InfModel inferredModel = ModelFactory.createInfModel(reasoner, model);
   private RdfDeserializer deserializer = new RdfDeserializer();
