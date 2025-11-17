@@ -35,5 +35,4 @@ titanium:
 
 scicat:
   client:
-    use:
-      bearer: false
+    backend-v4: false
