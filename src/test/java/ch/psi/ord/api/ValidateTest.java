@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
 import io.quarkus.test.junit.QuarkusTest;
+import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -263,5 +264,33 @@ public class ValidateTest extends EndpointTest {
         .statusCode(400)
         .contentType(is(CONTENT_TYPE_JSON_RES))
         .body(is("Invalid or empty zip archive"));
+  }
+
+  @Test
+  @DisplayName("Invalid Accept header (JSON-LD)")
+  public void test13() throws IOException {
+    given()
+        .when()
+        .accept(MediaType.APPLICATION_XML)
+        .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
+        .post("/ro-crate/validate")
+        .then()
+        .statusCode(406)
+        .contentType(is(CONTENT_TYPE_JSON_RES))
+        .body(is("Failed to parse the metadata descriptor"));
+  }
+
+  @Test
+  @DisplayName("Invalid Accept header (ZIP)")
+  public void test14() throws IOException {
+    given()
+        .when()
+        .accept(MediaType.APPLICATION_XML)
+        .header("Content-Type", ExtraMediaType.APPLICATION_ZIP)
+        .post("/ro-crate/validate")
+        .then()
+        .statusCode(406)
+        .contentType(is(CONTENT_TYPE_JSON_RES))
+        .body(is("Failed to parse the metadata descriptor"));
   }
 }
