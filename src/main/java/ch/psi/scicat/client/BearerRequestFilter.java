@@ -3,6 +3,7 @@ package ch.psi.scicat.client;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.ClientRequestContext;
 import jakarta.ws.rs.client.ClientRequestFilter;
+import jakarta.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @Slf4j
+@Provider
 public class BearerRequestFilter implements ClientRequestFilter {
   @Inject
   @ConfigProperty(name = "scicat.client.backend-v4")
