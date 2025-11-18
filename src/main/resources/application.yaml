@@ -37,3 +37,15 @@ scicat:
   client:
     use:
       bearer: false
+
+"%it-v3":
+  scicat:
+    client:
+      use:
+        bearer: false
+
+"%it-v4":
+  scicat:
+    client:
+      use:
+        bearer: true
