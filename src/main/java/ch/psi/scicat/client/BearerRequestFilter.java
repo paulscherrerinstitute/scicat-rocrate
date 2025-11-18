@@ -17,12 +17,14 @@ public class BearerRequestFilter implements ClientRequestFilter {
   @ConfigProperty(name = "scicat.client.backend-v4")
   boolean backendV4;
 
-  private static final String AUTH_HEADER = "Authorization";
-  private static final String BEARER_PREFIX = "Bearer";
+  public static final String AUTH_HEADER = "Authorization";
+  public static final String BEARER_PREFIX = "Bearer";
 
   @Override
   public void filter(ClientRequestContext requestContext) throws IOException {
-    if (backendV4 && requestContext.getHeaders().containsKey(AUTH_HEADER)) {
+    if (backendV4
+        && requestContext.getHeaders() != null
+        && requestContext.getHeaders().containsKey(AUTH_HEADER)) {
       log.debug(
           "Preprending 'Bearer ' to 'Authorization' header for {} {}",
           requestContext.getMethod(),
@@ -35,8 +37,11 @@ public class BearerRequestFilter implements ClientRequestFilter {
 
       List<Object> updatedAuth =
           originalAuth.stream()
-              .filter(h -> !h.toString().startsWith(BEARER_PREFIX))
-              .map(h -> String.format("%s %s", BEARER_PREFIX, h))
+              .map(
+                  h ->
+                      !h.toString().startsWith(BEARER_PREFIX)
+                          ? String.format("%s %s", BEARER_PREFIX, h.toString())
+                          : h)
               .collect(Collectors.toList());
 
       requestContext.getHeaders().put(AUTH_HEADER, updatedAuth);
