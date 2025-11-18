@@ -20,11 +20,6 @@ public abstract class EndpointTest {
 
   public static String CONTENT_TYPE_JSON_RES = "application/json;charset=UTF-8";
 
-  public EndpointTest() {
-    // Running integration tests
-    if (scicatService != null) this.accessToken = login();
-  }
-
   public String login() {
     try {
       String url = "http://backend.localhost/api/v3/Users/login";
