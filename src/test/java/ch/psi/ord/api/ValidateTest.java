@@ -186,4 +186,40 @@ public class ValidateTest extends EndpointTest {
             "errors[0]", hasEntry("message", "Expected between 1 and 2147483647 values but got 0"))
         .body("errors[0]", hasEntry("type", "PropertyError"));
   }
+
+  @Test
+  @DisplayName("Empty graph (JSON-LD)")
+  public void test08() throws IOException {
+    given()
+        .when()
+        .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
+        .body("{}")
+        .post("/ro-crate/validate")
+        .then()
+        .statusCode(200)
+        .contentType(is(CONTENT_TYPE_JSON_RES))
+        .body("isValid", is(false))
+        .body("entities", emptyIterable())
+        .body("errors", hasSize(1))
+        .body("errors[0]", hasEntry("message", "No suitable entity found in the graph"))
+        .body("errors[0]", hasEntry("type", "NoEntityFound"));
+  }
+
+  @Test
+  @DisplayName("Empty graph (ZIP)")
+  public void test09() throws IOException {
+    given()
+        .when()
+        .header("Content-Type", ExtraMediaType.APPLICATION_ZIP)
+        .body(zipResource("empty.json"))
+        .post("/ro-crate/validate")
+        .then()
+        .statusCode(200)
+        .contentType(is(CONTENT_TYPE_JSON_RES))
+        .body("isValid", is(false))
+        .body("entities", emptyIterable())
+        .body("errors", hasSize(1))
+        .body("errors[0]", hasEntry("message", "No suitable entity found in the graph"))
+        .body("errors[0]", hasEntry("type", "NoEntityFound"));
+  }
 }
