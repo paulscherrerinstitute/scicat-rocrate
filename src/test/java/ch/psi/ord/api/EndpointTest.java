@@ -18,11 +18,6 @@ public abstract class EndpointTest {
   @InjectMock @RestClient protected ScicatService scicatService;
   protected String accessToken = "";
 
-  public EndpointTest() {
-    // Running integration tests
-    if (scicatService != null) this.accessToken = login();
-  }
-
   public String login() {
     try {
       String url = "http://backend.localhost/api/v3/Users/login";
