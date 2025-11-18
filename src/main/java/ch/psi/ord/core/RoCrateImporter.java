@@ -49,14 +49,14 @@ import org.modelmapper.ModelMapper;
 @Slf4j
 public class RoCrateImporter {
   private RoCrate crate;
-  private Model model = ModelFactory.createOntologyModel();
-  private Reasoner reasoner = ReasonerRegistry.getOWLReasoner();
+  private Model model = ModelFactory.createDefaultModel();
+  private Reasoner reasoner = ReasonerRegistry.getOWLMicroReasoner();
   private InfModel inferredModel = ModelFactory.createInfModel(reasoner, model);
   private RdfDeserializer deserializer = new RdfDeserializer();
   @Inject private ModelMapper modelMapper;
   @Inject private ScicatClient scicatClient;
 
-  private static String publicationExistsFilter =
+  public static String publicationExistsFilter =
       "{\"relatedPublications\": {\"inq\": [\"%s (IsIdenticalTo)\"]}}";
 
   public void loadCrate(RoCrate crate) {
