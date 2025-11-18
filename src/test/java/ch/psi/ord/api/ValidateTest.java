@@ -1,6 +1,7 @@
 package ch.psi.ord.api;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.is;
 
@@ -24,9 +25,7 @@ public class ValidateTest extends EndpointTest {
         .statusCode(200)
         .contentType(is(CONTENT_TYPE_JSON_RES))
         .body("isValid", is(true))
-        .body(
-            "entities",
-            Matchers.contains("https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
+        .body("entities", contains("https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
         .body("errors", emptyIterable());
   }
 
@@ -42,6 +41,9 @@ public class ValidateTest extends EndpointTest {
         .then()
         .statusCode(200)
         .contentType(is(CONTENT_TYPE_JSON_RES))
+        .body("isValid", is(true))
+        .body("entities", contains("https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
+        .body("errors", emptyIterable())
         .body("isValid", is(true))
         .body(
             "entities",
