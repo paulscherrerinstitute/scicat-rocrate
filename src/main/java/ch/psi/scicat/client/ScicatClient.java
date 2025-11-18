@@ -15,8 +15,6 @@ import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.resteasy.reactive.RestResponse;
@@ -70,11 +68,6 @@ public class ScicatClient {
 
   public RestResponse<PublishedData> getPublishedDataById(String doi) {
     RestResponse<PublishedData> clientResponse = scicatService.getPublishedDataById(doi);
-    // Required on backend-next because of this bug:
-    // https://github.com/SciCatProject/scicat-backend-next/issues/2036
-    if (clientResponse.getStatus() == 200 && !clientResponse.hasEntity()) {
-      throw new WebApplicationException(Response.status(Status.NOT_FOUND).build());
-    }
     return RestResponse.fromResponse(clientResponse);
   }
 
