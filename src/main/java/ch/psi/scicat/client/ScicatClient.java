@@ -6,8 +6,6 @@ import ch.psi.scicat.model.CreatePublishedDataDto;
 import ch.psi.scicat.model.Dataset;
 import ch.psi.scicat.model.PublishedData;
 import ch.psi.scicat.model.UserInfos;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
@@ -20,22 +18,18 @@ import jakarta.ws.rs.core.Response.Status;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.resteasy.reactive.RestResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class ScicatClient {
   @Inject @RestClient ScicatService scicatService;
 
   @Inject
-  @ConfigProperty(name = "scicat.client.use.bearer")
-  boolean preprendBearer;
-
-  private static final Logger logger = LoggerFactory.getLogger(ScicatClient.class);
+  @ConfigProperty(name = "scicat.client.backend-v4")
+  boolean backendV4;
 
   public boolean isHealthy() {
     try {
-      if (preprendBearer) {
+      if (backendV4) {
         RestResponse<Void> response = scicatService.isHealthy();
         return response.getStatus() == 200;
       } else {
@@ -49,9 +43,7 @@ public class ScicatClient {
 
   public boolean checkTokenValidity(@HeaderParam("Authorization") String accessToken) {
     try {
-      if (preprendBearer) {
-        accessToken = "Bearer " + accessToken;
-
+      if (backendV4) {
         return scicatService.myself(accessToken).getStatus() == 200;
       } else {
         return scicatService.userInfos(accessToken).getStatus() == 200;
@@ -93,15 +85,6 @@ public class ScicatClient {
 
   public RestResponse<PublishedData> createPublishedData(
       CreatePublishedDataDto publishedData, String scicatToken) {
-    try {
-      logger.debug(new ObjectMapper().writeValueAsString(publishedData));
-    } catch (JsonProcessingException e) {
-      e.printStackTrace();
-    }
-
-    if (preprendBearer) {
-      scicatToken = "Bearer " + scicatToken;
-    }
     RestResponse<PublishedData> clientResponse =
         scicatService.createPublishedData(scicatToken, publishedData);
     return RestResponse.fromResponse(clientResponse);
@@ -120,7 +103,7 @@ public class ScicatClient {
   }
 
   public RestResponse<UserInfos> userInfos(@HeaderParam("Authorization") String accessToken) {
-    if (preprendBearer) {
+    if (backendV4) {
       throw new UnsupportedOperationException();
     }
 
