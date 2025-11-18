@@ -6,6 +6,7 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-json
+        exclude: ^src/test/resources/malformed\.json$
       - id: check-xml
       - id: check-added-large-files
   - repo: local
