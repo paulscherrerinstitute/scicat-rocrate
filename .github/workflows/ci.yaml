@@ -58,7 +58,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: ScicatProject/scicatlive
           ref: psi/api-01/v3
