@@ -1,14 +1,14 @@
-package ch.psi.scicat.model;
+package ch.psi.scicat.model.v3;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum DatasetType {
-  RAW("raw"),
-  DERIVED("derived");
+public enum PublishedDataStatus {
+  PENDING_REGISTRATION("pending_registration"),
+  REGISTERED("registered");
 
   private final String value;
 
-  DatasetType(String value) {
+  PublishedDataStatus(String value) {
     this.value = value;
   }
 

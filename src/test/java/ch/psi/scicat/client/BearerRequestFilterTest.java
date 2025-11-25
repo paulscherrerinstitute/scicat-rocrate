@@ -3,13 +3,13 @@ package ch.psi.scicat.client;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
+import ch.psi.scicat.client.v4.BearerRequestFilter;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.ClientRequestContext;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import java.util.List;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -19,11 +19,6 @@ import org.mockito.Mockito;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class BearerRequestFilterTest {
   @Inject BearerRequestFilter filter;
-
-  @BeforeAll
-  void setup() {
-    filter.backendV4 = true;
-  }
 
   @Test
   @DisplayName("null getHeaders()")

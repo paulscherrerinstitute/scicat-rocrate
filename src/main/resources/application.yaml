@@ -34,5 +34,5 @@ titanium:
       size: 10
 
 scicat:
-  client:
-    backend-v4: false
+  v4: false
+  url: http://backend.localhost
