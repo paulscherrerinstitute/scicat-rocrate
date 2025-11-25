@@ -17,6 +17,6 @@ public interface ScicatServiceV4 extends ScicatService {
   RestResponse<Void> health();
 
   @GET
-  @Path("/api/v3/users/my/self")
-  RestResponse<MyIdentity> myself(@HeaderParam("Authorization") String accessToken);
+  @Path("/api/v3/users/my/identity")
+  RestResponse<MyIdentity> myidentity(@HeaderParam("Authorization") String accessToken);
 }

@@ -33,7 +33,7 @@ public class ScicatClientV4 extends ScicatClient {
   @Override
   public boolean checkTokenValidity(String accessToken) {
     try {
-      return api.myself(accessToken).getStatus() == 200;
+      return api.myidentity(accessToken).getStatus() == 200;
     } catch (WebApplicationException e) {
       return false;
     }
@@ -41,7 +41,7 @@ public class ScicatClientV4 extends ScicatClient {
 
   @Override
   public UserDetails userDetails(String accessToken) {
-    MyIdentity myself = api.myself(accessToken).getEntity();
+    MyIdentity myself = api.myidentity(accessToken).getEntity();
 
     return new UserDetails()
         .setUsername(myself.getProfile().getUsername())
