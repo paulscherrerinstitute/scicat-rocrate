@@ -43,7 +43,10 @@ public class ScicatClientV3 extends ScicatClient {
   public UserDetails userDetails(String accessToken) {
     UserInfos userInfos = api.userInfos(accessToken).getEntity();
 
-    return new UserDetails().setUsername(userInfos.getCurrentUser());
+    return new UserDetails()
+        .setUsername(userInfos.getCurrentUser())
+        .setGroups(userInfos.getCurrentGroups())
+        .setEmail(userInfos.getCurrentUserEmail());
   }
 
   @Override

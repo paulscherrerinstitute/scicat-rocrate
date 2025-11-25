@@ -1,6 +1,7 @@
 package ch.psi.scicat.client.v4;
 
 import ch.psi.scicat.client.ScicatService;
+import ch.psi.scicat.model.v3.MyIdentity;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.Path;
@@ -17,5 +18,5 @@ public interface ScicatServiceV4 extends ScicatService {
 
   @GET
   @Path("/api/v3/users/my/self")
-  RestResponse<Void> myself(@HeaderParam("Authorization") String accessToken);
+  RestResponse<MyIdentity> myself(@HeaderParam("Authorization") String accessToken);
 }

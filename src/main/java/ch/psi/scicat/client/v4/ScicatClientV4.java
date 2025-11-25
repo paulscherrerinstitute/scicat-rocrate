@@ -7,6 +7,7 @@ import ch.psi.scicat.model.v3.CountResponse;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
 import ch.psi.scicat.model.v3.CreatePublishedDataDto;
 import ch.psi.scicat.model.v3.Dataset;
+import ch.psi.scicat.model.v3.MyIdentity;
 import ch.psi.scicat.model.v3.PublishedData;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -40,7 +41,12 @@ public class ScicatClientV4 extends ScicatClient {
 
   @Override
   public UserDetails userDetails(String accessToken) {
-    throw new UnsupportedOperationException("Unimplemented method 'userDetails'");
+    MyIdentity myself = api.myself(accessToken).getEntity();
+
+    return new UserDetails()
+        .setUsername(myself.getProfile().getUsername())
+        .setGroups(myself.getProfile().getAccessGroups())
+        .setEmail(myself.getProfile().getEmail());
   }
 
   @Override

@@ -40,7 +40,6 @@ public class MyIdentity {
 
   @Data
   public static class Profile {
-
     @JsonProperty("displayName")
     private String displayName;
 
