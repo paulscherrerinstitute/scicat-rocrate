@@ -38,7 +38,8 @@ quarkus build -Dquarkus.container-image.push=true
 
 This service can be configured using the following environment variables:
 
-| Name                         | Description                       | Example value         |
-|------------------------------|-----------------------------------|-----------------------|
-| `SCICAT_URL`                 | Base URL of the SciCat backend    | https://dacat.psi.ch/ |
-| `TITANIUM_JSONLD_CACHE_SIZE` | Size of the JSON-LD context cache | 10                    |
+| Name                         | Description                         | Example value         |
+|------------------------------|-------------------------------------|-----------------------|
+| `SCICAT_URL`                 | Base URL of the SciCat backend      | https://dacat.psi.ch/ |
+| `SCICAT_V4`                  | Running against scicat-backend-next | true                  |
+| `TITANIUM_JSONLD_CACHE_SIZE` | Size of the JSON-LD context cache   | 10                    |
