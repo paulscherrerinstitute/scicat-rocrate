@@ -2,14 +2,12 @@ package ch.psi.scicat.client.v4;
 
 import jakarta.ws.rs.client.ClientRequestContext;
 import jakarta.ws.rs.client.ClientRequestFilter;
-import jakarta.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Provider
 public class BearerRequestFilter implements ClientRequestFilter {
   public static final String AUTH_HEADER = "Authorization";
   public static final String BEARER_PREFIX = "Bearer";

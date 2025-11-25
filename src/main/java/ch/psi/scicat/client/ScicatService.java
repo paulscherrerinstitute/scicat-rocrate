@@ -14,7 +14,7 @@ import jakarta.ws.rs.QueryParam;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.resteasy.reactive.RestResponse;
 
-@RegisterRestClient(configKey = "scicat-api")
+@RegisterRestClient(configKey = "scicat")
 public interface ScicatService {
   @GET
   @Path("/api/v3/datasets/{pid}")

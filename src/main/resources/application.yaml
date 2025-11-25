@@ -1,3 +1,7 @@
+scicat:
+  url: &scicat-url http://backend.localhost
+  v4: false
+
 quarkus:
   test:
     container:
@@ -16,8 +20,8 @@ quarkus:
   rest-client:
     logging:
       scope: request-response
-    scicat-api:
-      url: http://backend.localhost
+    scicat:
+      url: *scicat-url
   smallrye-openapi:
     path: /openapi-specs
   smallrye-health:
@@ -32,7 +36,3 @@ titanium:
   jsonld:
     cache:
       size: 10
-
-scicat:
-  v4: false
-  url: http://backend.localhost

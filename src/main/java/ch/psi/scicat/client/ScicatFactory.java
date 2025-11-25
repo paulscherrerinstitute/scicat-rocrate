@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @Slf4j
+@ApplicationScoped
 public class ScicatFactory {
   @Inject
   @ConfigProperty(name = "scicat.v4")
@@ -22,24 +23,24 @@ public class ScicatFactory {
   @ConfigProperty(name = "scicat.url")
   String url;
 
-  @Produces
-  @ApplicationScoped
   public ScicatService createScicatService() {
     QuarkusRestClientBuilder builder =
         QuarkusRestClientBuilder.newBuilder().baseUri(URI.create(url));
 
     if (backendV4) {
-      log.info("Configured to run against scicat-backend-next");
+      log.info("Configured to run against scicat-backend-next at {}", url);
       return builder.build(ScicatServiceV4.class);
     }
 
-    log.info("Configured to run against legacy backend");
+    log.info("Configured to run against legacy backend at {}", url);
     return builder.build(ScicatServiceV3.class);
   }
 
   @Produces
   @ApplicationScoped
   public ScicatClient createScicatClient() {
-    return backendV4 ? new ScicatClientV4() : new ScicatClientV3();
+    return backendV4
+        ? new ScicatClientV4(createScicatService())
+        : new ScicatClientV3(createScicatService());
   }
 }

@@ -1,6 +1,7 @@
 package ch.psi.scicat.client.v4;
 
 import ch.psi.scicat.client.ScicatClient;
+import ch.psi.scicat.client.ScicatService;
 import ch.psi.scicat.model.compat.UserDetails;
 import ch.psi.scicat.model.v3.CountResponse;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
@@ -9,13 +10,15 @@ import ch.psi.scicat.model.v3.Dataset;
 import ch.psi.scicat.model.v3.PublishedData;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
-import lombok.NonNull;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.resteasy.reactive.RestResponse;
 
-// @RegisterRestClient(configKey = "scicat-api")
 public class ScicatClientV4 extends ScicatClient {
-  @Inject @RestClient @NonNull ScicatServiceV4 api;
+  ScicatServiceV4 api;
+
+  @Inject
+  public ScicatClientV4(ScicatService api) {
+    this.api = (ScicatServiceV4) api;
+  }
 
   @Override
   public boolean isHealthy() {
