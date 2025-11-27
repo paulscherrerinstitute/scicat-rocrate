@@ -7,13 +7,12 @@ import static org.mockito.Mockito.when;
 import ch.psi.ord.core.DoiUtils;
 import ch.psi.ord.core.RoCrateImporter;
 import ch.psi.scicat.TestData;
-import ch.psi.scicat.model.CountResponse;
-import ch.psi.scicat.model.CreateDatasetDto;
-import ch.psi.scicat.model.CreatePublishedDataDto;
-import ch.psi.scicat.model.Dataset;
-import ch.psi.scicat.model.PublishedData;
+import ch.psi.scicat.model.v3.CountResponse;
+import ch.psi.scicat.model.v3.CreateDatasetDto;
+import ch.psi.scicat.model.v3.CreatePublishedDataDto;
+import ch.psi.scicat.model.v3.Dataset;
+import ch.psi.scicat.model.v3.PublishedData;
 import io.quarkus.test.junit.QuarkusTest;
-import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
 import org.hamcrest.Matchers;
 import org.jboss.resteasy.reactive.RestResponse;
@@ -31,13 +30,13 @@ public class ImportTest extends EndpointTest {
   @Test
   @DisplayName("Empty body")
   public void test01() {
-    if (scicatService != null) {
-      when(scicatService.userInfos(any())).thenReturn(RestResponse.status(Status.OK));
+    if (scicatClient != null) {
+      when(scicatClient.checkTokenValidity(any())).thenReturn(true);
     }
 
     given()
         .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
-        .header("scicat-token", accessToken)
+        .header("api-key", accessToken)
         .when()
         .post("/ro-crate/import")
         .then()
@@ -47,13 +46,13 @@ public class ImportTest extends EndpointTest {
   @Test
   @DisplayName("Invalid JSON-LD")
   public void test02() {
-    if (scicatService != null) {
-      when(scicatService.userInfos(any())).thenReturn(RestResponse.status(Status.OK));
+    if (scicatClient != null) {
+      when(scicatClient.checkTokenValidity(any())).thenReturn(true);
     }
 
     given()
         .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
-        .header("scicat-token", accessToken)
+        .header("api-key", accessToken)
         .body("{")
         .when()
         .post("/ro-crate/import")
@@ -64,13 +63,13 @@ public class ImportTest extends EndpointTest {
   @Test
   @DisplayName("Empty JSON-LD")
   public void test03() {
-    if (scicatService != null) {
-      when(scicatService.userInfos(any())).thenReturn(RestResponse.ok(TestData.rocrateUser));
+    if (scicatClient != null) {
+      when(scicatClient.checkTokenValidity(any())).thenReturn(true);
     }
 
     given()
         .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
-        .header("scicat-token", accessToken)
+        .header("api-key", accessToken)
         .body("{}")
         .when()
         .post("/ro-crate/import")
@@ -81,8 +80,8 @@ public class ImportTest extends EndpointTest {
   @Test
   @DisplayName("Unauthenticated")
   public void test04() throws IOException, Exception {
-    if (scicatService != null) {
-      when(scicatService.userInfos(any())).thenReturn(RestResponse.status(Status.UNAUTHORIZED));
+    if (scicatClient != null) {
+      when(scicatClient.checkTokenValidity(any())).thenReturn(false);
     }
 
     given()
@@ -97,25 +96,25 @@ public class ImportTest extends EndpointTest {
   @Test
   @DisplayName("One publication")
   public void test05() {
-    if (scicatService != null) {
-      when(scicatService.userInfos(any())).thenReturn(RestResponse.ok(TestData.rocrateUser));
-      when(scicatService.countPublishedData(
+    if (scicatClient != null) {
+      when(scicatClient.checkTokenValidity(any())).thenReturn(true);
+      when(scicatClient.countPublishedData(
               String.format(
                   RoCrateImporter.publicationExistsFilter,
                   DoiUtils.buildStandardUrl("10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5")),
               null))
           .thenReturn(RestResponse.ok(new CountResponse().setCount(0)));
-      when(scicatService.userInfos(null)).thenReturn(RestResponse.ok(TestData.rocrateUser));
-      when(scicatService.createDataset(any(), any(CreateDatasetDto.class)))
+      when(scicatClient.userDetails(any())).thenReturn(TestData.rocrateUser);
+      when(scicatClient.createDataset(any(), any(CreateDatasetDto.class)))
           .thenReturn(RestResponse.ok(new Dataset().setPid("some-pid")));
-      when(scicatService.createPublishedData(any(), any(CreatePublishedDataDto.class)))
+      when(scicatClient.createPublishedData(any(), any(CreatePublishedDataDto.class)))
           .thenReturn(RestResponse.ok(new PublishedData().setDoi("some-pid")));
-      when(scicatService.registerPublishedData(any(), any())).thenReturn(RestResponse.ok());
+      when(scicatClient.registerPublishedData(any(), any())).thenReturn(RestResponse.ok());
     }
 
     given()
         .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
-        .header("scicat-token", accessToken)
+        .header("api-key", accessToken)
         .body(getClass().getClassLoader().getResourceAsStream("one-publication.json"))
         .when()
         .post("/ro-crate/import")
@@ -127,9 +126,9 @@ public class ImportTest extends EndpointTest {
   @Test
   @DisplayName("Import existing publication")
   public void test06() {
-    if (scicatService != null) {
-      when(scicatService.userInfos(null)).thenReturn(RestResponse.status(Status.OK));
-      when(scicatService.countPublishedData(
+    if (scicatClient != null) {
+      when(scicatClient.checkTokenValidity(any())).thenReturn(true);
+      when(scicatClient.countPublishedData(
               String.format(
                   RoCrateImporter.publicationExistsFilter,
                   DoiUtils.buildStandardUrl("10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5")),
@@ -138,7 +137,7 @@ public class ImportTest extends EndpointTest {
     }
     given()
         .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
-        .header("scicat-token", accessToken)
+        .header("api-key", accessToken)
         .body(getClass().getClassLoader().getResourceAsStream("one-publication.json"))
         .when()
         .post("/ro-crate/import")

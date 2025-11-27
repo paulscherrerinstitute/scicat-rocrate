@@ -1,8 +1,8 @@
 package ch.psi.ord.core;
 
 import ch.psi.scicat.client.ScicatClient;
-import ch.psi.scicat.model.Dataset;
-import ch.psi.scicat.model.PublishedData;
+import ch.psi.scicat.model.v3.Dataset;
+import ch.psi.scicat.model.v3.PublishedData;
 import edu.kit.datamanager.ro_crate.RoCrate;
 import edu.kit.datamanager.ro_crate.context.RoCrateMetadataContext;
 import edu.kit.datamanager.ro_crate.entities.contextual.ContextualEntity;
