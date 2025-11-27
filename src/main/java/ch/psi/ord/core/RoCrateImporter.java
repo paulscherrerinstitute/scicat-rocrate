@@ -9,13 +9,13 @@ import ch.psi.rdf.RdfDeserializer;
 import ch.psi.rdf.RdfDeserializer.DeserializationReport;
 import ch.psi.rdf.RdfUtils;
 import ch.psi.scicat.client.ScicatClient;
-import ch.psi.scicat.model.CountResponse;
-import ch.psi.scicat.model.CreateDatasetDto;
-import ch.psi.scicat.model.CreatePublishedDataDto;
-import ch.psi.scicat.model.Dataset;
-import ch.psi.scicat.model.DatasetType;
-import ch.psi.scicat.model.PublishedData;
-import ch.psi.scicat.model.UserInfos;
+import ch.psi.scicat.model.compat.UserDetails;
+import ch.psi.scicat.model.v3.CountResponse;
+import ch.psi.scicat.model.v3.CreateDatasetDto;
+import ch.psi.scicat.model.v3.CreatePublishedDataDto;
+import ch.psi.scicat.model.v3.Dataset;
+import ch.psi.scicat.model.v3.DatasetType;
+import ch.psi.scicat.model.v3.PublishedData;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -109,7 +109,7 @@ public class RoCrateImporter {
       importMap.put(publication.getIdentifier(), createdDataset.getEntity().getPid());
     }
 
-    RestResponse<PublishedData> created = scicatClient.createPublishedData(dto, scicatToken);
+    RestResponse<PublishedData> created = scicatClient.createPublishedData(scicatToken, dto);
     scicatClient.registerPublishedData(created.getEntity().getDoi(), scicatToken);
     importMap.put(publication.getIdentifier(), created.getEntity().getDoi());
   }
@@ -117,19 +117,19 @@ public class RoCrateImporter {
   private CreateDatasetDto createPlaceholderDataset(
       CreatePublishedDataDto publishedDatasetDto, String scicatToken) {
     CreateDatasetDto datasetDto = new CreateDatasetDto();
-    UserInfos userInfos = scicatClient.userInfos(scicatToken).getEntity();
+    UserDetails userDetails = scicatClient.userDetails(scicatToken);
 
-    publishedDatasetDto.setScicatUser(userInfos.getCurrentUser());
+    publishedDatasetDto.setScicatUser(userDetails.getUsername());
 
     datasetDto
         .setOwner(String.join("; ", publishedDatasetDto.getCreator()))
-        .setContactEmail(userInfos.getCurrentUserEmail())
+        .setContactEmail(userDetails.getEmail())
         .setSourceFolder("/")
         .setCreationTime(Instant.now())
         .setType(DatasetType.DERIVED)
         .setPublished(true);
-    if (userInfos.getCurrentGroups().size() > 0) {
-      datasetDto.setOwnerGroup(userInfos.getCurrentGroups().getFirst());
+    if (userDetails.getGroups().size() > 0) {
+      datasetDto.setOwnerGroup(userDetails.getGroups().getFirst());
     } else {
       log.error(
           "User is part of no groups, will not be able to update the PublishedData status to"

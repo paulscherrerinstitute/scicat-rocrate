@@ -2,7 +2,7 @@ package ch.psi.ord.api;
 
 import ch.psi.ord.core.ZenodoExporter;
 import ch.psi.scicat.client.ScicatClient;
-import ch.psi.scicat.model.PublishedData;
+import ch.psi.scicat.model.v3.PublishedData;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
