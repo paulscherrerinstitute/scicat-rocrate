@@ -165,7 +165,7 @@ public class RoCrateController {
   @Consumes(ExtraMediaType.APPLICATION_JSONLD)
   @Produces(MediaType.APPLICATION_JSON)
   public Response importCrate(
-      @HeaderParam(value = "scicat-token") String scicatToken, InputStream body) {
+      @HeaderParam(value = "api-key") String scicatToken, InputStream body) {
     if (!scicatClient.checkTokenValidity(scicatToken)) {
       return Response.status(Status.UNAUTHORIZED).build();
     }
@@ -193,7 +193,7 @@ public class RoCrateController {
   @Consumes(ExtraMediaType.APPLICATION_ZIP)
   @Produces(MediaType.APPLICATION_JSON)
   public Response importZippedCrate(
-      @HeaderParam(value = "scicat-token") String scicatToken, InputStream body) {
+      @HeaderParam(value = "api-key") String scicatToken, InputStream body) {
     if (!scicatClient.checkTokenValidity(scicatToken)) {
       return Response.status(Status.UNAUTHORIZED).build();
     }

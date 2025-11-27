@@ -36,7 +36,7 @@ public class ImportTest extends EndpointTest {
 
     given()
         .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
-        .header("scicat-token", accessToken)
+        .header("api-key", accessToken)
         .when()
         .post("/ro-crate/import")
         .then()
@@ -52,7 +52,7 @@ public class ImportTest extends EndpointTest {
 
     given()
         .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
-        .header("scicat-token", accessToken)
+        .header("api-key", accessToken)
         .body("{")
         .when()
         .post("/ro-crate/import")
@@ -69,7 +69,7 @@ public class ImportTest extends EndpointTest {
 
     given()
         .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
-        .header("scicat-token", accessToken)
+        .header("api-key", accessToken)
         .body("{}")
         .when()
         .post("/ro-crate/import")
@@ -114,7 +114,7 @@ public class ImportTest extends EndpointTest {
 
     given()
         .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
-        .header("scicat-token", accessToken)
+        .header("api-key", accessToken)
         .body(getClass().getClassLoader().getResourceAsStream("one-publication.json"))
         .when()
         .post("/ro-crate/import")
@@ -137,7 +137,7 @@ public class ImportTest extends EndpointTest {
     }
     given()
         .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
-        .header("scicat-token", accessToken)
+        .header("api-key", accessToken)
         .body(getClass().getClassLoader().getResourceAsStream("one-publication.json"))
         .when()
         .post("/ro-crate/import")
