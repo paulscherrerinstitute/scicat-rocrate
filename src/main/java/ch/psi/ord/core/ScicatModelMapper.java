@@ -4,7 +4,7 @@ import static org.modelmapper.Conditions.isNotNull;
 
 import ch.psi.ord.model.Person;
 import ch.psi.ord.model.Publication;
-import ch.psi.scicat.model.CreatePublishedDataDto;
+import ch.psi.scicat.model.v3.CreatePublishedDataDto;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
 import java.time.OffsetDateTime;

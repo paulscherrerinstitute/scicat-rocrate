@@ -1,6 +1,6 @@
 package ch.psi.ord.api;
 
-import ch.psi.scicat.client.ScicatService;
+import ch.psi.scicat.client.ScicatClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.InjectMock;
@@ -12,10 +12,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 public abstract class EndpointTest {
-  @InjectMock @RestClient protected ScicatService scicatService;
+  @InjectMock protected ScicatClient scicatClient;
+
   protected String accessToken = "";
 
   public static String CONTENT_TYPE_JSON_RES = "application/json;charset=UTF-8";

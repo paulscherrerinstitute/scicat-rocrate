@@ -16,14 +16,14 @@ public class ExportTest extends EndpointTest {
   @Test
   @DisplayName("Export to zip")
   public void test00() {
-    if (scicatService != null) {
-      when(scicatService.getPublishedDataById(TestData.psiPub1.getDoi()))
+    if (scicatClient != null) {
+      when(scicatClient.getPublishedDataById(TestData.psiPub1.getDoi()))
           .thenReturn(RestResponse.ok(TestData.psiPub1));
-      when(scicatService.getDatasetByPid(TestData.psiDs1.getPid()))
+      when(scicatClient.getDatasetByPid(TestData.psiDs1.getPid()))
           .thenReturn(RestResponse.ok(TestData.psiDs1));
-      when(scicatService.getDatasetByPid(TestData.psiDs2.getPid()))
+      when(scicatClient.getDatasetByPid(TestData.psiDs2.getPid()))
           .thenReturn(RestResponse.ok(TestData.psiDs2));
-      when(scicatService.getDatasetByPid(TestData.psiDs3.getPid()))
+      when(scicatClient.getDatasetByPid(TestData.psiDs3.getPid()))
           .thenReturn(RestResponse.ok(TestData.psiDs3));
     }
     given()
