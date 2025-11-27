@@ -1,4 +1,4 @@
-package ch.psi.scicat.model;
+package ch.psi.scicat.model.v3;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
