@@ -122,12 +122,15 @@ public class RoCrateImporter {
     publishedDatasetDto.setScicatUser(userDetails.getUsername());
 
     datasetDto
+        .setDatasetName("Original RO-Crate")
         .setOwner(String.join("; ", publishedDatasetDto.getCreator()))
+        .setPrincipalInvestigator(String.join("; ", publishedDatasetDto.getCreator()))
         .setContactEmail(userDetails.getEmail())
         .setSourceFolder("/")
+        .setCreationLocation("")
         .setCreationTime(Instant.now())
-        .setType(DatasetType.DERIVED)
-        .setPublished(true);
+        .setType(DatasetType.RAW)
+        .setPublished(false);
     if (userDetails.getGroups().size() > 0) {
       datasetDto.setOwnerGroup(userDetails.getGroups().getFirst());
     } else {

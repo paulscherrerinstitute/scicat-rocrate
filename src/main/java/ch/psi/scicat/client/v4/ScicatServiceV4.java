@@ -11,6 +11,7 @@ import org.jboss.resteasy.reactive.RestResponse;
 
 @RegisterRestClient
 @RegisterProvider(BearerRequestFilter.class)
+@RegisterProvider(CountRequestFilter.class)
 public interface ScicatServiceV4 extends ScicatService {
   @GET
   @Path("/api/v3/health")
