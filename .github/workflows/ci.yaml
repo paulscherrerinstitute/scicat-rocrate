@@ -55,13 +55,16 @@ jobs:
     needs: check_changes
     if: needs.check_changes.outputs.runTests == 'true'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        backend-version: [v3, v4]
     steps:
       - uses: actions/checkout@v6
 
       - uses: actions/checkout@v6
         with:
           repository: ScicatProject/scicatlive
-          ref: psi/api-01/v3
+          ref: psi/api-01/${{ matrix.backend-version }}
           path: scicatlive
 
       - uses: hoverkraft-tech/compose-action@v2.4.1
@@ -75,7 +78,7 @@ jobs:
           push: never
           imageName: ${{ env.devImage }}
           cacheFrom: ${{ env.devImage }}
-          runCmd: ./mvnw verify -DskipITs=false -Dquarkus.container-image.push=false
+          runCmd: ./mvnw verify -Dquarkus.profile=it-${{ matrix.backend-version }} -DskipITs=false -Dquarkus.container-image.push=false
 
   actionlint:
     runs-on: ubuntu-latest
