@@ -60,7 +60,7 @@ public class ScicatClientV3 extends ScicatClient {
   }
 
   @Override
-  public RestResponse<PublishedData> registerPublishedData(String doi, String accessToken) {
+  public RestResponse<Void> registerPublishedData(String doi, String accessToken) {
     return api.registerPublishedData(doi, accessToken);
   }
 
