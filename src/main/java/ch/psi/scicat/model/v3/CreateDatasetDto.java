@@ -7,25 +7,34 @@ import lombok.Data;
 
 @Data
 public class CreateDatasetDto {
-  @JsonProperty("owner")
+  @JsonProperty(required = true)
+  String datasetName;
+
+  @JsonProperty(required = true)
   String owner;
 
-  @JsonProperty("contactEmail")
+  @JsonProperty(required = true)
   String contactEmail;
 
-  @JsonProperty("sourceFolder")
+  @JsonProperty(required = true)
+  String principalInvestigator;
+
+  @JsonProperty(required = true)
   String sourceFolder;
 
-  @JsonProperty("creationTime")
+  @JsonProperty(required = true)
   @JsonFormat(shape = JsonFormat.Shape.STRING)
   private Instant creationTime;
 
-  @JsonProperty("type")
+  @JsonProperty(required = true)
   DatasetType type;
 
-  @JsonProperty("ownerGroup")
+  @JsonProperty(required = true)
   String ownerGroup;
 
-  @JsonProperty("isPublished")
-  boolean isPublished;
+  @JsonProperty(value = "isPublished")
+  boolean published;
+
+  @JsonProperty(required = true)
+  String creationLocation;
 }
