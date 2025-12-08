@@ -193,7 +193,7 @@ public class RoCrateImporter {
   }
 
   public List<Resource> listPublications() {
-    return new ArrayList<>(listResourcesOfType(SchemaDO.CreativeWork, this::isPublication));
+    return new ArrayList<>(listResourcesOfType(SchemaDO.Collection, this::isPublication));
   }
 
   private Set<Resource> listResourcesOfType(Resource type, Predicate<Resource> predicate) {

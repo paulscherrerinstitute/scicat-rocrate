@@ -60,7 +60,7 @@ public class RoCrateExporter {
 
     DataEntityBuilder publicationBuilder = new DataEntityBuilder();
     publicationBuilder
-        .addType(SchemaDO.CreativeWork.getLocalName())
+        .addType(SchemaDO.Collection.getLocalName())
         .setId(DoiUtils.buildStandardUrl(publication.getDoi()))
         .addProperty(SchemaDO.identifier.getLocalName(), publication.getDoi());
     publication
