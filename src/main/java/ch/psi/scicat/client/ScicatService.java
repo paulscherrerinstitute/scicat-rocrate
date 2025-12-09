@@ -31,7 +31,7 @@ public interface ScicatService {
 
   @POST
   @Path("/api/v3/publisheddata/{doi}/register")
-  public RestResponse<PublishedData> registerPublishedData(
+  public RestResponse<Void> registerPublishedData(
       @PathParam("doi") String doi, @HeaderParam("Authorization") String accessToken);
 
   @GET
