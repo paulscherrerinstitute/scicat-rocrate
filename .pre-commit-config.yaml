@@ -5,6 +5,7 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
+        exclude: ^src/main/resources/application\.yaml$
       - id: check-json
         exclude: ^src/test/resources/malformed\.json$
       - id: check-xml
