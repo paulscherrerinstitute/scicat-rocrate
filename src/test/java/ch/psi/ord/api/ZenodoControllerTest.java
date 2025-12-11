@@ -1,7 +1,10 @@
 package ch.psi.ord.api;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -39,6 +42,23 @@ public class ZenodoControllerTest extends EndpointTest {
         .body(SchemaDO.dateCreated.getLocalName(), equalTo(TestData.psiPub1.getCreatedAt()))
         .body(
             SchemaDO.datePublished.getLocalName(),
-            equalTo(TestData.psiPub1.getRegisteredTime().toString()));
+            equalTo(TestData.psiPub1.getRegisteredTime().toString()))
+        .body(
+            SchemaDO.publisher.getLocalName() + ".@type",
+            equalTo(SchemaDO.Organization.getLocalName()))
+        .body(
+            SchemaDO.publisher.getLocalName() + "." + SchemaDO.name.getLocalName(),
+            equalTo("Paul Scherrer Institute"))
+        .body(SchemaDO.creator.getLocalName(), hasSize(TestData.psiPub1.getCreator().size()))
+        .body(
+            SchemaDO.creator.getLocalName() + ".@type",
+            everyItem(equalTo(SchemaDO.Person.getLocalName())))
+        .body(
+            SchemaDO.creator.getLocalName() + "." + SchemaDO.name.getLocalName(),
+            containsInAnyOrder(TestData.psiPub1.getCreator().toArray()))
+        .body(SchemaDO.distribution.getLocalName(), hasSize(TestData.psiPub1.getPidArray().size()))
+        .body(
+            SchemaDO.distribution.getLocalName() + ".@type",
+            everyItem(equalTo(SchemaDO.DataDownload.getLocalName())));
   }
 }
