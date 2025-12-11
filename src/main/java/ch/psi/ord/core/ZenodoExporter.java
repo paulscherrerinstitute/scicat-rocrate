@@ -21,7 +21,7 @@ public class ZenodoExporter {
     JsonObjectBuilder builder = Json.createObjectBuilder();
 
     builder.add("@context", SchemaDO.NS);
-    builder.add("@type", SchemaDO.Dataset.getURI());
+    builder.add("@type", SchemaDO.Dataset.getLocalName());
 
     String doiUrl = String.format(DoiUtils.buildStandardUrl(publishedData.getDoi()));
     builder.add("@id", doiUrl);
