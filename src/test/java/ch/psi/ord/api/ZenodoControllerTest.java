@@ -2,6 +2,7 @@ package ch.psi.ord.api;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import ch.psi.ord.core.DoiUtils;
@@ -18,15 +19,15 @@ public class ZenodoControllerTest extends EndpointTest {
   @DisplayName("Export to Zenodo JSON-LD")
   public void test00() {
     if (scicatClient != null) {
-      when(scicatClient.getPublishedDataById("10.9999%2Fpsi_pub1"))
-          .thenReturn(RestResponse.ok(TestData.psiPub1));
+      when(scicatClient.getPublishedDataById(any())).thenReturn(RestResponse.ok(TestData.psiPub1));
     }
 
     String doiUrl = String.format(DoiUtils.buildStandardUrl(TestData.psiPub1.getDoi()));
     given()
         .when()
         .accept(ExtraMediaType.APPLICATION_JSONLD)
-        .get("/zenodo/10.9999%2Fpsi_pub1/export")
+        .pathParam("doi", TestData.psiPub1.getDoi())
+        .get("/zenodo/{doi}/export")
         .then()
         .statusCode(200)
         .body("@context", equalTo(SchemaDO.NS))
