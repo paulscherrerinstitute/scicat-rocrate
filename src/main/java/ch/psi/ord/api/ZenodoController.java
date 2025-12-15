@@ -28,7 +28,7 @@ public class ZenodoController {
   public Response exportPublication(@PathParam("doi") String doi) {
     try {
       RestResponse<PublishedData> publication = scicatClient.getPublishedDataById(doi);
-      return Response.ok(exporter.toZenodoJsonLd(publication.getEntity())).build();
+      return Response.ok(exporter.toZenodoJsonLd(publication.getEntity()).toString()).build();
     } catch (WebApplicationException e) {
       Response res = e.getResponse();
       return Response.status(res.getStatus())
