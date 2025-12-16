@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.SchemaDO;
 import org.junit.jupiter.api.Assertions;
@@ -54,7 +53,7 @@ public class RoCrateImporterTest {
     @Test
     @DisplayName("One Publication")
     public void test02() {
-      m.createResource(SchemaDO.CreativeWork).addProperty(SchemaDO.identifier, validDoi);
+      m.createResource(SchemaDO.Collection).addProperty(SchemaDO.identifier, validDoi);
 
       importer.loadModel(m);
       Assertions.assertEquals(1, importer.listPublications().size());
@@ -63,7 +62,7 @@ public class RoCrateImporterTest {
     @Test
     @DisplayName("One Publication - invalid identifier")
     public void test03() {
-      m.createResource(SchemaDO.CreativeWork).addProperty(SchemaDO.identifier, invalidDoi);
+      m.createResource(SchemaDO.Collection).addProperty(SchemaDO.identifier, invalidDoi);
 
       importer.loadModel(m);
       Assertions.assertEquals(0, importer.listPublications().size());
@@ -72,7 +71,7 @@ public class RoCrateImporterTest {
     @Test
     @DisplayName("Schema.org non-literal identifier")
     public void test04() {
-      m.createResource(SchemaDO.CreativeWork).addProperty(SchemaDO.identifier, m.createResource());
+      m.createResource(SchemaDO.Collection).addProperty(SchemaDO.identifier, m.createResource());
 
       importer.loadModel(m);
       Assertions.assertEquals(0, importer.listPublications().size());
@@ -83,7 +82,7 @@ public class RoCrateImporterTest {
     public void test05() {
       Property identifierEquivalent = m.createProperty("http://example.org/id");
       m.add(identifierEquivalent, OWL.equivalentProperty, SchemaDO.identifier);
-      m.createResource(SchemaDO.CreativeWork).addProperty(identifierEquivalent, validDoi);
+      m.createResource(SchemaDO.Collection).addProperty(identifierEquivalent, validDoi);
 
       importer.loadModel(m);
       Assertions.assertEquals(1, importer.listPublications().size());
@@ -94,7 +93,7 @@ public class RoCrateImporterTest {
     public void test06() {
       Property identifierEquivalent = m.createProperty("http://example.org/id");
       m.add(identifierEquivalent, OWL.equivalentProperty, SchemaDO.identifier);
-      m.createResource(SchemaDO.CreativeWork).addProperty(identifierEquivalent, invalidDoi);
+      m.createResource(SchemaDO.Collection).addProperty(identifierEquivalent, invalidDoi);
 
       importer.loadModel(m);
       Assertions.assertEquals(0, importer.listPublications().size());
@@ -104,7 +103,7 @@ public class RoCrateImporterTest {
     @DisplayName("Multiple Publications")
     public void test07() {
       for (int i = 0; i < 5; i++) {
-        m.createResource(SchemaDO.CreativeWork).addProperty(SchemaDO.identifier, validDoi + i);
+        m.createResource(SchemaDO.Collection).addProperty(SchemaDO.identifier, validDoi + i);
       }
 
       importer.loadModel(m);
@@ -114,8 +113,7 @@ public class RoCrateImporterTest {
     @Test
     @DisplayName("Http type")
     public void test08() {
-      m.createResource(ResourceFactory.createResource("http://schema.org/CreativeWork"))
-          .addProperty(SchemaDO.identifier, validDoi);
+      m.createResource(SchemaDO.Collection).addProperty(SchemaDO.identifier, validDoi);
 
       importer.loadModel(m);
       Assertions.assertEquals(1, importer.listPublications().size());
@@ -124,8 +122,7 @@ public class RoCrateImporterTest {
     @Test
     @DisplayName("Http identifier")
     public void test09() {
-      m.createResource(SchemaDO.CreativeWork)
-          .addProperty(ResourceFactory.createProperty("http://schema.org/identifier"), validDoi);
+      m.createResource(SchemaDO.Collection).addProperty(SchemaDO.identifier, validDoi);
 
       importer.loadModel(m);
       Assertions.assertEquals(1, importer.listPublications().size());
@@ -134,8 +131,7 @@ public class RoCrateImporterTest {
     @Test
     @DisplayName("Http type and identifier")
     public void test10() {
-      m.createResource(ResourceFactory.createResource("http://schema.org/CreativeWork"))
-          .addProperty(ResourceFactory.createProperty("http://schema.org/identifier"), validDoi);
+      m.createResource(SchemaDO.Collection).addProperty(SchemaDO.identifier, validDoi);
 
       importer.loadModel(m);
       Assertions.assertEquals(1, importer.listPublications().size());
