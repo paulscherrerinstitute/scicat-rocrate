@@ -28,6 +28,7 @@ jobs:
             src:
               - src/**
               - pom.xml
+              - .github/workflows/ci.yaml
 
   build:
     runs-on: ubuntu-latest
