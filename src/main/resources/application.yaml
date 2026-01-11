@@ -2,6 +2,16 @@ scicat:
   url: &scicat-url http://backend.localhost
   v4: false
 
+"%it-v3":
+  scicat:
+    url: &scicat-url https://backend.localhost
+    v4: false
+
+"%it-v4":
+  scicat:
+    url: &scicat-url http://backend.localhost
+    v4: true
+
 quarkus:
   test:
     container:
