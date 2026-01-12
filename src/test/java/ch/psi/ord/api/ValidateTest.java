@@ -234,7 +234,7 @@ public class ValidateTest extends EndpointTest {
         .then()
         .statusCode(400)
         .contentType(is(CONTENT_TYPE_JSON_RES))
-        .body(is("Failed to parse the metadata descriptor"));
+        .body("message", is("Failed to parse the metadata descriptor"));
   }
 
   @Test
@@ -248,7 +248,7 @@ public class ValidateTest extends EndpointTest {
         .then()
         .statusCode(400)
         .contentType(is(CONTENT_TYPE_JSON_RES))
-        .body(is("Failed to parse the metadata descriptor"));
+        .body("message", is("Failed to parse the metadata descriptor"));
   }
 
   @Test
@@ -262,6 +262,6 @@ public class ValidateTest extends EndpointTest {
         .then()
         .statusCode(400)
         .contentType(is(CONTENT_TYPE_JSON_RES))
-        .body(is("Invalid or empty zip archive"));
+        .body("message", is("Invalid or empty zip archive"));
   }
 }
