@@ -4,6 +4,9 @@ on:
   pull_request:
     branches: '**'
 
+permissions:
+  packages: write
+
 env:
   devImage: ghcr.io/${{ github.repository }}-devcontainer
 
@@ -28,6 +31,7 @@ jobs:
             src:
               - src/**
               - pom.xml
+              - .github/workflows/ci.yaml
 
   build:
     runs-on: ubuntu-latest
@@ -64,7 +68,7 @@ jobs:
           ref: psi/api-01/v3
           path: scicatlive
 
-      - uses: hoverkraft-tech/compose-action@v2.4.2
+      - uses: hoverkraft-tech/compose-action@v2.4.3
         with:
           compose-file: ./compose.yaml
           up-flags: --wait-timeout 120
@@ -88,7 +92,6 @@ jobs:
         uses: docker://rhysd/actionlint:latest
         with:
           args: -color
-
 
   precommit:
     name: pre-commit
