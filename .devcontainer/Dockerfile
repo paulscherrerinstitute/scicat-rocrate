@@ -9,7 +9,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 USER vscode
-RUN pipx install pre-commit
+RUN pipx ensurepath && pipx install pre-commit
 RUN . "$NVM_DIR/nvm.sh" && nvm install --lts
 RUN curl -Ls https://sh.jbang.dev | bash -s - trust add https://repo1.maven.org/maven2/io/quarkus/quarkus-cli/ \
     && curl -Ls https://sh.jbang.dev | bash -s - app install --fresh --force quarkus@quarkusio

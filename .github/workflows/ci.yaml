@@ -4,6 +4,9 @@ on:
   pull_request:
     branches: '**'
 
+permissions:
+  packages: write
+
 env:
   devImage: ghcr.io/${{ github.repository }}-devcontainer
 
@@ -87,7 +90,6 @@ jobs:
         uses: docker://rhysd/actionlint:latest
         with:
           args: -color
-
 
   precommit:
     name: pre-commit
