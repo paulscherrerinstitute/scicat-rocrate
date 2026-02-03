@@ -1,32 +1,34 @@
 {
-	"name": "Java",
-	"build": {
-		"dockerfile": "Dockerfile"
-	},
-	"runArgs": [ "--network=host" ],
-	"updateRemoteUserUID": true,
-	"mounts": [
-		{
-			"source": "devcontainer-maven-cache-${containerWorkspaceFolderBasename}",
-			"target": "/home/vscode/.m2",
-			"type": "volume"
-		}
-	],
-	"features": {
-		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": { }
-	},
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"redhat.vscode-xml",
-				"redhat.vscode-quarkus",
-				"darkriszty.markdown-table-prettify",
-				"josevseb.google-java-format-for-vs-code"
-			]
-		}
-	},
-	"postCreateCommand": "sudo -E chown -R $(id -u):$(id -g) ~/.m2",
-	"onCreateCommand": {
-		"install pre-commit hooks": "cd ${containerWorkspaceFolder} && pre-commit install"
-	}
+  "name": "Java",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "runArgs": [ "--network=host" ],
+  "updateRemoteUserUID": true,
+  "mounts": [
+    {
+      "source": "devcontainer-maven-cache-${containerWorkspaceFolderBasename}",
+      "target": "/home/vscode/.m2",
+      "type": "volume"
+    }
+  ],
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "moby": "false"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "redhat.vscode-xml",
+        "redhat.vscode-quarkus",
+        "darkriszty.markdown-table-prettify",
+        "josevseb.google-java-format-for-vs-code"
+      ]
+    }
+  },
+  "postCreateCommand": "sudo -E chown -R $(id -u):$(id -g) ~/.m2",
+  "onCreateCommand": {
+    "install pre-commit hooks": "cd ${containerWorkspaceFolder} && pre-commit install"
+  }
 }
