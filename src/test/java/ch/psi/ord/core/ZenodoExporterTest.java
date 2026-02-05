@@ -5,8 +5,8 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
 import org.apache.jena.vocabulary.SchemaDO;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 @QuarkusTest
 public class ZenodoExporterTest {
