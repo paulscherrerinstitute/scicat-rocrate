@@ -39,8 +39,6 @@ public class ZenodoExporter {
     RDFWriter.create().source(model).format(RDFFormat.JSONLD11).build().output(sw);
 
     Document doc = JsonDocument.of(new StringReader(sw.toString()));
-    Document context =
-        JsonDocument.of(new StringReader("{\"@context\": {\"@vocab\": \"https://schema.org/\"}}"));
     String frameJson =
         """
         {
