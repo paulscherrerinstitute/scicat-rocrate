@@ -22,9 +22,9 @@
         "license": "https://schema.org/license",
         "additionalType": "https://schema.org/additionalType",
         "name": "https://schema.org/name",
+        "Collection": "https://schema.org/Collection",
         "publisher": "https://schema.org/publisher",
         "conformsTo": "http://purl.org/dc/terms/conformsTo",
-        "scicat": "_:scicat",
         "Person": "https://schema.org/Person"
     },
     "@graph": [
@@ -39,22 +39,16 @@
             "datePublished": "2023-01-01",
             "hasPart": [
                 {
-                    "@id": "scicat:relatedPublications"
-                },
-                {
-                    "@id": "scicat:sizeOfArchive"
+                    "@id": "https://dacat-development.psi.ch/datasets/PID.SAMPLE.PREFIX%2Fmaxiv_ds2"
                 },
                 {
                     "@id": "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"
                 },
                 {
-                    "@id": "scicat:PublishedData"
+                    "@id": "https://dacat-development.psi.ch/datasets/PID.SAMPLE.PREFIX%2Fsoleil_ds2"
                 },
                 {
-                    "@id": "scicat:numberOfFiles"
-                },
-                {
-                    "@id": "scicat:scicatUser"
+                    "@id": "https://dacat-development.psi.ch/datasets/PID.SAMPLE.PREFIX%2Fukri_ds5"
                 }
             ]
         },
@@ -69,59 +63,28 @@
             "@type": "CreativeWork"
         },
         {
-            "rangeIncludes": {
-                "@id": "xsd:string"
-            },
-            "domainIncludes": {
-                "@id": "scicat:PublishedData"
-            },
-            "@id": "scicat:scicatUser",
-            "@type": "rdfs:Property"
+            "name": "Tests_Carto.tar",
+            "description": "",
+            "@id": "https://dacat-development.psi.ch/datasets/PID.SAMPLE.PREFIX%2Fsoleil_ds2",
+            "@type": "Dataset"
         },
         {
-            "rangeIncludes": {
-                "@id": "xsd:integer"
-            },
-            "domainIncludes": {
-                "@id": "scicat:PublishedData"
-            },
-            "owl:equivalentProperty": {
-                "@id": "https://schema.datacite.org/meta/kernel-4/metadata.xsd#relatedIdentifer"
-            },
-            "@id": "scicat:relatedPublications",
-            "@type": "rdfs:Property"
-        },
-        {
-            "rangeIncludes": {
-                "@id": "xsd:integer"
-            },
-            "domainIncludes": {
-                "@id": "scicat:PublishedData"
-            },
-            "@id": "scicat:sizeOfArchive",
-            "@type": "rdfs:Property"
-        },
-        {
-            "rangeIncludes": {
-                "@id": "xsd:integer"
-            },
-            "domainIncludes": {
-                "@id": "scicat:PublishedData"
-            },
-            "@id": "scicat:numberOfFiles",
-            "@type": "rdfs:Property"
+            "name": "files.zip",
+            "description": "",
+            "@id": "https://dacat-development.psi.ch/datasets/PID.SAMPLE.PREFIX%2Fmaxiv_ds2",
+            "@type": "Dataset"
         },
         {
             "identifier": "10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5",
             "creator": [
                 {
-                    "@id": "aa84e53e-5a2e-4047-8b48-058efb5f2382"
+                    "@id": "eaf4cc90-2ea0-44c2-8c9f-a9f8ce448a2a"
                 },
                 {
-                    "@id": "022dc250-f2f6-4954-bc4b-976d402f15b2"
+                    "@id": "284f40e5-72fe-4414-91f8-141abcd0ed9d"
                 },
                 {
-                    "@id": "74578a66-8a6e-4182-ad2d-3b54df460a7f"
+                    "@id": "bdfa1049-0bf2-46aa-86db-74555124d266"
                 }
             ],
             "publisher": {
@@ -135,32 +98,29 @@
             "abstract": "3 ds",
             "additionalType": "raw",
             "sdDatePublished": "2023-01-26T13:02:38.341Z",
-            "creativeWorkStatus": "registered",
+            "creativeWorkStatus": "REGISTERED",
             "dateCreated": "2023-01-26T13:02:13.639Z",
             "dateModified": "2023-01-26T13:02:13.643Z",
             "description": "3 ds",
             "hasPart": [
+                {
+                    "@id": "https://dacat-development.psi.ch/datasets/PID.SAMPLE.PREFIX%2Fsoleil_ds2"
+                },
+                {
+                    "@id": "https://dacat-development.psi.ch/datasets/PID.SAMPLE.PREFIX%2Fmaxiv_ds2"
+                },
+                {
+                    "@id": "https://dacat-development.psi.ch/datasets/PID.SAMPLE.PREFIX%2Fukri_ds5"
+                }
             ],
-            "scicat:numberOfFiles": 0,
-            "scicat:sizeOfArchive": 35050000000,
             "@id": "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5",
-            "@type": [
-                "CreativeWork",
-                "scicat:PublishedData"
-            ]
+            "@type": "Collection"
         },
         {
-            "owl:equivalentClass": {
-                "@id": "https://schema.org/CreativeWork"
-            },
-            "@id": "scicat:PublishedData",
-            "@type": "rdfs:Class"
-        },
-        {
-            "identifier": "https://creativecommons.org/licenses/by-sa/4.0/",
-            "name": "Creative Commons Attribution Share Alike 4.0 International",
-            "@id": "https://creativecommons.org/licenses/by-sa/4.0/",
-            "@type": "CreativeWork"
+            "name": "raw",
+            "description": "",
+            "@id": "https://dacat-development.psi.ch/datasets/PID.SAMPLE.PREFIX%2Fukri_ds5",
+            "@type": "Dataset"
         },
         {
             "name": "Paul Scherrer Institute",
@@ -168,19 +128,25 @@
             "@type": "Organization"
         },
         {
-            "name": "Gabriel Bernardo",
-            "@id": "74578a66-8a6e-4182-ad2d-3b54df460a7f",
-            "@type": "Person"
-        },
-        {
             "name": "Maik Kahnt",
-            "@id": "022dc250-f2f6-4954-bc4b-976d402f15b2",
+            "@id": "284f40e5-72fe-4414-91f8-141abcd0ed9d",
             "@type": "Person"
         },
         {
             "name": "Doru Constantin",
-            "@id": "aa84e53e-5a2e-4047-8b48-058efb5f2382",
+            "@id": "eaf4cc90-2ea0-44c2-8c9f-a9f8ce448a2a",
             "@type": "Person"
+        },
+        {
+            "name": "Gabriel Bernardo",
+            "@id": "bdfa1049-0bf2-46aa-86db-74555124d266",
+            "@type": "Person"
+        },
+        {
+            "identifier": "https://creativecommons.org/licenses/by-sa/4.0/",
+            "name": "Creative Commons Attribution Share Alike 4.0 International",
+            "@id": "https://creativecommons.org/licenses/by-sa/4.0/",
+            "@type": "CreativeWork"
         }
     ]
 }

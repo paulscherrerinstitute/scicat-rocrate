@@ -4,7 +4,7 @@ import ch.psi.ord.core.DoiUtils;
 import ch.psi.ord.core.RoCrate;
 import ch.psi.ord.core.RoCrateExporter;
 import ch.psi.ord.core.RoCrateImporter;
-import ch.psi.ord.model.NoMetadataDescriptor;
+import ch.psi.ord.model.Error;
 import ch.psi.ord.model.ValidationReport;
 import ch.psi.scicat.client.ScicatClient;
 import com.apicatalog.jsonld.JsonLdOptions;
@@ -34,6 +34,7 @@ import org.apache.jena.riot.RiotException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
+import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
 @Path("ro-crate")
 @Tag(name = "ro-crate")
@@ -64,6 +65,23 @@ public class RoCrateController {
     jsonLdOptions.setUndefinedTermsPolicy(ProcessingPolicy.Warn);
     jsonLdOptions.setDocumentLoader(documentLoader);
     jsonLdOptions.setUriValidation(UriValidationPolicy.None);
+  }
+
+  @ServerExceptionMapper
+  public Response mapRiotException(RiotException e) {
+    return Response.status(Status.BAD_REQUEST)
+        .entity(new Error("Failed to parse the metadata descriptor"))
+        .build();
+  }
+
+  @ServerExceptionMapper
+  public Response mapZipException(ZipException e) {
+    return Response.status(Status.BAD_REQUEST).entity(new Error(e.getMessage())).build();
+  }
+
+  @ServerExceptionMapper
+  public Response mapFileNotFoundException(FileNotFoundException e) {
+    return Response.status(Status.BAD_REQUEST).entity(new Error(e.getMessage())).build();
   }
 
   private Optional<Response> export(List<String> identifiers) {
@@ -131,10 +149,6 @@ public class RoCrateController {
     try (RoCrate crate = new RoCrate(body)) {
       importer.loadCrate(crate);
       return Response.ok(importer.validate()).build();
-    } catch (RiotException e) {
-      return Response.status(Status.BAD_REQUEST)
-          .entity("Failed to parse the metadata descriptor")
-          .build();
     }
   }
 
@@ -142,21 +156,12 @@ public class RoCrateController {
   @Path("/validate")
   @Consumes(ExtraMediaType.APPLICATION_ZIP)
   @Produces(MediaType.APPLICATION_JSON)
-  public Response validateZippedCrate(InputStream body) {
+  public Response validateZippedCrate(InputStream body)
+      throws RiotException, FileNotFoundException, ZipException, IOException {
     try (ZipInputStream zip = new ZipInputStream(body);
         RoCrate crate = new RoCrate(zip)) {
       importer.loadCrate(crate);
       return Response.ok(importer.validate()).build();
-    } catch (RiotException e) {
-      return Response.status(Status.BAD_REQUEST)
-          .entity("Failed to parse the metadata descriptor")
-          .build();
-    } catch (ZipException e) {
-      return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
-    } catch (FileNotFoundException e) {
-      return Response.status(Status.BAD_REQUEST).entity(new NoMetadataDescriptor()).build();
-    } catch (IOException e) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -181,10 +186,6 @@ public class RoCrateController {
       return Response.status(importMap.isEmpty() ? Status.OK : Status.CREATED)
           .entity(importMap)
           .build();
-    } catch (RiotException e) {
-      return Response.status(Status.BAD_REQUEST)
-          .entity("Failed to parse the metadata descriptor")
-          .build();
     }
   }
 
@@ -193,7 +194,8 @@ public class RoCrateController {
   @Consumes(ExtraMediaType.APPLICATION_ZIP)
   @Produces(MediaType.APPLICATION_JSON)
   public Response importZippedCrate(
-      @HeaderParam(value = "api-key") String scicatToken, InputStream body) {
+      @HeaderParam(value = "api-key") String scicatToken, InputStream body)
+      throws RiotException, FileNotFoundException, ZipException, IOException {
     if (!scicatClient.checkTokenValidity(scicatToken)) {
       return Response.status(Status.UNAUTHORIZED).build();
     }
@@ -210,16 +212,6 @@ public class RoCrateController {
       return Response.status(importMap.isEmpty() ? Status.OK : Status.CREATED)
           .entity(importMap)
           .build();
-    } catch (RiotException e) {
-      return Response.status(Status.BAD_REQUEST)
-          .entity("Failed to parse the metadata descriptor")
-          .build();
-    } catch (ZipException e) {
-      return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
-    } catch (FileNotFoundException e) {
-      return Response.status(Status.BAD_REQUEST).entity(new NoMetadataDescriptor()).build();
-    } catch (IOException e) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 }
