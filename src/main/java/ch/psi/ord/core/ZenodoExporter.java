@@ -1,87 +1,56 @@
 package ch.psi.ord.core;
 
-import ch.psi.ord.api.ExtraMediaType;
+import ch.psi.ord.model.ZenodoDataset;
+import ch.psi.rdf.RdfSerializer;
+import ch.psi.scicat.client.ScicatClient;
 import ch.psi.scicat.model.v3.PublishedData;
+import com.apicatalog.jsonld.JsonLd;
+import com.apicatalog.jsonld.document.Document;
+import com.apicatalog.jsonld.document.JsonDocument;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.json.Json;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
-import java.util.List;
+import jakarta.ws.rs.WebApplicationException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.riot.RDFWriter;
 import org.apache.jena.vocabulary.SchemaDO;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.resteasy.reactive.RestResponse;
+import org.modelmapper.ModelMapper;
 
 @ApplicationScoped
 public class ZenodoExporter {
-  @Inject
-  @ConfigProperty(name = "quarkus.rest-client.\"ch.psi.scicat.client.ScicatService\".url")
-  String scicatServiceUrl;
+  @Inject ScicatClient scicatClient;
+  @Inject private ModelMapper modelMapper;
+  private RdfSerializer serializer = new RdfSerializer();
 
-  public JsonObject toZenodoJsonLd(PublishedData publishedData) {
-    JsonObjectBuilder builder = Json.createObjectBuilder();
+  public String exportDoi(String doi) throws Exception {
+    RestResponse<PublishedData> res = scicatClient.getPublishedDataById(doi);
+    PublishedData publishedData = res.getEntity();
+    ZenodoDataset zenodoDataset = modelMapper.map(publishedData, ZenodoDataset.class);
 
-    builder.add("@context", SchemaDO.NS);
-    builder.add("@type", SchemaDO.Dataset.getLocalName());
+    Model model = ModelFactory.createDefaultModel().setNsPrefix("", SchemaDO.NS);
+    if (serializer.serialize(model, zenodoDataset).isEmpty()) {
+      throw new WebApplicationException();
+    }
+    StringWriter sw = new StringWriter();
+    RDFWriter.create().source(model).format(RDFFormat.JSONLD11).build().output(sw);
 
-    String doiUrl = String.format(DoiUtils.buildStandardUrl(publishedData.getDoi()));
-    builder.add("@id", doiUrl);
-    builder.add(SchemaDO.identifier.getLocalName(), doiUrl);
+    Document doc = JsonDocument.of(new StringReader(sw.toString()));
+    Document context =
+        JsonDocument.of(new StringReader("{\"@context\": {\"@vocab\": \"https://schema.org/\"}}"));
+    String frameJson =
+        """
+        {
+          "@context": {"@vocab": "https://schema.org/"},
+          "@type": "Dataset",
+          "@embed": "@always"
+        }
+        """;
 
-    builder.add(SchemaDO.name.getLocalName(), publishedData.getTitle());
-    builder.add(SchemaDO.dateCreated.getLocalName(), publishedData.getCreatedAt());
-    builder.add(
-        SchemaDO.datePublished.getLocalName(), publishedData.getRegisteredTime().toString());
-    builder.add(SchemaDO.dateModified.getLocalName(), publishedData.getUpdatedAt());
-    // FIXME: for now we only support one hardcoded license
-    builder.add(SchemaDO.license.getLocalName(), "https://creativecommons.org/licenses/by-sa/4.0/");
-    builder.add(SchemaDO.description.getLocalName(), publishedData.getAbstract());
-
-    builder.add(
-        SchemaDO.creator.getLocalName(),
-        Json.createArrayBuilder(
-            publishedData.getCreator().stream()
-                .map(
-                    creatorName ->
-                        Json.createObjectBuilder()
-                            .add("@type", SchemaDO.Person.getLocalName())
-                            .add(SchemaDO.name.getLocalName(), creatorName)
-                            .build())
-                .toList()));
-
-    // FIXME: for now we only have one publisher
-    builder.add(
-        SchemaDO.publisher.getLocalName(),
-        Json.createObjectBuilder()
-            .add("@type", SchemaDO.Organization.getLocalName())
-            .add(SchemaDO.name.getLocalName(), "Paul Scherrer Institute")
-            .build());
-
-    builder.add(
-        SchemaDO.url.getLocalName(),
-        String.format(
-            "%s/publisheddata/%s", scicatServiceUrl, publishedData.getDoi().replace("/", "%2f")));
-
-    builder.add(
-        SchemaDO.distribution.getLocalName(),
-        Json.createArrayBuilder(
-            // TODO: How to get the actual URLs
-            List.of(
-                    "https://fixme-1-dl.psi.ch",
-                    "https://fixme-2-dl.psi.ch",
-                    "https://fixme-3-dl.psi.ch")
-                .stream()
-                .map(
-                    contentUrl ->
-                        Json.createObjectBuilder()
-                            .add("@type", SchemaDO.DataDownload.getLocalName())
-                            .add(SchemaDO.contentUrl.getLocalName(), contentUrl)
-                            // FIXME: we expect only tarballs for now
-                            .add(
-                                SchemaDO.encodingFormat.getLocalName(),
-                                ExtraMediaType.APPLICATION_TAR)
-                            .build())
-                .toList()));
-
-    return builder.build();
+    Document frame = JsonDocument.of(new StringReader(frameJson));
+    return JsonLd.frame(doc, frame).get().toString();
   }
 }

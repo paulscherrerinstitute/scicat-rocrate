@@ -15,7 +15,7 @@ public class Organization {
   String name;
 
   @RdfResourceUri()
-  String generateId() {
+  public String generateId() {
     if (this == PSI) {
       return "https://ror.org/03eh3y714";
     }
