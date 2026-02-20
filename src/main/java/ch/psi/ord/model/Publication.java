@@ -11,7 +11,7 @@ import org.apache.jena.vocabulary.SchemaDO;
 
 @Getter
 @Setter
-@RdfClass(typesUri = SchemaDO.NS + "CreativeWork")
+@RdfClass(typesUri = SchemaDO.NS + "Collection")
 public class Publication {
   @RdfProperty(uri = SchemaDO.NS + "identifier", minCardinality = 1, maxCardinality = 1)
   private String identifier;

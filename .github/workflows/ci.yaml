@@ -71,6 +71,7 @@ jobs:
       - uses: hoverkraft-tech/compose-action@v2.5.0
         with:
           compose-file: ./compose.yaml
+          up-flags: --wait-timeout 120
           cwd: ${{ github.workspace }}/scicatlive
 
       - name: Run test suite
