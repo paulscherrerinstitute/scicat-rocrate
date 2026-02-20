@@ -60,7 +60,7 @@ public class RdfSerializer {
     try {
       for (Method method : obj.getClass().getDeclaredMethods()) {
         if (method.isAnnotationPresent(RdfResourceUri.class)) {
-          return Optional.of(method.invoke(obj).toString());
+          return Optional.ofNullable(method.invoke(obj)).map(Object::toString);
         }
       }
     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
