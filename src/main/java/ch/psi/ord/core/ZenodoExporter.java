@@ -1,6 +1,7 @@
 package ch.psi.ord.core;
 
 import ch.psi.ord.model.ZenodoDataset;
+import ch.psi.rdf.RdfSerializationException;
 import ch.psi.rdf.RdfSerializer;
 import ch.psi.scicat.client.ScicatClient;
 import ch.psi.scicat.model.v3.PublishedData;
@@ -10,15 +11,12 @@ import com.apicatalog.jsonld.document.Document;
 import com.apicatalog.jsonld.document.JsonDocument;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFWriter;
-import org.apache.jena.vocabulary.SchemaDO;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.modelmapper.ModelMapper;
 
@@ -52,17 +50,18 @@ public class ZenodoExporter {
     }
   }
 
-  public String exportDoi(String doi) throws Exception {
+  public String exportDoi(String doi) throws RdfSerializationException, JsonLdError {
     RestResponse<PublishedData> res = scicatClient.getPublishedDataById(doi);
     PublishedData publishedData = res.getEntity();
     ZenodoDataset zenodoDataset = modelMapper.map(publishedData, ZenodoDataset.class);
 
-    Model model = ModelFactory.createDefaultModel().setNsPrefix("", SchemaDO.NS);
-    if (serializer.serialize(model, zenodoDataset).isEmpty()) {
-      throw new WebApplicationException();
-    }
+    Resource serializedDataset = serializer.serialize(zenodoDataset);
     StringWriter sw = new StringWriter();
-    RDFWriter.create().source(model).format(RDFFormat.JSONLD11).build().output(sw);
+    RDFWriter.create()
+        .source(serializedDataset.getModel())
+        .format(RDFFormat.JSONLD11)
+        .build()
+        .output(sw);
     Document doc = JsonDocument.of(new StringReader(sw.toString()));
 
     return JsonLd.frame(doc, zenodoFrame).get().toString();
