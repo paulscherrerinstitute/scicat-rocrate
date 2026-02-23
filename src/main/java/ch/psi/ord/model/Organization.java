@@ -12,7 +12,7 @@ import org.apache.jena.vocabulary.SchemaDO;
 @RdfClass(typesUri = SchemaDO.NS + "Organization")
 public class Organization {
   @RdfProperty(uri = SchemaDO.NS + "name", minCardinality = 1)
-  String name;
+  public String name;
 
   @RdfResourceUri()
   public String generateId() {
