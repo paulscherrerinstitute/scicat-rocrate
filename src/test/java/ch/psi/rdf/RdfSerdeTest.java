@@ -1,5 +1,11 @@
 package ch.psi.rdf;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ch.psi.rdf.RdfDeserializer.DeserializationReport;
 import ch.psi.rdf.TestClasses.PrimitiveTypes;
 import io.quarkus.test.junit.QuarkusTest;
@@ -11,7 +17,6 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.vocabulary.RDF;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,23 +39,23 @@ public class RdfSerdeTest {
   @Test
   @DisplayName("Bad input")
   public void test00() throws Exception {
-    Assertions.assertTrue(serializer.serialize(model, Instant.now()).isEmpty());
-    Assertions.assertTrue(serializer.serialize(null, new TestClasses.Empty()).isEmpty());
-    Assertions.assertTrue(serializer.serialize(model, null).isEmpty());
-    Assertions.assertTrue(serializer.serialize(null, null).isEmpty());
+    RdfSerializationException e =
+        assertThrows(RdfSerializationException.class, () -> serializer.serialize(Instant.now()));
+    assertEquals(
+        e.getMessage(),
+        "Can not serialize instance of 'java.time.Instant', missing '@RdfClass' annotation");
 
-    Assertions.assertFalse(
-        deserializer.deserialize(model.createResource(), Instant.class).isValid());
-    Assertions.assertFalse(deserializer.deserialize(null, Instant.class).isValid());
-    Assertions.assertFalse(deserializer.deserialize(model.createResource(), null).isValid());
-    Assertions.assertFalse(deserializer.deserialize(null, null).isValid());
+    assertFalse(deserializer.deserialize(model.createResource(), Instant.class).isValid());
+    assertFalse(deserializer.deserialize(null, Instant.class).isValid());
+    assertFalse(deserializer.deserialize(model.createResource(), null).isValid());
+    assertFalse(deserializer.deserialize(null, null).isValid());
   }
 
   @Test
   @DisplayName("Empty class")
   public void test01() throws Exception {
-    Resource r = serializer.serialize(model, new TestClasses.Empty()).get();
-    Assertions.assertEquals(getTypeUri(r), TestClasses.NS + "Empty");
+    Resource r = serializer.serialize(new TestClasses.Empty());
+    assertEquals(getTypeUri(r), TestClasses.NS + "Empty");
   }
 
   @Test
@@ -63,24 +68,24 @@ public class RdfSerdeTest {
     instance.floatArray = List.of(7.7f, 8.8f, 9.9f);
     instance.booleanArray = List.of(true, false, true);
 
-    Resource r = serializer.serialize(model, instance).get();
-    Assertions.assertEquals(getTypeUri(r), TestClasses.NS + "Arrays");
+    Resource r = serializer.serialize(instance);
+    assertEquals(getTypeUri(r), TestClasses.NS + "Arrays");
 
     DeserializationReport<TestClasses.Arrays> report =
         deserializer.deserialize(r, TestClasses.Arrays.class);
-    Assertions.assertTrue(report.isValid());
-    Assertions.assertNotNull(report.get());
+    assertTrue(report.isValid());
+    assertNotNull(report.get());
     // Order is not preserved
     TestClasses.Arrays deserializedInstance = report.get();
-    Assertions.assertEquals(
+    assertEquals(
         new HashSet<>(instance.stringArray), new HashSet<>(deserializedInstance.stringArray));
-    Assertions.assertEquals(
+    assertEquals(
         new HashSet<>(instance.integerArray), new HashSet<>(deserializedInstance.integerArray));
-    Assertions.assertEquals(
+    assertEquals(
         new HashSet<>(instance.doubleArray), new HashSet<>(deserializedInstance.doubleArray));
-    Assertions.assertEquals(
+    assertEquals(
         new HashSet<>(instance.floatArray), new HashSet<>(deserializedInstance.floatArray));
-    Assertions.assertEquals(
+    assertEquals(
         new HashSet<>(instance.booleanArray), new HashSet<>(deserializedInstance.booleanArray));
   }
 
@@ -88,9 +93,9 @@ public class RdfSerdeTest {
   @DisplayName("Custom URI")
   public void test03() throws Exception {
     TestClasses.CustomUri customURI = new TestClasses.CustomUri();
-    Resource r = serializer.serialize(model, customURI).get();
-    Assertions.assertEquals(getTypeUri(r), TestClasses.NS + "CustomUri");
-    Assertions.assertEquals(customURI.customUri(), r.getURI());
+    Resource r = serializer.serialize(customURI);
+    assertEquals(getTypeUri(r), TestClasses.NS + "CustomUri");
+    assertEquals(customURI.customUri(), r.getURI());
   }
 
   @Test
@@ -106,39 +111,39 @@ public class RdfSerdeTest {
     primitiveTypes.g = Float.valueOf(6);
     primitiveTypes.h = false;
     primitiveTypes.i = Boolean.TRUE;
-    Resource r = serializer.serialize(model, primitiveTypes).get();
-    Assertions.assertEquals(getTypeUri(r), TestClasses.NS + "PrimitiveTypes");
+    Resource r = serializer.serialize(primitiveTypes);
+    assertEquals(getTypeUri(r), TestClasses.NS + "PrimitiveTypes");
 
-    Assertions.assertEquals(
+    assertEquals(
         primitiveTypes.a,
         r.getProperty(TestClasses.Propstring).getObject().asLiteral().getString());
-    Assertions.assertEquals(
+    assertEquals(
         primitiveTypes.b, r.getProperty(TestClasses.Propinteger).getObject().asLiteral().getInt());
-    Assertions.assertEquals(
+    assertEquals(
         primitiveTypes.c,
         r.getProperty(TestClasses.PropintegerClass).getObject().asLiteral().getInt());
-    Assertions.assertEquals(
+    assertEquals(
         primitiveTypes.d, r.getProperty(TestClasses.Propdouble).getObject().asLiteral().getInt());
-    Assertions.assertEquals(
+    assertEquals(
         primitiveTypes.e,
         r.getProperty(TestClasses.PropdoubleClass).getObject().asLiteral().getDouble());
-    Assertions.assertEquals(
+    assertEquals(
         primitiveTypes.f, r.getProperty(TestClasses.Propfloat).getObject().asLiteral().getFloat());
-    Assertions.assertEquals(
+    assertEquals(
         primitiveTypes.g,
         r.getProperty(TestClasses.PropfloatClass).getObject().asLiteral().getFloat());
-    Assertions.assertEquals(
+    assertEquals(
         primitiveTypes.h,
         r.getProperty(TestClasses.Propboolean).getObject().asLiteral().getBoolean());
-    Assertions.assertEquals(
+    assertEquals(
         primitiveTypes.i,
         r.getProperty(TestClasses.PropbooleanClass).getObject().asLiteral().getBoolean());
 
     DeserializationReport<PrimitiveTypes> report =
         deserializer.deserialize(r, PrimitiveTypes.class);
-    Assertions.assertTrue(report.isValid());
-    Assertions.assertNotNull(report.get());
-    Assertions.assertEquals(primitiveTypes, report.get());
+    assertTrue(report.isValid());
+    assertNotNull(report.get());
+    assertEquals(primitiveTypes, report.get());
   }
 
   @Test
@@ -146,15 +151,15 @@ public class RdfSerdeTest {
   public void test05() {
     model.createResource(ResourceFactory.createResource(TestClasses.NS_http + "Empty"));
     Resource subject = model.listSubjects().toList().getFirst();
-    Assertions.assertTrue(deserializer.deserialize(subject, TestClasses.Empty.class).isValid());
+    assertTrue(deserializer.deserialize(subject, TestClasses.Empty.class).isValid());
   }
 
   @Test
   @DisplayName("Type URI scheme mismatch (https instead of http)")
   public void test06() throws Exception {
-    serializer.serialize(model, new TestClasses.Empty());
-    Resource subject = model.listSubjects().toList().getFirst();
-    Assertions.assertTrue(deserializer.deserialize(subject, TestClasses.EmptyHttp.class).isValid());
+    Resource serialized = serializer.serialize(new TestClasses.Empty());
+    Resource subject = serialized.getModel().listSubjects().toList().getFirst();
+    assertTrue(deserializer.deserialize(subject, TestClasses.EmptyHttp.class).isValid());
   }
 
   @Test
@@ -169,7 +174,7 @@ public class RdfSerdeTest {
 
     Resource subject = model.listSubjects().toList().getFirst();
     var report = deserializer.deserialize(subject, TestClasses.PrimitiveTypes.class);
-    Assertions.assertTrue(report.isValid());
-    Assertions.assertEquals(12.0, report.get().d);
+    assertTrue(report.isValid());
+    assertEquals(12.0, report.get().d);
   }
 }

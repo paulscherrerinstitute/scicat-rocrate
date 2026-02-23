@@ -9,8 +9,8 @@ import org.apache.jena.vocabulary.SchemaDO;
 @Data
 public class DataDownload {
   @RdfProperty(uri = SchemaDO.NS + "contentUrl")
-  String contentUrl;
+  public String contentUrl;
 
   @RdfProperty(uri = SchemaDO.NS + "encodingFormat")
-  String encodingFormat;
+  public String encodingFormat;
 }

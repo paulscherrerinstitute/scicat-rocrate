@@ -16,7 +16,7 @@ public class ZenodoController {
   @GET
   @Path("/{doi}/export")
   @Produces(ExtraMediaType.APPLICATION_JSONLD)
-  public Response exportPublication(@PathParam("doi") String doi) throws Exception {
+  public Response exportDoi(@PathParam("doi") String doi) throws Exception {
     try {
       return Response.ok(exporter.exportDoi(doi)).build();
     } catch (WebApplicationException e) {
