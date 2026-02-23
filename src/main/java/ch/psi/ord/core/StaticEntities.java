@@ -21,7 +21,12 @@ public class StaticEntities {
     CONTEXT_NODE.put("rdfs", RDFS.uri);
     CONTEXT_NODE.put("conformsTo", "http://purl.org/dc/terms/conformsTo");
 
-    List.of(SchemaDO.Dataset, SchemaDO.CreativeWork, SchemaDO.Person, SchemaDO.Organization)
+    List.of(
+            SchemaDO.Dataset,
+            SchemaDO.CreativeWork,
+            SchemaDO.Collection,
+            SchemaDO.Person,
+            SchemaDO.Organization)
         .forEach(c -> CONTEXT_NODE.put(c.getLocalName(), c.getURI()));
 
     List.of(
