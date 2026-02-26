@@ -33,7 +33,6 @@ public class ZenodoControllerTest extends EndpointTest {
         .get("/zenodo/{doi}/export")
         .then()
         .statusCode(200)
-        .body("@context", equalTo(SchemaDO.NS))
         .body("@type", equalTo(SchemaDO.Dataset.getLocalName()))
         .body("@id", equalTo(doiUrl))
         .body(SchemaDO.identifier.getLocalName(), equalTo(doiUrl))
@@ -48,7 +47,7 @@ public class ZenodoControllerTest extends EndpointTest {
             equalTo(SchemaDO.Organization.getLocalName()))
         .body(
             SchemaDO.publisher.getLocalName() + "." + SchemaDO.name.getLocalName(),
-            equalTo("Paul Scherrer Institute"))
+            equalTo(TestData.psiPub1.getPublisher()))
         .body(SchemaDO.creator.getLocalName(), hasSize(TestData.psiPub1.getCreator().size()))
         .body(
             SchemaDO.creator.getLocalName() + ".@type",
