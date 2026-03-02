@@ -12,6 +12,10 @@ updates:
      prefix: chore
      prefix-development: chore
      include: scope
+   groups:
+    jena:
+      patterns:
+        - "org.apache.jena:jena-*"
  - package-ecosystem: "docker"
    directory: "/src/main/docker/"
    schedule:
