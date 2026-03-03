@@ -11,11 +11,11 @@ import org.apache.jena.vocabulary.SchemaDO;
 @RdfClass(typesUri = SchemaDO.NS + "Person")
 public class Person {
   @RdfProperty(uri = SchemaDO.NS + "name", minCardinality = 1)
-  String name;
+  public String name;
 
   @RdfProperty(uri = SchemaDO.NS + "givenName")
-  String givenName;
+  public String givenName;
 
   @RdfProperty(uri = SchemaDO.NS + "familyName")
-  String familyName;
+  public String familyName;
 }

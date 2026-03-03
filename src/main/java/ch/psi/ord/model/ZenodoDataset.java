@@ -12,7 +12,7 @@ import org.apache.jena.vocabulary.SchemaDO;
 @RdfClass(typesUri = SchemaDO.NS + "Dataset")
 public class ZenodoDataset {
   @RdfProperty(uri = SchemaDO.NS + "identifier", minCardinality = 1)
-  String identifier;
+  public String identifier;
 
   @RdfResourceUri()
   public String getIdentifier() {
@@ -20,25 +20,25 @@ public class ZenodoDataset {
   }
 
   @RdfProperty(uri = SchemaDO.NS + "name", minCardinality = 1)
-  String name;
+  public String name;
 
   @RdfProperty(uri = SchemaDO.NS + "description", minCardinality = 1)
-  String description;
+  public String description;
 
   @RdfProperty(uri = SchemaDO.NS + "dateCreated", minCardinality = 1)
-  String dateCreated;
+  public String dateCreated;
 
   @RdfProperty(uri = SchemaDO.NS + "datePublished", minCardinality = 1)
-  String datePublished;
+  public String datePublished;
 
   @RdfProperty(uri = SchemaDO.NS + "publisher", minCardinality = 1)
-  Organization publisher;
+  public Organization publisher;
 
   @RdfProperty(uri = SchemaDO.NS + "creator", minCardinality = 1)
-  List<Person> creators;
+  public List<Person> creators;
 
   @RdfProperty(uri = SchemaDO.NS + "distribution", minCardinality = 1)
-  List<DataDownload> distribution =
+  public List<DataDownload> distribution =
       List.of(
           new DataDownload()
               .setContentUrl("https://fixme-1-dl.psi.ch")

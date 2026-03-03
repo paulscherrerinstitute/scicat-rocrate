@@ -3,77 +3,116 @@ package ch.psi.rdf;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.vocabulary.RDF;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+/**
+ * A utility class to serialize Java objects in RDF.
+ *
+ * <p>This serializer uses reflection and custom annotations ({@link RdfClass}, {@link RdfProperty},
+ * and {@link RdfResourceUri}) to serialize an annotated object to a Jena {@link Model}. It supports
+ * primitive types, nested annotated objects, and collections.
+ *
+ * @see RdfClass
+ * @see RdfProperty
+ * @see RdfResourceUri
+ */
+@Slf4j
 public class RdfSerializer {
-  private static final Logger logger = LoggerFactory.getLogger(RdfSerializer.class);
-
-  // FIXME: transaction like logic should be implemented on the model
-  public Optional<Resource> serialize(Model model, Object obj) throws Exception {
-    Optional<Resource> serializedObject = Optional.empty();
-    if (model == null || obj == null) {
-      return serializedObject;
-    }
-
+  /**
+   * Translates a Java object into an RDF Resource.
+   *
+   * @param obj The object instance to be serialized.
+   * @return A {@link Resource} containing the object's data as RDF properties.
+   * @throws RdfSerializationException If the class is improperly annotated, a field or method is
+   *     has the wrong visibility or generating a URI for the object fails
+   */
+  public Resource serialize(Object obj) throws RdfSerializationException {
+    Model model = ModelFactory.createDefaultModel();
     Class<?> clazz = obj.getClass();
 
-    if (clazz.isAnnotationPresent(RdfClass.class)) {
-      RdfClass rdfClass = clazz.getAnnotation(RdfClass.class);
-      serializedObject =
-          generateResourceUri(obj)
-              .map(uri -> Optional.of(model.createResource(uri)))
-              .orElseGet(() -> Optional.of(model.createResource()));
+    @NonNull RdfClass rdfClass = validateClassAnnotation(clazz);
+    Resource serializedObject = createResourceWithUri(obj, model);
 
-      // NOTE: what to do when types is empty?
-      for (String type : rdfClass.typesUri()) {
-        Resource typeResource = model.createResource(type);
-        serializedObject.get().addProperty(RDF.type, typeResource);
-      }
+    for (String type : rdfClass.typesUri()) {
+      Resource typeResource = model.createResource(type);
+      serializedObject.addProperty(RDF.type, typeResource);
+    }
 
-      for (Field field : clazz.getDeclaredFields()) {
-        field.setAccessible(true);
-        if (field.isAnnotationPresent(RdfProperty.class)) {
-          RdfProperty rdfProperty = field.getAnnotation(RdfProperty.class);
-          Property property = ResourceFactory.createProperty(rdfProperty.uri());
-          Object value = field.get(obj);
+    List<Field> annotatedFields =
+        Arrays.stream(clazz.getDeclaredFields())
+            .filter(f -> f.isAnnotationPresent(RdfProperty.class))
+            .collect(Collectors.toList());
 
-          if (value != null) {
-            serializeValue(serializedObject.get(), value, property);
-          } else {
-            logger.warn("Ignoring field '{}' because it's null", field.getName());
-          }
+    for (Field field : annotatedFields) {
+      try {
+        @NonNull RdfProperty rdfProperty = field.getAnnotation(RdfProperty.class);
+        Property property = ResourceFactory.createProperty(rdfProperty.uri());
+        Object value = field.get(obj);
+        if (value != null) {
+          serializeValue(serializedObject, value, property);
+        } else {
+          log.warn("Ignoring field '{}' because it's null", field.getName());
         }
+      } catch (IllegalAccessException e) {
+        throw new RdfSerializationException(
+            String.format(
+                "Failed to read field '%s' of class '%s'",
+                field.getName(), clazz.getCanonicalName()),
+            e);
       }
     }
 
     return serializedObject;
   }
 
-  public Optional<String> generateResourceUri(Object obj) {
-    try {
-      for (Method method : obj.getClass().getDeclaredMethods()) {
-        if (method.isAnnotationPresent(RdfResourceUri.class)) {
-          return Optional.ofNullable(method.invoke(obj)).map(Object::toString);
-        }
-      }
-    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-      logger.error(
-          "URI generation function for class '" + obj.getClass().getName() + "' is not compliant",
-          e);
+  private Resource createResourceWithUri(Object obj, Model model) throws RdfSerializationException {
+    List<Method> annotatedMethods =
+        Arrays.stream(obj.getClass().getDeclaredMethods())
+            .filter(
+                m ->
+                    m.isAnnotationPresent(RdfResourceUri.class)
+                        && m.getParameterCount() == 0
+                        && m.getReturnType() == String.class)
+            .toList();
+
+    if (annotatedMethods.isEmpty()) {
+      return model.createResource();
     }
 
-    return Optional.empty();
+    for (Method method : annotatedMethods) {
+      try {
+        String generatedUri = (String) method.invoke(obj);
+        return model.createResource(generatedUri);
+      } catch (InvocationTargetException e) {
+        throw new RdfSerializationException(
+            String.format(
+                "URI generation method '%s' of class '%s' threw an exception.",
+                method.getName(), obj.getClass().getCanonicalName()),
+            e);
+      } catch (IllegalAccessException e) {
+        throw new RdfSerializationException(
+            String.format(
+                "Failed to call method '%s' of class '%s'.",
+                method.getName(), obj.getClass().getCanonicalName()),
+            e);
+      }
+    }
+
+    return model.createResource();
   }
 
   private void serializeValue(Resource serializedObject, Object value, Property property)
-      throws Exception {
+      throws RdfSerializationException {
     if (value instanceof String str) {
       serializedObject.addProperty(property, str);
     } else if (value instanceof Boolean b) {
@@ -85,14 +124,36 @@ public class RdfSerializer {
     } else if (value instanceof Float f) {
       serializedObject.addLiteral(property, f.floatValue());
     } else if (value.getClass().isAnnotationPresent(RdfClass.class)) {
-      Optional<Resource> nestedObject = serialize(serializedObject.getModel(), value);
-      nestedObject.ifPresent(o -> serializedObject.addProperty(property, o));
+      Resource nestedObject = serialize(value);
+      serializedObject
+          .getModel()
+          .add(nestedObject.getModel())
+          .add(serializedObject, property, nestedObject);
     } else if (value instanceof Iterable) {
       for (Object item : (Iterable<?>) value) {
         serializeValue(serializedObject, item, property);
       }
     } else {
-      throw new IllegalStateException("Unable to serialize type " + value.getClass().getName());
+      throw new IllegalStateException(
+          String.format("Unable to serialize type %s", value.getClass().getName()));
     }
+  }
+
+  private RdfClass validateClassAnnotation(Class<?> clazz) throws RdfSerializationException {
+    if (!clazz.isAnnotationPresent(RdfClass.class)) {
+      throw new RdfSerializationException(
+          String.format(
+              "Can not serialize instance of '%s', missing '@RdfClass' annotation",
+              clazz.getCanonicalName()));
+    }
+    RdfClass rdfClass = clazz.getAnnotation(RdfClass.class);
+    if (rdfClass.typesUri().length < 1) {
+      throw new RdfSerializationException(
+          String.format(
+              "Can not serialize instance of '%s', empty 'typesUri' annotation parameter",
+              clazz.getCanonicalName()));
+    }
+
+    return rdfClass;
   }
 }
