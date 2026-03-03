@@ -4,7 +4,9 @@ import static org.modelmapper.Conditions.isNotNull;
 
 import ch.psi.ord.model.Person;
 import ch.psi.ord.model.Publication;
+import ch.psi.ord.model.ZenodoDataset;
 import ch.psi.scicat.model.v3.CreatePublishedDataDto;
+import ch.psi.scicat.model.v3.PublishedData;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
 import java.time.OffsetDateTime;
@@ -72,6 +74,14 @@ public class ScicatModelMapper {
         }
       };
 
+  Converter<String, String> doiToDoiUrl =
+      new Converter<String, String>() {
+        @Override
+        public String convert(MappingContext<String, String> context) {
+          return DoiUtils.buildStandardUrl(context.getSource());
+        }
+      };
+
   @Produces
   public ModelMapper createPublicationModelMapper() {
     ModelMapper mapper = new ModelMapper();
@@ -100,6 +110,27 @@ public class ScicatModelMapper {
               // Default values
               m.map(src -> "derived", CreatePublishedDataDto::setResourceType);
               m.map(src -> "pending_registration", CreatePublishedDataDto::setStatus);
+            });
+
+    mapper
+        .typeMap(PublishedData.class, ZenodoDataset.class)
+        .addMappings(
+            m -> {
+              m.when(isNotNull())
+                  .using(doiToDoiUrl)
+                  .map(PublishedData::getDoi, ZenodoDataset::setIdentifier);
+              m.when(isNotNull()).map(PublishedData::getTitle, ZenodoDataset::setName);
+              m.when(isNotNull()).map(PublishedData::getAbstract, ZenodoDataset::setDescription);
+              m.when(isNotNull()).map(PublishedData::getCreatedAt, ZenodoDataset::setDateCreated);
+              m.when(isNotNull())
+                  .map(PublishedData::getRegisteredTime, ZenodoDataset::setDatePublished);
+              m.when(isNotNull())
+                  .map(
+                      src -> src.getPublisher(),
+                      (dst, v) -> dst.getPublisher().setName((String) v));
+              m.when(isNotNull())
+                  .using(stringListToPerson)
+                  .map(PublishedData::getCreator, ZenodoDataset::setCreators);
             });
 
     return mapper;
