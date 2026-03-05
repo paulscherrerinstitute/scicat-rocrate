@@ -22,20 +22,26 @@ public abstract class EndpointTest {
 
   public String login() {
     try {
-      String url = "http://backend.localhost/api/v3/Users/login";
-      String jsonInputString = "{\"username\":\"rocrate\", \"password\":\"rocrate\"}";
+      String url = "http://backend.localhost/api/v3/auth/login";
+      String loginPayload =
+          """
+          {
+            "username":"rocrate",
+            "password":"rocrate"
+          }
+          """;
       HttpClient client = HttpClient.newHttpClient();
       HttpRequest request =
           HttpRequest.newBuilder()
               .uri(URI.create(url))
               .header("Content-Type", "application/json")
               .header("Accept", "application/json")
-              .POST(HttpRequest.BodyPublishers.ofString(jsonInputString))
+              .POST(HttpRequest.BodyPublishers.ofString(loginPayload))
               .build();
       HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
       ObjectMapper objectMapper = new ObjectMapper();
       JsonNode jsonResponse = objectMapper.readTree(response.body());
-      return jsonResponse.get("id").asText();
+      return jsonResponse.get("access_token").asText();
     } catch (IOException | InterruptedException e) {
       throw new RuntimeException("Failed to fetch SciCat access token, aborting tests");
     }

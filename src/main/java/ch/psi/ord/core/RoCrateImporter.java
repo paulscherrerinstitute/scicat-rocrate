@@ -9,12 +9,12 @@ import ch.psi.rdf.RdfDeserializer;
 import ch.psi.rdf.RdfDeserializer.DeserializationReport;
 import ch.psi.rdf.RdfUtils;
 import ch.psi.scicat.client.ScicatClient;
-import ch.psi.scicat.model.compat.UserDetails;
 import ch.psi.scicat.model.v3.CountResponse;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
 import ch.psi.scicat.model.v3.CreatePublishedDataDto;
 import ch.psi.scicat.model.v3.Dataset;
 import ch.psi.scicat.model.v3.DatasetType;
+import ch.psi.scicat.model.v3.MyIdentity;
 import ch.psi.scicat.model.v3.PublishedData;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -57,7 +57,9 @@ public class RoCrateImporter {
   @Inject private ScicatClient scicatClient;
 
   public static String publicationExistsFilter =
-      "{\"relatedPublications\": {\"inq\": [\"%s (IsIdenticalTo)\"]}}";
+      """
+          { "where": { "relatedPublications": "%s (IsIdenticalTo)" } }
+      """;
 
   public void loadCrate(RoCrate crate) {
     this.crate = crate;
@@ -117,22 +119,22 @@ public class RoCrateImporter {
   private CreateDatasetDto createPlaceholderDataset(
       CreatePublishedDataDto publishedDatasetDto, String scicatToken) {
     CreateDatasetDto datasetDto = new CreateDatasetDto();
-    UserDetails userDetails = scicatClient.userDetails(scicatToken);
+    MyIdentity userDetails = scicatClient.myidentity(scicatToken).getEntity();
 
-    publishedDatasetDto.setScicatUser(userDetails.getUsername());
+    publishedDatasetDto.setScicatUser(userDetails.getProfile().getUsername());
 
     datasetDto
         .setDatasetName("Original RO-Crate")
         .setOwner(String.join("; ", publishedDatasetDto.getCreator()))
         .setPrincipalInvestigator(String.join("; ", publishedDatasetDto.getCreator()))
-        .setContactEmail(userDetails.getEmail())
+        .setContactEmail(userDetails.getProfile().getEmail())
         .setSourceFolder("/")
         .setCreationLocation("")
         .setCreationTime(Instant.now())
         .setType(DatasetType.RAW)
         .setPublished(false);
-    if (userDetails.getGroups().size() > 0) {
-      datasetDto.setOwnerGroup(userDetails.getGroups().getFirst());
+    if (userDetails.getProfile().getAccessGroups().size() > 0) {
+      datasetDto.setOwnerGroup(userDetails.getProfile().getAccessGroups().getFirst());
     } else {
       log.error(
           "User is part of no groups, will not be able to update the PublishedData status to"
