@@ -1,6 +1,6 @@
 scicat:
   url: &scicat-url http://backend.localhost
-  v4: false
+  v4: true
 
 "%it-v3":
   scicat:

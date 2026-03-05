@@ -16,43 +16,38 @@ import java.util.zip.ZipOutputStream;
 public abstract class EndpointTest {
   @InjectMock protected ScicatClient scicatClient;
 
-  private HttpClient client = HttpClient.newHttpClient();
-  private final String loginPayload = "{\"username\":\"rocrate\", \"password\":\"rocrate\"}";
-  private ObjectMapper objectMapper = new ObjectMapper();
+  static boolean backendV4 = System.getenv("BACKEND_VERSION").equals("v4");
 
   protected String accessToken = "";
-
   public static String CONTENT_TYPE_JSON_RES = "application/json;charset=UTF-8";
 
   public String login() {
     try {
-      URI urlV3 = URI.create("http://backend.localhost/api/v3/Users/login");
-      URI urlV4 = URI.create("http://backend.localhost/api/v3/auth/login");
-
-      HttpResponse<String> response = sendLoginRequest(urlV3);
-      boolean isBackendNext = response.statusCode() == 201;
-      if (isBackendNext) {
-        response = sendLoginRequest(urlV4);
-      }
-
+      String url =
+          String.format("http://backend.localhost/api/v3/%s/login", backendV4 ? "auth" : "Users");
+      String jsonInputString =
+          """
+          {
+            "username":"rocrate",
+            "password":"rocrate"
+          }
+          """;
+      HttpClient client = HttpClient.newHttpClient();
+      HttpRequest request =
+          HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Content-Type", "application/json")
+              .header("Accept", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(jsonInputString))
+              .build();
+      HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+      ObjectMapper objectMapper = new ObjectMapper();
       JsonNode jsonResponse = objectMapper.readTree(response.body());
-      return jsonResponse.get(isBackendNext ? "access_token" : "id").asText();
+      return jsonResponse.get(backendV4 ? "access_token" : "id").asText();
     } catch (Exception e) {
       System.out.println(e.getMessage());
       throw new RuntimeException("Failed to login to SciCat, aborting tests");
     }
-  }
-
-  private HttpResponse<String> sendLoginRequest(URI uri) throws IOException, InterruptedException {
-    HttpRequest request =
-        HttpRequest.newBuilder()
-            .uri(uri)
-            .header("Content-Type", "application/json")
-            .header("Accept", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString(loginPayload))
-            .build();
-
-    return client.send(request, HttpResponse.BodyHandlers.ofString());
   }
 
   public byte[] zipResource(String name) throws IOException {

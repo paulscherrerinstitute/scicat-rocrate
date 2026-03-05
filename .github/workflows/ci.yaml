@@ -83,7 +83,7 @@ jobs:
           push: never
           imageName: ${{ env.devImage }}
           cacheFrom: ${{ env.devImage }}
-          runCmd: ./mvnw verify -Dquarkus.profile=it-${{ matrix.backend-version }} -DskipITs=false -Dquarkus.container-image.push=false
+          runCmd: BACKEND_VERSION=${{ matrix.backend-version }} ./mvnw verify -Dquarkus.profile=it-${{ matrix.backend-version }} -DskipITs=false -Dquarkus.container-image.push=false
 
   actionlint:
     runs-on: ubuntu-latest

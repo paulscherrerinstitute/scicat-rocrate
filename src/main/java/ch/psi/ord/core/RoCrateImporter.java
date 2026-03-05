@@ -42,6 +42,7 @@ import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ReasonerRegistry;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.SchemaDO;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.modelmapper.ModelMapper;
 
@@ -56,8 +57,17 @@ public class RoCrateImporter {
   @Inject private ModelMapper modelMapper;
   @Inject private ScicatClient scicatClient;
 
+  @ConfigProperty(name = "scicat.v4")
+  static boolean backendV4;
+
   public static String publicationExistsFilter =
-      "{\"relatedPublications\": {\"inq\": [\"%s (IsIdenticalTo)\"]}}";
+      backendV4
+          ? """
+          { "where": { "relatedPublications": "%s (IsIdenticalTo)" } }
+          """
+          : """
+          {"relatedPublications": {"inq": ["%s (IsIdenticalTo)"]}}
+          """;
 
   public void loadCrate(RoCrate crate) {
     this.crate = crate;
