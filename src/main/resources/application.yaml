@@ -1,6 +1,5 @@
 scicat:
   url: &scicat-url http://backend.localhost
-  v4: false
 
 quarkus:
   test:

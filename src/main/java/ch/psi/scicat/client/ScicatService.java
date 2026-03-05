@@ -4,6 +4,7 @@ import ch.psi.scicat.model.v3.CountResponse;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
 import ch.psi.scicat.model.v3.CreatePublishedDataDto;
 import ch.psi.scicat.model.v3.Dataset;
+import ch.psi.scicat.model.v3.MyIdentity;
 import ch.psi.scicat.model.v3.PublishedData;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
@@ -11,11 +12,21 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
+import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.jboss.resteasy.reactive.RestResponse;
 
 @RegisterRestClient(configKey = "scicat")
+@RegisterProvider(BearerRequestFilter.class)
 public interface ScicatService {
+  @GET
+  @Path("/api/v3/health")
+  RestResponse<Void> health();
+
+  @GET
+  @Path("/api/v3/users/my/identity")
+  RestResponse<MyIdentity> myidentity(@HeaderParam("Authorization") String accessToken);
+
   @GET
   @Path("/api/v3/datasets/{pid}")
   public RestResponse<Dataset> getDatasetByPid(@PathParam("pid") String pid);
@@ -37,7 +48,7 @@ public interface ScicatService {
   @GET
   @Path("/api/v3/publisheddata/count")
   public RestResponse<CountResponse> countPublishedData(
-      @QueryParam("where") String where, @HeaderParam("Authorization") String accessToken);
+      @QueryParam("filter") String where, @HeaderParam("Authorization") String accessToken);
 
   @POST
   @Path("/api/v3/publisheddata")

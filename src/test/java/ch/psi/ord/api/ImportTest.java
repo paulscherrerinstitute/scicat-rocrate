@@ -104,7 +104,7 @@ public class ImportTest extends EndpointTest {
                   DoiUtils.buildStandardUrl("10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5")),
               null))
           .thenReturn(RestResponse.ok(new CountResponse().setCount(0)));
-      when(scicatClient.userDetails(any())).thenReturn(TestData.rocrateUser);
+      when(scicatClient.myidentity(any())).thenReturn(RestResponse.ok(TestData.rocrateUser));
       when(scicatClient.createDataset(any(), any(CreateDatasetDto.class)))
           .thenReturn(RestResponse.ok(new Dataset().setPid("some-pid")));
       when(scicatClient.createPublishedData(any(), any(CreatePublishedDataDto.class)))

@@ -3,7 +3,6 @@ package ch.psi.scicat.client;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-import ch.psi.scicat.client.v4.BearerRequestFilter;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.ClientRequestContext;
