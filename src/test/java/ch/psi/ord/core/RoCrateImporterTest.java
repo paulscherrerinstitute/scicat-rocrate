@@ -13,15 +13,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @QuarkusTest
 public class RoCrateImporterTest {
   @Inject RoCrateImporter importer;
-
-  private static final Logger logger = LoggerFactory.getLogger(RoCrateImporterTest.class);
-
   Model m;
 
   @BeforeEach
