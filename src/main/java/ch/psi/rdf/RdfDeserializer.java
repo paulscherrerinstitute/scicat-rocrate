@@ -11,17 +11,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.vocabulary.RDF;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class RdfDeserializer {
-  private static final Logger logger = LoggerFactory.getLogger(RdfDeserializer.class);
-
   public static class DeserializationReport<T> {
     private Set<ValidationError> errors = new HashSet<>();
     private T value = null;
@@ -102,11 +100,11 @@ public class RdfDeserializer {
               }
               setField(field, obj.get(), collection);
             } else {
-              logger.error("Unsupported collection");
+              log.error("Unsupported collection");
             }
           } else if (values.size() > 0) {
             if (values.size() > 1) {
-              logger.warn(
+              log.warn(
                   "Field '{}' of class '{}' is not a collection, only the first value will be"
                       + " assigned",
                   field.getName(),
@@ -139,7 +137,7 @@ public class RdfDeserializer {
                   | InvocationTargetException
                   | NoSuchMethodException
                   | SecurityException e) {
-                logger.error("Failed to instantiate instance of " + clazz.getName(), e);
+                log.error("Failed to instantiate instance of " + clazz.getName(), e);
                 return Optional.empty();
               }
             });
@@ -225,11 +223,11 @@ public class RdfDeserializer {
 
     try {
       if (value == null) {
-        logger.warn("Setting field {} to a null value", field.getName());
+        log.warn("Setting field {} to a null value", field.getName());
       }
       field.set(instance, value);
     } catch (IllegalArgumentException | IllegalAccessException e) {
-      logger.error("Unable to set field {}", field.getName(), e);
+      log.error("Unable to set field {}", field.getName(), e);
     }
   }
 
@@ -237,9 +235,9 @@ public class RdfDeserializer {
     Property p = ResourceFactory.createProperty(propertyUri);
     List<RDFNode> values = subject.listProperties(p).mapWith(s -> s.getObject()).toList();
     if (values.size() == 0) {
-      logger.info("{} has no property {}", subject.toString(), propertyUri);
+      log.info("{} has no property {}", subject.toString(), propertyUri);
       p = ResourceFactory.createProperty(RdfUtils.switchScheme(propertyUri));
-      logger.info("Trying to switch property scheme to: '{}' ", p.toString());
+      log.info("Trying to switch property scheme to: '{}' ", p.toString());
       values = subject.listProperties(p).mapWith(s -> s.getObject()).toList();
     }
 
