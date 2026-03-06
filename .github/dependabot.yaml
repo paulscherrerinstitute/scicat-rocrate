@@ -36,3 +36,11 @@ updates:
      prefix: chore
      prefix-development: chore
      include: scope
+ - package-ecosystem: "docker-compose"
+   directory: "./src/test/resources/scicatlive"
+   schedule:
+     interval: daily
+   commit-message:
+     prefix: chore
+     prefix-development: chore
+     include: scope

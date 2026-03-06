@@ -1,5 +1,6 @@
 package ch.psi.ord.api;
 
+import ch.psi.s3_broker.client.S3BrokerService;
 import ch.psi.scicat.client.ScicatClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,9 +13,11 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 public abstract class EndpointTest {
   @InjectMock protected ScicatClient scicatClient;
+  @InjectMock @RestClient protected S3BrokerService s3BrokerService;
 
   protected String accessToken = "";
 
