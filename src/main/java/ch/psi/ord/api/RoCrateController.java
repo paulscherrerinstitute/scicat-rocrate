@@ -15,15 +15,21 @@ import com.apicatalog.jsonld.uri.UriValidationPolicy;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.NameBinding;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,6 +41,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
+import org.jboss.resteasy.reactive.server.ServerRequestFilter;
 
 @Path("ro-crate")
 @Tag(name = "ro-crate")
@@ -82,6 +89,21 @@ public class RoCrateController {
   @ServerExceptionMapper
   public Response mapFileNotFoundException(FileNotFoundException e) {
     return Response.status(Status.BAD_REQUEST).entity(new Error(e.getMessage())).build();
+  }
+
+  @Target(ElementType.METHOD)
+  @Retention(value = RetentionPolicy.RUNTIME)
+  @NameBinding
+  public @interface ScicatAuth {}
+
+  @ScicatAuth
+  @ServerRequestFilter()
+  public Optional<Response> scicatAuthFilter(ContainerRequestContext requestContext) {
+    String scicatToken = requestContext.getHeaderString("api-key");
+    if (!scicatClient.checkTokenValidity(scicatToken)) {
+      return Optional.of(Response.status(Status.UNAUTHORIZED).build());
+    }
+    return Optional.empty();
   }
 
   private Optional<Response> export(List<String> identifiers) {
@@ -169,12 +191,9 @@ public class RoCrateController {
   @Path("/import")
   @Consumes(ExtraMediaType.APPLICATION_JSONLD)
   @Produces(MediaType.APPLICATION_JSON)
+  @ScicatAuth
   public Response importCrate(
       @HeaderParam(value = "api-key") String scicatToken, InputStream body) {
-    if (!scicatClient.checkTokenValidity(scicatToken)) {
-      return Response.status(Status.UNAUTHORIZED).build();
-    }
-
     try (RoCrate crate = new RoCrate(body)) {
       importer.loadCrate(crate);
       ValidationReport report = importer.validate();
@@ -193,13 +212,10 @@ public class RoCrateController {
   @Path("/import")
   @Consumes(ExtraMediaType.APPLICATION_ZIP)
   @Produces(MediaType.APPLICATION_JSON)
+  @ScicatAuth
   public Response importZippedCrate(
       @HeaderParam(value = "api-key") String scicatToken, InputStream body)
       throws RiotException, FileNotFoundException, ZipException, IOException {
-    if (!scicatClient.checkTokenValidity(scicatToken)) {
-      return Response.status(Status.UNAUTHORIZED).build();
-    }
-
     try (ZipInputStream zip = new ZipInputStream(body);
         RoCrate crate = new RoCrate(zip)) {
       importer.loadCrate(crate);
