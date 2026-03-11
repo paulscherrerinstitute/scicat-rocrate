@@ -5,14 +5,14 @@ import ch.psi.rdf.RdfUtils;
 import ch.psi.rdf.annotations.RdfClass;
 import ch.psi.rdf.annotations.RdfDeserialize;
 import ch.psi.rdf.annotations.RdfProperty;
+import ch.psi.rdf.annotations.RdfResourceUri;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
@@ -24,7 +24,8 @@ import org.apache.jena.vocabulary.RDF;
 public class ObjectDeserializer<T> implements RdfDeserializer<T> {
   private final Class<T> clazz;
   private final RdfClass rdfClassAnnotation;
-  private final Map<Field, RdfProperty> annotatedFields;
+  private final Map<Field, RdfProperty> annotatedFields = new HashMap<>();
+  private final List<Field> rdfUriFields = new ArrayList<>();
 
   public ObjectDeserializer(Class<T> clazz) throws RdfDeserializationException {
     this.clazz = clazz;
@@ -34,10 +35,16 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
               "Class %s is not annotated with %s", clazz.getName(), RdfClass.class.getName()));
     }
     this.rdfClassAnnotation = clazz.getAnnotation(RdfClass.class);
-    this.annotatedFields =
-        Stream.of(clazz.getDeclaredFields())
-            .filter(f -> f.isAnnotationPresent(RdfProperty.class))
-            .collect(Collectors.toMap(f -> f, f -> f.getAnnotation(RdfProperty.class)));
+    for (Field field : clazz.getDeclaredFields()) {
+      RdfProperty rdfProperty = field.getAnnotation(RdfProperty.class);
+      if (rdfProperty != null) {
+        this.annotatedFields.put(field, rdfProperty);
+      }
+
+      if (field.isAnnotationPresent(RdfResourceUri.class)) {
+        this.rdfUriFields.add(field);
+      }
+    }
   }
 
   @Override
@@ -56,6 +63,7 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
           String.format("Failed to create an instance of %s", clazz.getName()), e);
     }
     Resource subject = node.asResource();
+    setUriFields(subject, obj);
     checkType(subject, rdfClassAnnotation.typesUri()).ifPresent(e -> context.addError(e));
 
     for (Map.Entry<Field, RdfProperty> entry : annotatedFields.entrySet()) {
@@ -99,6 +107,13 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
     }
 
     return obj;
+  }
+
+  private void setUriFields(Resource subject, T obj) {
+    String value = subject.toString();
+    for (Field f : this.rdfUriFields) {
+      this.setField(f, obj, value);
+    }
   }
 
   private Optional<PropertyError> checkType(Resource subject, String[] expectedTypes) {

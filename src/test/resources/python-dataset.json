@@ -1,0 +1,368 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "datePublished": "2026-05-01T09:46:52+00:00",
+      "description": "A minimal RO-Crate with one Person",
+      "name": "Minimal Example"
+    },
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      }
+    },
+    {
+      "@id": "PropertyValue",
+      "@type": "rdfs:Class",
+      "owl:equivalentClass": {
+        "@id": "schema:PropertyValue"
+      },
+      "owl:restriction": [
+        {
+          "@id": "40c7a5af-28c8-47c2-9a10-268d043dfe75"
+        },
+        {
+          "@id": "59db3e33-1d2c-490b-a11c-01597221b5b0"
+        },
+        {
+          "@id": "222e5a06-da9c-400a-982a-9eece01e652a"
+        }
+      ],
+      "rdfs:label": "PropertyValue",
+      "rdfs:subClassOf": {
+        "@id": "schema:Thing"
+      }
+    },
+    {
+      "@id": "a2d98d5e-b56d-4710-9dd2-c8c3329ea94b",
+      "@type": "owl:Restriction",
+      "owl:maxCardinality": 1,
+      "owl:minCardinality": 1,
+      "owl:onProperty": {
+        "@id": "name"
+      }
+    },
+    {
+      "@id": "familyName",
+      "@type": "rdf:Property",
+      "owl:equivalentProperty": {
+        "@id": "schema:familyName"
+      },
+      "rdfs:label": "Familyname",
+      "schema:domainIncludes": {
+        "@id": "Person"
+      },
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      }
+    },
+    {
+      "@id": "40d31d3d-085e-4c4c-8dcd-365f383b6bc0",
+      "@type": "owl:Restriction",
+      "owl:maxCardinality": 1,
+      "owl:minCardinality": 1,
+      "owl:onProperty": {
+        "@id": "description"
+      }
+    },
+    {
+      "@id": "givenName",
+      "@type": "rdf:Property",
+      "owl:equivalentProperty": {
+        "@id": "schema:givenName"
+      },
+      "rdfs:label": "Givenname",
+      "schema:domainIncludes": {
+        "@id": "Person"
+      },
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      }
+    },
+    {
+      "@id": "person_placeholder_1474694903309889187",
+      "@type": "Person",
+      "familyName": "Doe",
+      "givenName": "Jane",
+      "name": "Doe, Jane"
+    },
+    {
+      "@id": "fd02f889-8d88-4295-a5b3-bcb792d6aff4",
+      "@type": "owl:Restriction",
+      "owl:maxCardinality": 1,
+      "owl:minCardinality": 1,
+      "owl:onProperty": {
+        "@id": "name"
+      }
+    },
+    {
+      "@id": "propertyvalue_placeholder_5567331485746231744",
+      "@type": "PropertyValue",
+      "name": "energy",
+      "unitText": "keV",
+      "value": 3
+    },
+    {
+      "@id": "e7eab062-51bb-46fa-a789-68fca27a4d5e",
+      "@type": "owl:Restriction",
+      "owl:maxCardinality": 1,
+      "owl:minCardinality": 1,
+      "owl:onProperty": {
+        "@id": "givenName"
+      }
+    },
+    {
+      "@id": "a530c415-173a-4d0b-874b-1137c504dacc",
+      "@type": "owl:Restriction",
+      "owl:maxCardinality": 1,
+      "owl:minCardinality": 1,
+      "owl:onProperty": {
+        "@id": "creator"
+      }
+    },
+    {
+      "@id": "59db3e33-1d2c-490b-a11c-01597221b5b0",
+      "@type": "owl:Restriction",
+      "owl:maxCardinality": 1,
+      "owl:minCardinality": 1,
+      "owl:onProperty": {
+        "@id": "value"
+      }
+    },
+    {
+      "@id": "propertyvalue_placeholder_685441144678311150",
+      "@type": "PropertyValue",
+      "name": "wavelength",
+      "unitText": "angstrom",
+      "value": 3.14
+    },
+    {
+      "@id": "creator",
+      "@type": "rdf:Property",
+      "owl:equivalentProperty": {
+        "@id": "schema:creator"
+      },
+      "rdfs:label": "Creator",
+      "schema:domainIncludes": {
+        "@id": "Dataset"
+      },
+      "schema:rangeIncludes": {
+        "@id": "Person"
+      }
+    },
+    {
+      "@id": "40c7a5af-28c8-47c2-9a10-268d043dfe75",
+      "@type": "owl:Restriction",
+      "owl:maxCardinality": 1,
+      "owl:minCardinality": 1,
+      "owl:onProperty": {
+        "@id": "name"
+      }
+    },
+    {
+      "@id": "propertyvalue_placeholder_4788540033134402021",
+      "@type": "PropertyValue",
+      "name": "detector",
+      "value": "Eiger"
+    },
+    {
+      "@id": "person_placeholder_2007308539096217466",
+      "@type": "Person",
+      "familyName": "Doe",
+      "givenName": "John",
+      "name": "Doe, John"
+    },
+    {
+      "@id": "7900680c-864b-407a-a1fc-84b9af643b02",
+      "@type": "owl:Restriction",
+      "owl:maxCardinality": 1,
+      "owl:minCardinality": 1,
+      "owl:onProperty": {
+        "@id": "familyName"
+      }
+    },
+    {
+      "@id": "Dataset",
+      "@type": "rdfs:Class",
+      "owl:equivalentClass": {
+        "@id": "schema:Dataset"
+      },
+      "owl:restriction": [
+        {
+          "@id": "a2d98d5e-b56d-4710-9dd2-c8c3329ea94b"
+        },
+        {
+          "@id": "40d31d3d-085e-4c4c-8dcd-365f383b6bc0"
+        },
+        {
+          "@id": "a530c415-173a-4d0b-874b-1137c504dacc"
+        },
+        {
+          "@id": "2c1be616-7de8-4395-8729-c417bed8db9e"
+        }
+      ],
+      "rdfs:label": "Dataset",
+      "rdfs:subClassOf": {
+        "@id": "schema:Thing"
+      }
+    },
+    {
+      "@id": "222e5a06-da9c-400a-982a-9eece01e652a",
+      "@type": "owl:Restriction",
+      "owl:maxCardinality": 1,
+      "owl:minCardinality": 0,
+      "owl:onProperty": {
+        "@id": "unitText"
+      }
+    },
+    {
+      "@id": "unitText",
+      "@type": "rdf:Property",
+      "owl:equivalentProperty": {
+        "@id": "schema:unitText"
+      },
+      "rdfs:label": "Unittext",
+      "schema:domainIncludes": {
+        "@id": "PropertyValue"
+      },
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      }
+    },
+    {
+      "@id": "2c1be616-7de8-4395-8729-c417bed8db9e",
+      "@type": "owl:Restriction",
+      "owl:maxCardinality": 1,
+      "owl:minCardinality": 1,
+      "owl:onProperty": {
+        "@id": "additionalProperty"
+      }
+    },
+    {
+      "@id": "additionalProperty",
+      "@type": "rdf:Property",
+      "owl:equivalentProperty": {
+        "@id": "schema:additionalProperty"
+      },
+      "rdfs:label": "Additionalproperty",
+      "schema:domainIncludes": {
+        "@id": "Dataset"
+      },
+      "schema:rangeIncludes": {
+        "@id": "PropertyValue"
+      }
+    },
+    {
+      "@id": "value",
+      "@type": "rdf:Property",
+      "owl:equivalentProperty": {
+        "@id": "schema:value"
+      },
+      "rdfs:label": "Value",
+      "schema:domainIncludes": {
+        "@id": "PropertyValue"
+      },
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      }
+    },
+    {
+      "@id": "_:b0",
+      "@type": "Dataset",
+      "additionalProperty": {
+        "@id": "propertyvalue_placeholder_7035382467349542852"
+      },
+      "creator": [
+        {
+          "@id": "person_placeholder_2007308539096217466"
+        },
+        {
+          "@id": "person_placeholder_1474694903309889187"
+        }
+      ],
+      "description": "This dataset comes from a RO-Crate",
+      "name": "Aare dataset"
+    },
+    {
+      "@id": "description",
+      "@type": "rdf:Property",
+      "owl:equivalentProperty": {
+        "@id": "schema:description"
+      },
+      "rdfs:label": "Description",
+      "schema:domainIncludes": {
+        "@id": "Dataset"
+      },
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      }
+    },
+    {
+      "@id": "propertyvalue_placeholder_7035382467349542852",
+      "@type": "PropertyValue",
+      "name": "data_collection",
+      "value": [
+        {
+          "@id": "propertyvalue_placeholder_685441144678311150"
+        },
+        {
+          "@id": "propertyvalue_placeholder_5567331485746231744"
+        },
+        {
+          "@id": "propertyvalue_placeholder_4788540033134402021"
+        }
+      ]
+    },
+    {
+      "@id": "name",
+      "@type": "rdf:Property",
+      "owl:equivalentProperty": {
+        "@id": "schema:name"
+      },
+      "rdfs:label": "Name",
+      "schema:domainIncludes": [
+        {
+          "@id": "PropertyValue"
+        },
+        {
+          "@id": "Person"
+        },
+        {
+          "@id": "Dataset"
+        }
+      ],
+      "schema:rangeIncludes": {
+        "@id": "xsd:string"
+      }
+    },
+    {
+      "@id": "Person",
+      "@type": "rdfs:Class",
+      "owl:equivalentClass": {
+        "@id": "schema:Person"
+      },
+      "owl:restriction": [
+        {
+          "@id": "fd02f889-8d88-4295-a5b3-bcb792d6aff4"
+        },
+        {
+          "@id": "e7eab062-51bb-46fa-a789-68fca27a4d5e"
+        },
+        {
+          "@id": "7900680c-864b-407a-a1fc-84b9af643b02"
+        }
+      ],
+      "rdfs:label": "Person",
+      "rdfs:subClassOf": {
+        "@id": "schema:Thing"
+      }
+    }
+  ]
+}
