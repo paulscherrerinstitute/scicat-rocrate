@@ -13,6 +13,9 @@ quarkus:
     tag: ${quarkus.application.version:latest}
   log:
     level: INFO
+    category:
+      "ch.psi":
+        level: DEBUG
   http:
     root-path: /api/v1
     test-port: 9999

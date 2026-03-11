@@ -8,16 +8,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
-import java.util.zip.ZipInputStream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.RiotException;
@@ -34,26 +36,21 @@ public class RoCrate implements AutoCloseable {
       Map.of(FILE_KEY, new ArrayList<>(), DIR_KEY, new ArrayList<>());
   @Getter private Path base = DEFAULT_BASE;
   @Getter private Model model;
+  @Getter private Resource root;
 
-  /**
-   * @param metadataDescriptor
-   * @throws RiotException
-   * @throws IOException
-   */
-  public RoCrate(InputStream metadataDescriptor) throws RiotException {
-    parseMetadataDescriptor(metadataDescriptor);
+  private RoCrate() {}
+
+  public static RoCrate fromMetadata(InputStream metadataDescriptor) throws RiotException {
+    RoCrate crate = new RoCrate();
+    crate.parseMetadataDescriptor(metadataDescriptor);
+    return crate;
   }
 
-  /**
-   * @param zip
-   * @throws RiotException
-   * @throws FileNotFoundException
-   * @throws IOException
-   */
-  public RoCrate(ZipInputStream zip)
-      throws RiotException, FileNotFoundException, ZipException, IOException {
-    extract(zip);
-    readMetadataDescriptor();
+  public static RoCrate fromZip(InputStream zip) throws RiotException, ZipException, IOException {
+    RoCrate crate = new RoCrate();
+    crate.extract(zip);
+    crate.readMetadataDescriptor();
+    return crate;
   }
 
   /**
@@ -67,33 +64,32 @@ public class RoCrate implements AutoCloseable {
     log.info("Created extraction directory {}", base);
   }
 
-  /**
-   * Extracts a zipped crate in a temporary directory
-   *
-   * @param zip
-   * @throws IOException if an IO error occurs during the creation of a temporary directory or
-   *     during the extraction of the zip archive
-   */
-  private void extract(ZipInputStream zip) throws ZipException, IOException {
+  private void extract(InputStream rawStream) throws ZipException, IOException {
     createTempDirectory();
-
     Path targetDir = base;
     int entryCount = 0;
-    for (ZipEntry entry; (entry = zip.getNextEntry()) != null; entryCount++) {
-      Path resolvedPath = targetDir.resolve(entry.getName()).normalize();
-      if (!resolvedPath.startsWith(targetDir)) {
-        // see: https://snyk.io/research/zip-slip-vulnerability
-        throw new RuntimeException("Entry with an illegal path: " + entry.getName());
-      }
-      if (entry.isDirectory()) {
-        Files.createDirectories(resolvedPath);
-        files.get(DIR_KEY).add(resolvedPath);
-        log.debug("Created directory {}", resolvedPath);
-      } else {
-        Files.createDirectories(resolvedPath.getParent());
-        Files.copy(zip, resolvedPath);
-        files.get(FILE_KEY).add(resolvedPath);
-        log.debug("Wrote file {}", resolvedPath);
+
+    try (ZipArchiveInputStream zip = new ZipArchiveInputStream(rawStream)) {
+      ZipArchiveEntry entry;
+      while ((entry = zip.getNextEntry()) != null) {
+        entryCount++;
+
+        Path resolvedPath = targetDir.resolve(entry.getName()).normalize();
+        if (!resolvedPath.startsWith(targetDir)) {
+          // see: https://snyk.io/research/zip-slip-vulnerability
+          throw new RuntimeException("Entry with an illegal path: " + entry.getName());
+        }
+
+        if (entry.isDirectory()) {
+          Files.createDirectories(resolvedPath);
+          files.get(DIR_KEY).add(resolvedPath);
+          log.debug("Created directory {}", resolvedPath);
+        } else {
+          Files.createDirectories(resolvedPath.getParent());
+          Files.copy(zip, resolvedPath, StandardCopyOption.REPLACE_EXISTING);
+          files.get(FILE_KEY).add(resolvedPath);
+          log.debug("Wrote file {}", resolvedPath);
+        }
       }
     }
 

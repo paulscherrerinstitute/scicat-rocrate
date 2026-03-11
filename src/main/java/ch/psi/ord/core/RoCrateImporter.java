@@ -3,12 +3,14 @@ package ch.psi.ord.core;
 import ch.psi.ord.model.MissingDataError;
 import ch.psi.ord.model.NoEntityFound;
 import ch.psi.ord.model.Publication;
+import ch.psi.ord.model.ScicatDataset;
 import ch.psi.ord.model.ValidationReport;
 import ch.psi.ord.model.ValidationReport.Entity;
 import ch.psi.rdf.RdfMapper;
 import ch.psi.rdf.RdfUtils;
 import ch.psi.rdf.deser.DeserializationReport;
 import ch.psi.rdf.deser.RdfDeserializationException;
+import ch.psi.scicat.cli.ScicatCli;
 import ch.psi.scicat.client.ScicatClient;
 import ch.psi.scicat.model.v3.CountResponse;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
@@ -21,6 +23,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -44,6 +47,7 @@ import org.apache.jena.reasoner.ReasonerRegistry;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.SchemaDO;
 import org.jboss.resteasy.reactive.RestResponse;
+import org.jspecify.annotations.NonNull;
 import org.modelmapper.ModelMapper;
 
 @RequestScoped
@@ -56,6 +60,7 @@ public class RoCrateImporter {
   private RdfMapper rdfMapper = new RdfMapper();
   @Inject private ModelMapper modelMapper;
   @Inject private ScicatClient scicatClient;
+  @Inject private ScicatCli scicatCli;
 
   public static String publicationExistsFilter =
       """
@@ -79,6 +84,8 @@ public class RoCrateImporter {
     for (var entity : report.getEntities()) {
       if (entity.object() instanceof Publication publication) {
         importPublication(importMap, publication, scicatToken);
+      } else if (entity.object() instanceof ScicatDataset dataset) {
+        importDataset(importMap, dataset, scicatToken);
       } else {
         throw new NotImplementedException("Only Publications are supported for now");
       }
@@ -145,16 +152,62 @@ public class RoCrateImporter {
     return datasetDto;
   }
 
+  public void importDataset(
+      Map<String, String> importMap, ScicatDataset dataset, String scicatToken) {
+    CreateDatasetDto dto = modelMapper.map(dataset, CreateDatasetDto.class);
+    // scicatClient.createDataset(scicatToken, dto);
+    try {
+      String pid = scicatCli.createDataset(scicatToken, dto, dataset.getId().startsWith("nfs://"));
+      importMap.put(dataset.getId(), pid);
+    } catch (IOException | InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
   public ValidationReport validate() throws RdfDeserializationException {
     ValidationReport report = new ValidationReport();
+    inferredModel.listSubjects().forEach(s -> log.debug("Subject: {}", s.toString()));
+    log.debug(findRoot().toString());
 
     List<MissingDataError> dataErrors = validateArchiveContent();
     if (!dataErrors.isEmpty()) {
       report.getErrors().addAll(dataErrors);
     }
 
+    Set<Resource> scicatDatasets =
+        this.listResourcesOfType(
+            SchemaDO.Dataset,
+            (r) -> !(r.toString().endsWith(this.crate.getBase().resolve("/").toString())));
+    // !r.isURIResource()); // || (r.isURIResource() && !r.getURI().equals("file:///")));
+
+    scicatDatasets.forEach(
+        d ->
+            log.debug(
+                "{} is in inferred model {}", d.getURI(), d.getModel() == this.inferredModel));
+
+    scicatDatasets.forEach(
+        ds -> {
+          ds.listProperties()
+              .forEach(s -> log.debug("{} {} {}", s.getSubject(), s.getPredicate(), s.getObject()));
+
+          DeserializationReport<@NonNull ScicatDataset> subreport;
+          try {
+            subreport = rdfMapper.deserialize(ds, ScicatDataset.class);
+            log.debug("{}", subreport);
+            if (subreport.isValid()) {
+              report.addEntity(
+                  new Entity<>(
+                      ds.isURIResource() ? ds.getURI() : ds.getId().toString(), subreport.get()));
+            } else {
+              report.getErrors().addAll(subreport.getErrors());
+            }
+          } catch (RdfDeserializationException e) {
+            e.printStackTrace();
+          }
+        });
+
     List<Resource> potentialPublications = listPublications();
-    if (potentialPublications.isEmpty()) {
+    if (potentialPublications.isEmpty() && scicatDatasets.isEmpty()) {
       report.addError(new NoEntityFound());
       return report;
     }
@@ -222,6 +275,16 @@ public class RoCrateImporter {
     return res;
   }
 
+  private boolean checkType(Resource subject, Resource expectedType) {
+    return subject
+        .listProperties(RDF.type)
+        .filterKeep(stmt -> stmt.getObject().isResource())
+        .mapWith(stmt -> stmt.getObject().asResource())
+        .filterKeep(
+            type -> type.equals(expectedType) || type.equals(RdfUtils.switchScheme(expectedType)))
+        .hasNext();
+  }
+
   private boolean isPublication(Resource subject) {
     Set<RDFNode> identifierValues = listProperties(subject, SchemaDO.identifier);
     if (identifierValues.size() < 1) {
@@ -253,5 +316,30 @@ public class RoCrateImporter {
   public DeserializationReport<Publication> validatePublication(Resource subject)
       throws RdfDeserializationException {
     return rdfMapper.deserialize(subject, Publication.class);
+  }
+
+  // See:
+  // https://www.researchobject.org/ro-crate/specification/1.2/appendix/relative-uris#finding-ro-crate-root-in-rdf-triple-stores
+  private Resource findRoot() {
+    List<Resource> rootDataset =
+        inferredModel
+            .listSubjects()
+            .filterKeep(
+                subject ->
+                    subject.toString().contains("ro-crate-metadata.json")
+                        && (subject.hasProperty(SchemaDO.about)
+                            || subject.hasProperty(RdfUtils.switchScheme(SchemaDO.about))))
+            .toList()
+            .stream()
+            .flatMap(md -> this.listProperties(md, SchemaDO.about).stream())
+            .filter(RDFNode::isResource)
+            .map(RDFNode::asResource)
+            .filter(about -> checkType(about, SchemaDO.Dataset))
+            .distinct()
+            .toList();
+
+    if (rootDataset.size() == 1) return rootDataset.getFirst();
+
+    return null;
   }
 }

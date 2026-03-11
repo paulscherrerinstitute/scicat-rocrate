@@ -260,4 +260,19 @@ public class ValidateTest extends EndpointTest {
         .contentType(is(CONTENT_TYPE_JSON_RES))
         .body("message", is("Invalid or empty zip archive"));
   }
+
+  @Test
+  @DisplayName("Aare dataset is valid")
+  public void test13() throws IOException {
+    given()
+        .when()
+        .header("Content-Type", ExtraMediaType.APPLICATION_ZIP)
+        .body(zipResource("python-dataset.json"))
+        .post("/ro-crate/validate")
+        .then()
+        .statusCode(200)
+        .contentType(is(CONTENT_TYPE_JSON_RES))
+        .body("isValid", is(true))
+        .body("entities", hasSize(1));
+  }
 }
