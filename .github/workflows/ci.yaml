@@ -32,6 +32,8 @@ jobs:
               - src/**
               - pom.xml
               - .github/workflows/ci.yaml
+              - .mvn/**
+              - mvnw{,.cmd}
 
   build:
     runs-on: ubuntu-latest
