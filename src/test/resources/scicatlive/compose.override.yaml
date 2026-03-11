@@ -1,0 +1,19 @@
+services:
+  backend:
+    environment:
+      - SITE=PSI
+      - CREATE_DATASET_GROUPS=
+    volumes:
+      - ../src/test/resources/scicatlive/functionalAccounts.json:/home/node/app/functionalAccounts.json
+  s3-broker:
+    image: ghcr.io/paulscherrerinstitute/scicat-s3-broker:0.3.0
+    labels:
+      - traefik.http.services.s3-broker.loadbalancer.server.port=8080
+    environment:
+    - SCICAT_URL=http://backend:3000
+    - JOB_MANAGER_USERNAME=admin
+    - JOB_MANAGER_PASSWORD=2jf70TPNZsS
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: on-failure

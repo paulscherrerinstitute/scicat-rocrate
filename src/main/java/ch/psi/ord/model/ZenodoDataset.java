@@ -1,9 +1,9 @@
 package ch.psi.ord.model;
 
-import ch.psi.ord.api.ExtraMediaType;
 import ch.psi.rdf.RdfClass;
 import ch.psi.rdf.RdfProperty;
 import ch.psi.rdf.RdfResourceUri;
+import java.time.Instant;
 import java.util.List;
 import lombok.Data;
 import org.apache.jena.vocabulary.SchemaDO;
@@ -38,15 +38,8 @@ public class ZenodoDataset {
   public List<Person> creators;
 
   @RdfProperty(uri = SchemaDO.NS + "distribution", minCardinality = 1)
-  public List<DataDownload> distribution =
-      List.of(
-          new DataDownload()
-              .setContentUrl("https://fixme-1-dl.psi.ch")
-              .setEncodingFormat(ExtraMediaType.APPLICATION_TAR),
-          new DataDownload()
-              .setContentUrl("https://fixme-2-dl.psi.ch")
-              .setEncodingFormat(ExtraMediaType.APPLICATION_TAR),
-          new DataDownload()
-              .setContentUrl("https://fixme-3-dl.psi.ch")
-              .setEncodingFormat(ExtraMediaType.APPLICATION_TAR));
+  public List<DataDownload> distribution;
+
+  @RdfProperty(uri = SchemaDO.NS + "expires", minCardinality = 1)
+  public Instant expires;
 }
