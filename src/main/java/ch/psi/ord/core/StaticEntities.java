@@ -26,7 +26,8 @@ public class StaticEntities {
             SchemaDO.CreativeWork,
             SchemaDO.Collection,
             SchemaDO.Person,
-            SchemaDO.Organization)
+            SchemaDO.Organization,
+            SchemaDO.MediaObject)
         .forEach(c -> CONTEXT_NODE.put(c.getLocalName(), c.getURI()));
 
     List.of(
@@ -49,6 +50,7 @@ public class StaticEntities {
             SchemaDO.description,
             SchemaDO.domainIncludes,
             SchemaDO.rangeIncludes,
+            SchemaDO.encodingFormat,
             SchemaDO._abstract)
         .forEach(p -> CONTEXT_NODE.put(p.getLocalName(), p.getURI()));
   }

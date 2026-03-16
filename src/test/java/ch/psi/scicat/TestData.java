@@ -64,7 +64,7 @@ public class TestData {
           .setExpires(Instant.parse("2036-02-28T09:55:19Z"))
           .setUrls(
               Map.of(
-                  "PID.SAMPLE.PREFIX/psi_ds1",
+                  "PID.SAMPLE.PREFIX/hzdr_ds1",
                   new DatasetUrls()
                       .setExpires(Instant.parse("2020-03-01T01:00:00Z"))
                       .setUrls(
