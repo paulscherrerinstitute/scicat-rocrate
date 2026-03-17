@@ -32,6 +32,7 @@ public class StaticEntities {
 
     List.of(
             SchemaDO.name,
+            SchemaDO.expires,
             SchemaDO.description,
             SchemaDO.license,
             SchemaDO.datePublished,

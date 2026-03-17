@@ -1,15 +1,19 @@
 package ch.psi.ord.api;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 
+import ch.psi.s3_broker.model.DatasetUrls;
 import ch.psi.scicat.TestData;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.ws.rs.core.MediaType;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
+import org.apache.jena.vocabulary.SchemaDO;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,16 +56,21 @@ public class ExportTest extends EndpointTest {
   @Test
   @DisplayName("Should include S3 links if not expired")
   public void test01() {
-    var expectedIds =
+    var expectedItems =
         Stream.of(TestData.psiDs1, TestData.psiDs2, TestData.psiDs3)
             .map(
-                ds ->
-                    TestData.psiPub1S3Response
-                        .getUrls()
-                        .get(ds.getPid())
-                        .getUrls()
-                        .getFirst()
-                        .getUrl())
+                ds -> {
+                  DatasetUrls dsUrls = TestData.psiPub1S3Response.getUrls().get(ds.getPid());
+                  return Map.of(
+                      "@id",
+                      dsUrls.getUrls().getFirst().getUrl(),
+                      "@type",
+                      SchemaDO.MediaObject.getLocalName(),
+                      "expires",
+                      dsUrls.getUrls().getFirst().getExpires().toString(),
+                      "encodingFormat",
+                      ExtraMediaType.APPLICATION_TAR);
+                })
             .toArray();
 
     given()
@@ -72,7 +81,8 @@ public class ExportTest extends EndpointTest {
         .post("/ro-crate/export")
         .then()
         .statusCode(200)
-        .body("@graph.@id", hasItems(expectedIds));
+        .body(
+            "'@graph'.findAll { it.'@type' == 'MediaObject' }", containsInAnyOrder(expectedItems));
   }
 
   @Test

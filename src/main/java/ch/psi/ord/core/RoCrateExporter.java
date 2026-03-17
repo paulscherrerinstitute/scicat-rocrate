@@ -2,6 +2,7 @@ package ch.psi.ord.core;
 
 import ch.psi.ord.api.ExtraMediaType;
 import ch.psi.s3_broker.client.S3BrokerService;
+import ch.psi.s3_broker.model.DatasetUrls;
 import ch.psi.s3_broker.model.PublishedDataUrls;
 import ch.psi.scicat.client.ScicatClient;
 import ch.psi.scicat.model.v3.Dataset;
@@ -20,7 +21,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.Year;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -51,12 +54,14 @@ public class RoCrateExporter {
 
   public DataEntity addPublication(PublishedData publication, boolean asRootEntity) {
     PublishedDataUrls brokerResponse = s3BrokerService.getPublishedDataUrls(publication.getDoi());
+    Map<String, DatasetUrls> urls =
+        Optional.ofNullable(brokerResponse.getUrls()).orElse(Collections.emptyMap());
 
     // https://www.researchobject.org/ro-crate/specification/1.2/data-entities.html#web-based-data-entities
     // File Data Entities with an @id URI outside the RO-Crate Root SHOULD at the time of RO-Crate
     // creation be directly downloadable by a simple non-interactive retrieval (e.g. HTTP GET) of a
     // single data stream, permitting redirections and HTTP/HTTPS authentication
-    boolean includeS3Urls = brokerResponse.expires.isAfter(Instant.now());
+    boolean includeS3Urls = brokerResponse.getExpires().isAfter(Instant.now());
 
     if (asRootEntity) {
       RootDataEntity root = crate.getRootDataEntity();
@@ -102,7 +107,8 @@ public class RoCrateExporter {
         .addProperty(SchemaDO.creativeWorkStatus.getLocalName(), publication.getStatus().toString())
         .addProperty(SchemaDO.dateCreated.getLocalName(), publication.getCreatedAt())
         .addProperty(SchemaDO.dateModified.getLocalName(), publication.getUpdatedAt())
-        .addProperty(SchemaDO.description.getLocalName(), publication.getDataDescription());
+        .addProperty(SchemaDO.description.getLocalName(), publication.getDataDescription())
+        .addProperty(SchemaDO.expires.getLocalName(), brokerResponse.getExpires().toString());
     publication
         .getPidArray()
         .forEach(
@@ -114,10 +120,11 @@ public class RoCrateExporter {
                       .addProperty(SchemaDO.name.getLocalName(), dataset.getDatasetName())
                       .addProperty(SchemaDO.description.getLocalName(), dataset.getDescription());
 
-              if (includeS3Urls && brokerResponse.getUrls().containsKey(pid)) {
-                brokerResponse
-                    .getUrls()
-                    .get(pid)
+              if (includeS3Urls && urls.containsKey(pid)) {
+                DatasetUrls datasetUrls = urls.get(pid);
+                datasetBuilder.addProperty(
+                    SchemaDO.expires.getLocalName(), datasetUrls.getExpires().toString());
+                datasetUrls
                     .getUrls()
                     .forEach(
                         s3Info -> {
@@ -128,6 +135,9 @@ public class RoCrateExporter {
                                   .addProperty(
                                       SchemaDO.encodingFormat.getLocalName(),
                                       ExtraMediaType.APPLICATION_TAR)
+                                  .addProperty(
+                                      SchemaDO.expires.getLocalName(),
+                                      s3Info.getExpires().toString())
                                   .build());
 
                           datasetBuilder.addIdProperty(
