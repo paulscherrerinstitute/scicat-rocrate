@@ -120,29 +120,31 @@ public class RoCrateExporter {
                       .addProperty(SchemaDO.name.getLocalName(), dataset.getDatasetName())
                       .addProperty(SchemaDO.description.getLocalName(), dataset.getDescription());
 
-              if (includeS3Urls && urls.containsKey(pid)) {
+              if (urls.containsKey(pid)) {
                 DatasetUrls datasetUrls = urls.get(pid);
                 datasetBuilder.addProperty(
                     SchemaDO.expires.getLocalName(), datasetUrls.getExpires().toString());
-                datasetUrls
-                    .getUrls()
-                    .forEach(
-                        s3Info -> {
-                          crate.addDataEntity(
-                              new DataEntityBuilder()
-                                  .addType(SchemaDO.MediaObject.getLocalName())
-                                  .setId(s3Info.getUrl())
-                                  .addProperty(
-                                      SchemaDO.encodingFormat.getLocalName(),
-                                      ExtraMediaType.APPLICATION_TAR)
-                                  .addProperty(
-                                      SchemaDO.expires.getLocalName(),
-                                      s3Info.getExpires().toString())
-                                  .build());
+                if (includeS3Urls) {
+                  datasetUrls
+                      .getUrls()
+                      .forEach(
+                          s3Info -> {
+                            crate.addDataEntity(
+                                new DataEntityBuilder()
+                                    .addType(SchemaDO.MediaObject.getLocalName())
+                                    .setId(s3Info.getUrl())
+                                    .addProperty(
+                                        SchemaDO.encodingFormat.getLocalName(),
+                                        ExtraMediaType.APPLICATION_TAR)
+                                    .addProperty(
+                                        SchemaDO.expires.getLocalName(),
+                                        s3Info.getExpires().toString())
+                                    .build());
 
-                          datasetBuilder.addIdProperty(
-                              SchemaDO.hasPart.getLocalName(), s3Info.getUrl());
-                        });
+                            datasetBuilder.addIdProperty(
+                                SchemaDO.hasPart.getLocalName(), s3Info.getUrl());
+                          });
+                }
               }
 
               DataEntity dsEntity = datasetBuilder.build();
