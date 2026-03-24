@@ -34,6 +34,7 @@ jobs:
               - .github/workflows/ci.yaml
               - .mvn/**
               - mvnw{,.cmd}
+              - .devcontainer/**
 
   build:
     runs-on: ubuntu-latest
