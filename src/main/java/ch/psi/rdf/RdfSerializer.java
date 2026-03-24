@@ -3,6 +3,10 @@ package ch.psi.rdf;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -123,6 +127,9 @@ public class RdfSerializer {
       serializedObject.addLiteral(property, d.doubleValue());
     } else if (value instanceof Float f) {
       serializedObject.addLiteral(property, f.floatValue());
+    } else if (value instanceof Instant instant) {
+      ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, ZoneOffset.UTC);
+      serializedObject.addLiteral(property, zdt.format(DateTimeFormatter.ISO_INSTANT));
     } else if (value.getClass().isAnnotationPresent(RdfClass.class)) {
       Resource nestedObject = serialize(value);
       serializedObject

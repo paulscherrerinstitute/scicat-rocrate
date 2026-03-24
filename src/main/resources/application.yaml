@@ -21,6 +21,8 @@ quarkus:
       scope: request-response
     scicat:
       url: *scicat-url
+    s3broker:
+      url: http://s3-broker.localhost
   smallrye-openapi:
     path: /openapi-specs
   smallrye-health:

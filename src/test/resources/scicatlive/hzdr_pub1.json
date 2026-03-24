@@ -1,0 +1,30 @@
+{
+  "_id": "10.9999/hzdr_pub1",
+  "doi": "10.9999/hzdr_pub1",
+  "affiliation": null,
+  "creator": [
+    "Hao Chu",
+    "al."
+  ],
+  "publisher": "HZDR",
+  "publicationYear": 2020,
+  "title": "Phase-resolved Higgs response in superconducting cuprates",
+  "url": "",
+  "abstract": "In high energy physics, the Higgs field couples to gauge bosons and fermions and gives mass to their elementary excitations. Experimentally, such couplings can be verified from the decay product of the Higgs boson, the scalar (amplitude) excitation of the Higgs field. In superconductors, Cooper pairs bear a certain analogy to the Higgs field. Coulomb interactions between the Cooper pairs give mass to the electromagnetic field, which leads to the Meissner effect. Additional coupling with other types of interactions or collective modes is foreseeable, and even highly probable for high-Tc superconductors, where multiple degrees of freedom are intertwined. The superconducting Higgs mode may reveal such couplings spectroscopically and uncover interactions directly relevant to Cooper pairing. To this end, we investigate the Higgs mode of several cuprate thin films using phase-resolved terahertz third harmonic generation (THG) to. In addition to the heavily damped Higgs mode itself, we observe a universal jump in the phase of the driven Higgs oscillation as well as a non-vanishing THG above Tc. These findings indicate coupling of the Higgs mode to other collective modes and a nonzero pairing amplitude above Tc. Our study demonstrates a new approach for investigating unconventional superconductivity. We foresee a fruitful future for phase-resolved spectroscopy in various superconducting systems.",
+  "dataDescription": "Phase-resolved Higgs response in superconducting cuprates",
+  "resourceType": "derived",
+  "pidArray": [
+    "PID.SAMPLE.PREFIX/hzdr_ds1"
+  ],
+  "authors": [ ],
+  "registeredTime": "2020-04-15T13:46:43.339Z",
+  "status": "registered",
+  "scicatUser": "",
+  "thumbnail": "",
+  "relatedPublications": [
+    "Chu, H., Kim, MJ., Katsumi, K. et al. Phase-resolved Higgs response in superconducting cuprates. Nat Commun 11, 1793 (2020). https://doi.org/10.1038/s41467-020-15613-1"
+  ],
+  "downloadLink": "https://rodare.hzdr.de/record/277",
+  "createdAt": "2021-06-29T16:12:16.022Z",
+  "updatedAt": "2021-06-29T16:12:16.024Z"
+}
