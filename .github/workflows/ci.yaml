@@ -65,21 +65,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/checkout@v6
-        with:
-          repository: ScicatProject/scicatlive
-          path: scicatlive
-
       - uses: hoverkraft-tech/compose-action@v2.6.0
         with:
           compose-file: |
-            ./compose.yaml
-            ../src/test/resources/scicatlive/compose.override.yaml
+            oci://ghcr.io/scicatproject/scicatlive:4.0.0-full
+            src/test/resources/scicatlive/compose.override.yaml
           up-flags: --wait-timeout 120
-          cwd: ${{ github.workspace }}/scicatlive
-        env:
-          JOBS_ENABLED: true
-          COMPOSE_PROFILES: search
 
       - name: Run test suite
         uses: devcontainers/ci@v0.3
