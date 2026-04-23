@@ -1,7 +1,7 @@
 package ch.psi.ord.model;
 
-import ch.psi.rdf.RdfClass;
-import ch.psi.rdf.RdfProperty;
+import ch.psi.rdf.annotations.RdfClass;
+import ch.psi.rdf.annotations.RdfProperty;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.jena.vocabulary.SchemaDO;

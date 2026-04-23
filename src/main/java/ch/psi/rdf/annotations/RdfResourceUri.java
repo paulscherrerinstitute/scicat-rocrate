@@ -1,4 +1,4 @@
-package ch.psi.rdf;
+package ch.psi.rdf.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
