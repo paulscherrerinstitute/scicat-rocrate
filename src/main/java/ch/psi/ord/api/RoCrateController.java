@@ -5,6 +5,7 @@ import ch.psi.ord.core.RoCrate;
 import ch.psi.ord.core.RoCrateExporter;
 import ch.psi.ord.core.RoCrateImporter;
 import ch.psi.ord.model.Error;
+import ch.psi.ord.model.ExportFormat;
 import ch.psi.ord.model.ValidationReport;
 import ch.psi.scicat.client.ScicatClient;
 import com.apicatalog.jsonld.JsonLdOptions;
@@ -40,6 +41,7 @@ import org.apache.jena.riot.RiotException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
+import org.jboss.resteasy.reactive.RestHeader;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 import org.jboss.resteasy.reactive.server.ServerRequestFilter;
 
@@ -133,34 +135,29 @@ public class RoCrateController {
   @POST
   @Path("/export")
   @Consumes(MediaType.APPLICATION_JSON)
-  @Produces(ExtraMediaType.APPLICATION_JSONLD)
-  public Response exportMetadataDescriptor(List<String> identifiers) {
-    Optional<Response> err = export(identifiers);
-    if (err.isPresent()) {
-      return err.get();
+  public Response exportCrate(
+      @RestHeader("export") ExportFormat exportFormat, List<String> identifiers) {
+    if (exportFormat == null) {
+      return Response.status(Status.BAD_REQUEST).entity("null").build();
     }
 
-    return Response.ok(exporter.getCrateMetadata())
-        .type(ExtraMediaType.APPLICATION_JSONLD_TYPE)
-        .build();
-  }
-
-  @POST
-  @Path("/export")
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Produces(ExtraMediaType.APPLICATION_ZIP)
-  public Response exportZip(List<String> identifiers) {
-    Optional<Response> err = export(identifiers);
-    if (err.isPresent()) {
-      return err.get();
+    Optional<Response> errorResponse = export(identifiers);
+    if (errorResponse.isPresent()) {
+      return errorResponse.get();
     }
 
-    Optional<byte[]> zip = exporter.getZip();
-    if (zip.isPresent()) {
-      return Response.ok(zip.get()).type(ExtraMediaType.APPLICATION_ZIP).build();
-    }
-
-    return Response.serverError().build();
+    return switch (exportFormat) {
+      case JSONLD ->
+          Response.ok(exporter.getCrateMetadata())
+              .type(ExtraMediaType.APPLICATION_JSONLD_TYPE)
+              .build();
+      case ZIP ->
+          exporter
+              .getZip()
+              .map(bytes -> Response.ok(bytes).type(ExtraMediaType.APPLICATION_ZIP).build())
+              .orElseGet(() -> Response.serverError().build());
+      default -> Response.status(Status.BAD_REQUEST).build();
+    };
   }
 
   @POST
