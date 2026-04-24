@@ -6,6 +6,7 @@ import ch.psi.ord.core.RoCrateExporter;
 import ch.psi.ord.core.RoCrateImporter;
 import ch.psi.ord.model.Error;
 import ch.psi.ord.model.ValidationReport;
+import ch.psi.rdf.deser.RdfDeserializationException;
 import ch.psi.scicat.client.ScicatClient;
 import com.apicatalog.jsonld.JsonLdOptions;
 import com.apicatalog.jsonld.JsonLdOptions.ProcessingPolicy;
@@ -167,7 +168,7 @@ public class RoCrateController {
   @Path("/validate")
   @Consumes(ExtraMediaType.APPLICATION_JSONLD)
   @Produces(MediaType.APPLICATION_JSON)
-  public Response validateCrate(InputStream body) {
+  public Response validateCrate(InputStream body) throws RdfDeserializationException {
     try (RoCrate crate = new RoCrate(body)) {
       importer.loadCrate(crate);
       return Response.ok(importer.validate()).build();
@@ -179,7 +180,11 @@ public class RoCrateController {
   @Consumes(ExtraMediaType.APPLICATION_ZIP)
   @Produces(MediaType.APPLICATION_JSON)
   public Response validateZippedCrate(InputStream body)
-      throws RiotException, FileNotFoundException, ZipException, IOException {
+      throws RiotException,
+          FileNotFoundException,
+          ZipException,
+          IOException,
+          RdfDeserializationException {
     try (ZipInputStream zip = new ZipInputStream(body);
         RoCrate crate = new RoCrate(zip)) {
       importer.loadCrate(crate);
@@ -192,8 +197,8 @@ public class RoCrateController {
   @Consumes(ExtraMediaType.APPLICATION_JSONLD)
   @Produces(MediaType.APPLICATION_JSON)
   @ScicatAuth
-  public Response importCrate(
-      @HeaderParam(value = "api-key") String scicatToken, InputStream body) {
+  public Response importCrate(@HeaderParam(value = "api-key") String scicatToken, InputStream body)
+      throws RdfDeserializationException {
     try (RoCrate crate = new RoCrate(body)) {
       importer.loadCrate(crate);
       ValidationReport report = importer.validate();
@@ -215,7 +220,11 @@ public class RoCrateController {
   @ScicatAuth
   public Response importZippedCrate(
       @HeaderParam(value = "api-key") String scicatToken, InputStream body)
-      throws RiotException, FileNotFoundException, ZipException, IOException {
+      throws RiotException,
+          FileNotFoundException,
+          ZipException,
+          IOException,
+          RdfDeserializationException {
     try (ZipInputStream zip = new ZipInputStream(body);
         RoCrate crate = new RoCrate(zip)) {
       importer.loadCrate(crate);
