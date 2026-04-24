@@ -5,9 +5,10 @@ import ch.psi.ord.model.NoEntityFound;
 import ch.psi.ord.model.Publication;
 import ch.psi.ord.model.ValidationReport;
 import ch.psi.ord.model.ValidationReport.Entity;
+import ch.psi.rdf.RdfMapper;
 import ch.psi.rdf.RdfUtils;
 import ch.psi.rdf.deser.DeserializationReport;
-import ch.psi.rdf.deser.RdfDeserializer;
+import ch.psi.rdf.deser.RdfDeserializationException;
 import ch.psi.scicat.client.ScicatClient;
 import ch.psi.scicat.model.v3.CountResponse;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
@@ -52,7 +53,7 @@ public class RoCrateImporter {
   private Model model = ModelFactory.createDefaultModel();
   private Reasoner reasoner = ReasonerRegistry.getOWLMicroReasoner();
   private InfModel inferredModel = ModelFactory.createInfModel(reasoner, model);
-  private RdfDeserializer deserializer = new RdfDeserializer();
+  private RdfMapper rdfMapper = new RdfMapper();
   @Inject private ModelMapper modelMapper;
   @Inject private ScicatClient scicatClient;
 
@@ -144,7 +145,7 @@ public class RoCrateImporter {
     return datasetDto;
   }
 
-  public ValidationReport validate() {
+  public ValidationReport validate() throws RdfDeserializationException {
     ValidationReport report = new ValidationReport();
 
     List<MissingDataError> dataErrors = validateArchiveContent();
@@ -249,7 +250,8 @@ public class RoCrateImporter {
     return true;
   }
 
-  public DeserializationReport<Publication> validatePublication(Resource subject) {
-    return deserializer.deserialize(subject, Publication.class);
+  public DeserializationReport<Publication> validatePublication(Resource subject)
+      throws RdfDeserializationException {
+    return rdfMapper.deserialize(subject, Publication.class);
   }
 }
