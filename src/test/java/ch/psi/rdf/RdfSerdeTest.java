@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ch.psi.rdf.TestClasses.CustomClassLevelSer;
 import ch.psi.rdf.TestClasses.PrimitiveTypes;
 import ch.psi.rdf.deser.DeserializationReport;
 import ch.psi.rdf.deser.RdfDeserializationException;
@@ -20,6 +21,7 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.SchemaDO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -172,5 +174,13 @@ public class RdfSerdeTest {
     var report = getReport(subject, TestClasses.PrimitiveTypes.class);
     assertTrue(report.isValid());
     assertEquals(12.0, report.get().d);
+  }
+
+  @Test
+  @DisplayName("Class level custom serializer")
+  public void test08() {
+    CustomClassLevelSer instance = new CustomClassLevelSer();
+    Resource r = serializeToResource(instance);
+    assertEquals(instance.a, r.getProperty(SchemaDO.value).getString());
   }
 }
