@@ -166,17 +166,22 @@ public class RdfDeserializer {
 
   private Optional<PropertyError> checkCardinalities(
       Resource subject, Property p, RdfProperty propertyAnnotation, int actualCardinality) {
-    if (actualCardinality < propertyAnnotation.minCardinality()
-        || actualCardinality > propertyAnnotation.maxCardinality()) {
-      String message =
+    String message = null;
+    if (actualCardinality < propertyAnnotation.minCardinality()) {
+      message =
+          (actualCardinality == 0)
+              ? "Missing required property"
+              : String.format(
+                  "Too few values: expected at least %d but got %d",
+                  propertyAnnotation.minCardinality(), actualCardinality);
+    } else if (actualCardinality > propertyAnnotation.maxCardinality()) {
+      message =
           String.format(
-              "Expected between %d and %d values but got %d",
-              propertyAnnotation.minCardinality(),
-              propertyAnnotation.maxCardinality(),
-              actualCardinality);
-      return Optional.of(new PropertyError(subject.getURI(), p.getURI(), message));
+              "Too many values: expected at most %d but got %d",
+              propertyAnnotation.maxCardinality(), actualCardinality);
     }
-    return Optional.empty();
+    return Optional.ofNullable(message)
+        .map(msg -> new PropertyError(subject.getURI(), p.getURI(), msg));
   }
 
   private <T> Object convertValue(
