@@ -113,8 +113,7 @@ public class ValidateTest extends EndpointTest {
             "errors[0]",
             hasEntry("nodeId", "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
         .body("errors[0]", hasEntry("property", "https://schema.org/name"))
-        .body(
-            "errors[0]", hasEntry("message", "Expected between 1 and 2147483647 values but got 0"))
+        .body("errors[0]", hasEntry("message", "Missing required property"))
         .body("errors[0]", hasEntry("type", "PropertyError"));
   }
 
@@ -136,8 +135,7 @@ public class ValidateTest extends EndpointTest {
             "errors[0]",
             hasEntry("nodeId", "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
         .body("errors[0]", hasEntry("property", "https://schema.org/name"))
-        .body(
-            "errors[0]", hasEntry("message", "Expected between 1 and 2147483647 values but got 0"))
+        .body("errors[0]", hasEntry("message", "Missing required property"))
         .body("errors[0]", hasEntry("type", "PropertyError"));
   }
 
@@ -159,8 +157,7 @@ public class ValidateTest extends EndpointTest {
             "errors[0]",
             hasEntry("nodeId", "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
         .body("errors[0]", hasEntry("property", "https://schema.org/name"))
-        .body(
-            "errors[0]", hasEntry("message", "Expected between 1 and 2147483647 values but got 0"))
+        .body("errors[0]", hasEntry("message", "Missing required property"))
         .body("errors[0]", hasEntry("type", "PropertyError"));
   }
 
@@ -182,8 +179,7 @@ public class ValidateTest extends EndpointTest {
             "errors[0]",
             hasEntry("nodeId", "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
         .body("errors[0]", hasEntry("property", "https://schema.org/name"))
-        .body(
-            "errors[0]", hasEntry("message", "Expected between 1 and 2147483647 values but got 0"))
+        .body("errors[0]", hasEntry("message", "Missing required property"))
         .body("errors[0]", hasEntry("type", "PropertyError"));
   }
 
