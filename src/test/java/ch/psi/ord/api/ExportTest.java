@@ -45,7 +45,7 @@ public class ExportTest extends EndpointTest {
   public void test00() {
     given()
         .header("Content-Type", MediaType.APPLICATION_JSON)
-        .header("Accept", ExtraMediaType.APPLICATION_ZIP)
+        .header("export", ExtraMediaType.APPLICATION_ZIP)
         .body(List.of(TestData.psiPub1.getDoi()))
         .when()
         .post("/ro-crate/export")
@@ -75,7 +75,7 @@ public class ExportTest extends EndpointTest {
 
     given()
         .header("Content-Type", MediaType.APPLICATION_JSON)
-        .header("Accept", ExtraMediaType.APPLICATION_JSONLD)
+        .header("export", ExtraMediaType.APPLICATION_JSONLD)
         .body(List.of(TestData.psiPub1.getDoi()))
         .when()
         .post("/ro-crate/export")
@@ -98,7 +98,7 @@ public class ExportTest extends EndpointTest {
 
     given()
         .header("Content-Type", MediaType.APPLICATION_JSON)
-        .header("Accept", ExtraMediaType.APPLICATION_JSONLD)
+        .header("export", ExtraMediaType.APPLICATION_JSONLD)
         .body(List.of(TestData.psiPub1.getDoi()))
         .when()
         .post("/ro-crate/export")
