@@ -1,16 +1,13 @@
 package ch.psi.rdf;
 
 import ch.psi.ord.model.PropertyError;
-import ch.psi.ord.model.ValidationError;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
@@ -20,49 +17,6 @@ import org.apache.jena.vocabulary.RDF;
 
 @Slf4j
 public class RdfDeserializer {
-  public static class DeserializationReport<T> {
-    private Set<ValidationError> errors = new HashSet<>();
-    private T value = null;
-
-    public boolean isValid() {
-      return errors.isEmpty() && value != null;
-    }
-
-    public void addError(ValidationError e) {
-      errors.add(e);
-    }
-
-    public void addErrors(DeserializationReport<?> report) {
-      errors.addAll(report.getErrors());
-    }
-
-    public Set<ValidationError> getErrors() {
-      return errors;
-    }
-
-    public void set(T value) {
-      this.value = value;
-    }
-
-    public T get() {
-      return value;
-    }
-
-    @Override
-    public String toString() {
-      StringBuilder builder = new StringBuilder();
-      if (isValid()) {
-        builder.append("Contains: \n  ").append(value);
-      } else {
-        for (ValidationError e : errors) {
-          builder.append(e.getMessage()).append('\n');
-        }
-      }
-
-      return builder.toString();
-    }
-  }
-
   public <T> DeserializationReport<T> deserialize(Resource subject, Class<T> clazz) {
     DeserializationReport<T> report = new DeserializationReport<>();
 
