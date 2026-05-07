@@ -2,9 +2,9 @@ services:
   backend:
     environment:
       - SITE=PSI
-      - CREATE_DATASET_GROUPS=
-    volumes:
-      - ../src/test/resources/scicatlive/functionalAccounts.json:/home/node/app/functionalAccounts.json
+    configs:
+      - source: functionalAccounts
+        target: /home/node/app/functionalAccounts.json
   s3-broker:
     image: ghcr.io/paulscherrerinstitute/scicat-s3-broker:0.3.0
     labels:
@@ -17,3 +17,40 @@ services:
       backend:
         condition: service_healthy
     restart: on-failure
+
+configs:
+  functionalAccounts:
+    content: |
+      [
+        {
+          "username": "admin",
+          "password": "2jf70TPNZsS",
+          "email": "scicatadmin@your.site",
+          "role": "admin"
+        },
+        {
+          "username": "ingestor",
+          "password": "aman",
+          "email": "scicatingestor@your.site",
+          "role": "ingestor"
+        },
+        {
+          "username": "archiveManager",
+          "password": "aman",
+          "email": "scicatarchivemanager@your.site",
+          "role": "archivemanager"
+        },
+        {
+          "username": "proposalIngestor",
+          "password": "aman",
+          "email": "scicatproposalingestor@your.site",
+          "role": "proposalingestor"
+        },
+        {
+          "username": "rocrate",
+          "email": "rocrate@your.site",
+          "password": "rocrate",
+          "role": "rocrate",
+          "global": false
+        }
+      ]
