@@ -1,5 +1,6 @@
 package ch.psi.rdf;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,10 +8,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ch.psi.rdf.TestClasses.PrimitiveTypes;
+import ch.psi.rdf.deser.DeserializationReport;
+import ch.psi.rdf.deser.RdfDeserializer;
+import ch.psi.rdf.ser.RdfSerializationException;
 import io.quarkus.test.junit.QuarkusTest;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.atomic.LongAdder;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -19,12 +24,17 @@ import org.apache.jena.vocabulary.RDF;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.ThrowingSupplier;
 
 @QuarkusTest
 public class RdfSerdeTest {
   private Model model;
-  private RdfSerializer serializer = new RdfSerializer();
+  private RdfMapper mapper = new RdfMapper();
   private RdfDeserializer deserializer = new RdfDeserializer();
+
+  private ThrowingSupplier<Resource> resourceSupplier(Object value) {
+    return () -> mapper.serialize(value).asResource();
+  }
 
   @BeforeEach
   public void setup() {
@@ -39,10 +49,11 @@ public class RdfSerdeTest {
   @DisplayName("Bad input")
   public void test00() throws Exception {
     RdfSerializationException e =
-        assertThrows(RdfSerializationException.class, () -> serializer.serialize(Instant.now()));
+        assertThrows(RdfSerializationException.class, () -> mapper.serialize(new LongAdder()));
     assertEquals(
         e.getMessage(),
-        "Can not serialize instance of 'java.time.Instant', missing '@RdfClass' annotation");
+        "Can not serialize instance of 'java.util.concurrent.atomic.LongAdder', missing '@RdfClass'"
+            + " annotation");
 
     assertFalse(deserializer.deserialize(model.createResource(), Instant.class).isValid());
     assertFalse(deserializer.deserialize(null, Instant.class).isValid());
@@ -53,7 +64,7 @@ public class RdfSerdeTest {
   @Test
   @DisplayName("Empty class")
   public void test01() throws Exception {
-    Resource r = serializer.serialize(new TestClasses.Empty());
+    Resource r = assertDoesNotThrow(resourceSupplier(new TestClasses.Empty()));
     assertEquals(getTypeUri(r), TestClasses.NS + "Empty");
   }
 
@@ -67,7 +78,7 @@ public class RdfSerdeTest {
     instance.floatArray = List.of(7.7f, 8.8f, 9.9f);
     instance.booleanArray = List.of(true, false, true);
 
-    Resource r = serializer.serialize(instance);
+    Resource r = assertDoesNotThrow(resourceSupplier(instance));
     assertEquals(getTypeUri(r), TestClasses.NS + "Arrays");
 
     DeserializationReport<TestClasses.Arrays> report =
@@ -92,7 +103,8 @@ public class RdfSerdeTest {
   @DisplayName("Custom URI")
   public void test03() throws Exception {
     TestClasses.CustomUri customURI = new TestClasses.CustomUri();
-    Resource r = serializer.serialize(customURI);
+    Resource r = assertDoesNotThrow(resourceSupplier(customURI));
+    assertNotNull(r);
     assertEquals(getTypeUri(r), TestClasses.NS + "CustomUri");
     assertEquals(customURI.customUri(), r.getURI());
   }
@@ -110,7 +122,8 @@ public class RdfSerdeTest {
     primitiveTypes.g = Float.valueOf(6);
     primitiveTypes.h = false;
     primitiveTypes.i = Boolean.TRUE;
-    Resource r = serializer.serialize(primitiveTypes);
+    Resource r = assertDoesNotThrow(resourceSupplier(primitiveTypes));
+    assertNotNull(r);
     assertEquals(getTypeUri(r), TestClasses.NS + "PrimitiveTypes");
 
     assertEquals(
@@ -156,7 +169,8 @@ public class RdfSerdeTest {
   @Test
   @DisplayName("Type URI scheme mismatch (https instead of http)")
   public void test06() throws Exception {
-    Resource serialized = serializer.serialize(new TestClasses.Empty());
+    Resource serialized = assertDoesNotThrow(resourceSupplier(new TestClasses.Empty()));
+    assertNotNull(serialized);
     Resource subject = serialized.getModel().listSubjects().toList().getFirst();
     assertTrue(deserializer.deserialize(subject, TestClasses.EmptyHttp.class).isValid());
   }

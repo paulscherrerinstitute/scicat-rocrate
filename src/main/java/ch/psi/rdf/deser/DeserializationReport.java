@@ -1,4 +1,4 @@
-package ch.psi.rdf;
+package ch.psi.rdf.deser;
 
 import ch.psi.ord.model.ValidationError;
 import java.util.HashSet;

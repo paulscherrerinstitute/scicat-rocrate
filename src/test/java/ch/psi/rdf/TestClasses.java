@@ -1,5 +1,8 @@
 package ch.psi.rdf;
 
+import ch.psi.rdf.annotations.RdfClass;
+import ch.psi.rdf.annotations.RdfProperty;
+import ch.psi.rdf.annotations.RdfResourceUri;
 import java.util.List;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;

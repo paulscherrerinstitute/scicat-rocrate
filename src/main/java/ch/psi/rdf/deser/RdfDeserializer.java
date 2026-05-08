@@ -1,6 +1,9 @@
-package ch.psi.rdf;
+package ch.psi.rdf.deser;
 
 import ch.psi.ord.model.PropertyError;
+import ch.psi.rdf.RdfUtils;
+import ch.psi.rdf.annotations.RdfClass;
+import ch.psi.rdf.annotations.RdfProperty;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;

@@ -1,4 +1,4 @@
-package ch.psi.rdf;
+package ch.psi.rdf.ser;
 
 public class RdfSerializationException extends Exception {
   public RdfSerializationException(String message) {

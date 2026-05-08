@@ -3,8 +3,8 @@ package ch.psi.ord.core;
 import ch.psi.ord.api.ExtraMediaType;
 import ch.psi.ord.model.DataDownload;
 import ch.psi.ord.model.ZenodoDataset;
-import ch.psi.rdf.RdfSerializationException;
-import ch.psi.rdf.RdfSerializer;
+import ch.psi.rdf.RdfMapper;
+import ch.psi.rdf.ser.RdfSerializationException;
 import ch.psi.s3_broker.client.S3BrokerService;
 import ch.psi.s3_broker.model.PublishedDataUrls;
 import ch.psi.scicat.client.ScicatClient;
@@ -19,7 +19,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFWriter;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -36,7 +36,7 @@ public class ZenodoExporter {
   @Inject ScicatClient scicatClient;
   @RestClient @Inject S3BrokerService s3BrokerService;
   @Inject private ModelMapper modelMapper;
-  private RdfSerializer serializer = new RdfSerializer();
+  private RdfMapper rdfMapper = new RdfMapper();
   private Document zenodoFrame;
 
   public ZenodoExporter() {
@@ -74,7 +74,7 @@ public class ZenodoExporter {
     ZenodoDataset zenodoDataset = modelMapper.map(publishedData, ZenodoDataset.class);
     zenodoDataset.setDistribution(distribution).setExpires(brokerResponse.getExpires());
 
-    Resource serializedDataset = serializer.serialize(zenodoDataset);
+    RDFNode serializedDataset = rdfMapper.serialize(zenodoDataset);
     StringWriter sw = new StringWriter();
     RDFWriter.create()
         .source(serializedDataset.getModel())
