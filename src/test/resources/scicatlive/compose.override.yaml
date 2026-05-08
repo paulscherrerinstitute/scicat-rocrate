@@ -1,10 +1,24 @@
 services:
+  keycloak:
+    image: tianon/true
+    scale: 0
+  ldap:
+    image: tianon/true
+    scale: 0
+  opensearch:
+    image: tianon/true
+    scale: 0
   backend:
     environment:
       - SITE=PSI
+      - OPENSEARCH_ENABLED=false
+      - OIDC_ISSUER=
     configs:
       - source: functionalAccounts
         target: /home/node/app/functionalAccounts.json
+    depends_on: !override
+      mongodb:
+        condition: service_started
   s3-broker:
     image: ghcr.io/paulscherrerinstitute/scicat-s3-broker:0.3.0
     labels:
