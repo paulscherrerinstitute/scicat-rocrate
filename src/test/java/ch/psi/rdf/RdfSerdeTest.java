@@ -3,9 +3,12 @@ package ch.psi.rdf;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ch.psi.rdf.TestClasses.CustomClassLevelDeser;
+import ch.psi.rdf.TestClasses.CustomClassLevelSer;
 import ch.psi.rdf.TestClasses.PrimitiveTypes;
 import ch.psi.rdf.deser.DeserializationReport;
 import ch.psi.rdf.deser.RdfDeserializationException;
@@ -20,6 +23,7 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.SchemaDO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,8 +59,6 @@ public class RdfSerdeTest {
         e.getMessage(),
         "Can not serialize instance of 'java.util.concurrent.atomic.LongAdder', missing '@RdfClass'"
             + " annotation");
-
-    assertTrue(e.getMessage().contains("missing '@RdfClass'"));
 
     assertAll(
         "Deserialization error cases",
@@ -176,5 +178,38 @@ public class RdfSerdeTest {
     var report = getReport(subject, TestClasses.PrimitiveTypes.class);
     assertTrue(report.isValid());
     assertEquals(12.0, report.get().d);
+  }
+
+  @Test
+  @DisplayName("Class level custom serializer")
+  public void test08() {
+    CustomClassLevelSer instance = new CustomClassLevelSer();
+    Resource r = serializeToResource(instance);
+    assertEquals(instance.a, r.getProperty(SchemaDO.value).getString());
+  }
+
+  @Test
+  @DisplayName("Class level custom deserializer")
+  public void test09() {
+    DeserializationReport<CustomClassLevelDeser> report1 =
+        getReport(
+            model
+                .createResource()
+                .addProperty(RDF.type, "https://testclasses.org/CustomDeserializer"),
+            CustomClassLevelDeser.class);
+
+    DeserializationReport<CustomClassLevelDeser> report2 =
+        getReport(
+            model
+                .createResource()
+                .addProperty(SchemaDO.name, "Foo")
+                .addProperty(RDF.type, "https://testclasses.org/CustomDeserializer"),
+            CustomClassLevelDeser.class);
+    assertAll(
+        "Custom deserializer was called",
+        () -> assertTrue(report1.isValid()),
+        () -> assertFalse(report1.get().hasName),
+        () -> assertTrue(report2.isValid()),
+        () -> assertTrue(report2.get().hasName));
   }
 }

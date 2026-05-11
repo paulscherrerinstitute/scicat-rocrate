@@ -1,12 +1,24 @@
 package ch.psi.rdf;
 
+import ch.psi.rdf.TestClasses.CustomClassLevelDeser.customDeserializer;
+import ch.psi.rdf.TestClasses.CustomClassLevelSer.customSerializer;
 import ch.psi.rdf.annotations.RdfClass;
+import ch.psi.rdf.annotations.RdfDeserialize;
 import ch.psi.rdf.annotations.RdfProperty;
 import ch.psi.rdf.annotations.RdfResourceUri;
+import ch.psi.rdf.annotations.RdfSerialize;
+import ch.psi.rdf.deser.RdfDeserializationContext;
+import ch.psi.rdf.deser.RdfDeserializationException;
+import ch.psi.rdf.deser.RdfDeserializer;
+import ch.psi.rdf.ser.RdfSerializationException;
+import ch.psi.rdf.ser.RdfSerializer;
 import java.util.List;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.vocabulary.SchemaDO;
 
 public class TestClasses {
   public static final String NS = "https://testclasses.org/";
@@ -107,6 +119,37 @@ public class TestClasses {
             && (i == null ? other.i == null : i.equals(other.i));
       }
       return false;
+    }
+  }
+
+  @RdfClass(typesUri = NS + "CustomSerializer")
+  @RdfSerialize(using = customSerializer.class)
+  public static class CustomClassLevelSer {
+    String a = "value";
+
+    public static class customSerializer implements RdfSerializer<CustomClassLevelSer> {
+      @Override
+      public List<RDFNode> serialize(
+          CustomClassLevelSer value, Model model, RdfSerializerProvider provider)
+          throws RdfSerializationException {
+        return List.of(model.createResource().addProperty(SchemaDO.value, value.a));
+      }
+    }
+  }
+
+  @RdfClass(typesUri = NS + "CustomDeserializer")
+  @RdfDeserialize(using = customDeserializer.class)
+  public static class CustomClassLevelDeser {
+    boolean hasName;
+
+    public static class customDeserializer implements RdfDeserializer<CustomClassLevelDeser> {
+      @Override
+      public CustomClassLevelDeser deserialize(RDFNode node, RdfDeserializationContext context)
+          throws RdfDeserializationException {
+        CustomClassLevelDeser result = new CustomClassLevelDeser();
+        result.hasName = node.asResource().hasProperty(SchemaDO.name);
+        return result;
+      }
     }
   }
 }
