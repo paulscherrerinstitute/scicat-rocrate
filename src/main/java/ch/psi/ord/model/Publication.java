@@ -42,5 +42,5 @@ public class Publication {
   private String description;
 
   @RdfProperty(uri = SchemaDO.NS + "hasPart")
-  private List<Object> hasPart = new ArrayList<>();
+  private List<Dataset> hasPart = new ArrayList<>();
 }
