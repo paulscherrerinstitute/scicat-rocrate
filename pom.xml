@@ -16,7 +16,7 @@
     <quarkus.platform.version>3.35.2</quarkus.platform.version>
     <quarkus.container-image.push>true</quarkus.container-image.push>
     <surefire-plugin.version>3.5.5</surefire-plugin.version>
-    <jena.version>6.0.0</jena.version>
+    <jena.version>6.1.0</jena.version>
     <lombok.version>1.18.46</lombok.version>
   </properties>
   <dependencyManagement>
