@@ -55,8 +55,10 @@ public class RdfSerdeTest {
   public void test00() {
     RdfSerializationException e =
         assertThrows(RdfSerializationException.class, () -> rdfMapper.serialize(new LongAdder()));
-
-    assertTrue(e.getMessage().contains("missing '@RdfClass'"));
+    assertEquals(
+        e.getMessage(),
+        "Can not serialize instance of 'java.util.concurrent.atomic.LongAdder', missing '@RdfClass'"
+            + " annotation");
 
     assertAll(
         "Deserialization error cases",
@@ -127,11 +129,11 @@ public class RdfSerdeTest {
     TestClasses.PrimitiveTypes expected = new TestClasses.PrimitiveTypes();
     expected.a = "test04";
     expected.b = 1;
-    expected.c = 2;
+    expected.c = Integer.valueOf(2);
     expected.d = 3;
-    expected.e = 4.0;
+    expected.e = Double.valueOf(4.0);
     expected.f = 5.0f;
-    expected.g = 6.0f;
+    expected.g = Float.valueOf(6.0f);
     expected.h = false;
     expected.i = Boolean.TRUE;
 

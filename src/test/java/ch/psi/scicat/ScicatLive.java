@@ -1,0 +1,59 @@
+package ch.psi.scicat;
+
+import io.quarkus.test.common.DevServicesContext;
+import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class ScicatLive
+    implements QuarkusTestResourceLifecycleManager, DevServicesContext.ContextAware {
+  static final String[] cmd = {
+    "docker",
+    "compose",
+    "-f",
+    "oci://ghcr.io/scicatproject/scicatlive:4.0.0-full",
+    "-f",
+    "src/test/resources/scicatlive/compose.override.yaml",
+  };
+
+  static final List<String> cmdUp =
+      Stream.concat(Arrays.stream(cmd), Arrays.stream(new String[] {"up", "--wait"}))
+          .collect(Collectors.toList());
+
+  static final List<String> cmdDown =
+      Stream.concat(Arrays.stream(cmd), Arrays.stream(new String[] {"down", "--volumes"}))
+          .collect(Collectors.toList());
+
+  ProcessBuilder processBuilder = new ProcessBuilder();
+
+  @Override
+  public void setIntegrationTestContext(DevServicesContext context) {}
+
+  @Override
+  public Map<String, String> start() {
+    try {
+      Process process = new ProcessBuilder(cmdUp).inheritIO().start();
+      int exitCode = process.waitFor();
+      if (exitCode != 0) {
+        throw new RuntimeException("scicatlive failed to start. Exit code: " + exitCode);
+      }
+    } catch (IOException | InterruptedException e) {
+      throw new RuntimeException("scicatlive failed to start.", e);
+    }
+    return Collections.emptyMap();
+  }
+
+  @Override
+  public void stop() {
+    try {
+      new ProcessBuilder(cmdDown).inheritIO().start().waitFor();
+    } catch (IOException | InterruptedException e) {
+      throw new RuntimeException("Failed to cleanly stop scicatlive.", e);
+    }
+  }
+}
