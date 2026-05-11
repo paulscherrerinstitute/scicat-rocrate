@@ -3,9 +3,11 @@ package ch.psi.rdf;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ch.psi.rdf.TestClasses.CustomClassLevelDeser;
 import ch.psi.rdf.TestClasses.CustomClassLevelSer;
 import ch.psi.rdf.TestClasses.PrimitiveTypes;
 import ch.psi.rdf.deser.DeserializationReport;
@@ -182,5 +184,30 @@ public class RdfSerdeTest {
     CustomClassLevelSer instance = new CustomClassLevelSer();
     Resource r = serializeToResource(instance);
     assertEquals(instance.a, r.getProperty(SchemaDO.value).getString());
+  }
+
+  @Test
+  @DisplayName("Class level custom deserializer")
+  public void test09() {
+    DeserializationReport<CustomClassLevelDeser> report1 =
+        getReport(
+            model
+                .createResource()
+                .addProperty(RDF.type, "https://testclasses.org/CustomDeserializer"),
+            CustomClassLevelDeser.class);
+
+    DeserializationReport<CustomClassLevelDeser> report2 =
+        getReport(
+            model
+                .createResource()
+                .addProperty(SchemaDO.name, "Foo")
+                .addProperty(RDF.type, "https://testclasses.org/CustomDeserializer"),
+            CustomClassLevelDeser.class);
+    assertAll(
+        "Custom deserializer was called",
+        () -> assertTrue(report1.isValid()),
+        () -> assertFalse(report1.get().hasName),
+        () -> assertTrue(report2.isValid()),
+        () -> assertTrue(report2.get().hasName));
   }
 }

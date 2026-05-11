@@ -1,5 +1,6 @@
 package ch.psi.rdf;
 
+import ch.psi.rdf.annotations.RdfDeserialize;
 import ch.psi.rdf.deser.BooleanDeserializer;
 import ch.psi.rdf.deser.DoubleDeserializer;
 import ch.psi.rdf.deser.FloatDeserializer;
@@ -34,11 +35,26 @@ public class RdfDeserializerProvider {
 
   @SuppressWarnings("unchecked")
   public <T> RdfDeserializer<T> getDeserializer(Class<T> clazz) throws RdfDeserializationException {
-    RdfDeserializer<?> existing = registry.get(clazz);
-    if (existing != null) return (RdfDeserializer<T>) existing;
+    if (clazz.isAnnotationPresent(RdfDeserialize.class)) {
+      RdfDeserialize annot = clazz.getAnnotation(RdfDeserialize.class);
+      try {
+        RdfDeserializer<T> customDeser =
+            (RdfDeserializer<T>) annot.using().getDeclaredConstructor().newInstance();
+
+        registry.put(clazz, customDeser);
+        return customDeser;
+      } catch (Exception e) {
+        throw new RdfDeserializationException(
+            "Failed to instantiate custom deserializer for " + clazz.getName(), e);
+      }
+    }
+
+    if (registry.get(clazz) instanceof RdfDeserializer<?> deserializer) {
+      return (RdfDeserializer<T>) deserializer;
+    }
 
     RdfDeserializer<T> created = new ObjectDeserializer<>(clazz);
-    registry.putIfAbsent(clazz, created);
-    return (RdfDeserializer<T>) registry.get(clazz);
+    registry.put(clazz, created);
+    return created;
   }
 }
