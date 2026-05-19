@@ -23,6 +23,7 @@ public class TestData {
   public static Dataset psiDs1;
   public static Dataset psiDs2;
   public static Dataset psiDs3;
+  public static Dataset hzdrDs1;
 
   private static ObjectMapper jsonReader = new ObjectMapper().registerModule(new JavaTimeModule());
 
@@ -61,7 +62,7 @@ public class TestData {
 
   public static PublishedDataUrls hzdrPub1S3Response =
       new PublishedDataUrls()
-          .setExpires(Instant.parse("2036-02-28T09:55:19Z"))
+          .setExpires(Instant.parse("2020-03-01T01:00:00Z"))
           .setUrls(
               Map.of(
                   "PID.SAMPLE.PREFIX/hzdr_ds1",
@@ -99,6 +100,10 @@ public class TestData {
       psiDs3 =
           jsonReader.readValue(
               TestData.class.getClassLoader().getResourceAsStream("scicatlive/psi_ds3.json"),
+              Dataset.class);
+      hzdrDs1 =
+          jsonReader.readValue(
+              TestData.class.getClassLoader().getResourceAsStream("scicatlive/hzdr_ds1.json"),
               Dataset.class);
     } catch (Exception e) {
       log.error("Failed to initialize test data", e);
