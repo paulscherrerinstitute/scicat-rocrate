@@ -1,19 +1,11 @@
 package ch.psi.scicat.model.v3;
 
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public enum PublishedDataStatus {
-  PENDING_REGISTRATION("pending_registration"),
-  REGISTERED("registered");
+  @JsonProperty("pending_registration")
+  PENDING_REGISTRATION,
 
-  private final String value;
-
-  PublishedDataStatus(String value) {
-    this.value = value;
-  }
-
-  @JsonValue
-  public String getValue() {
-    return value;
-  }
+  @JsonProperty("registered")
+  REGISTERED;
 }
