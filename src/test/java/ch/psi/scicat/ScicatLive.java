@@ -12,11 +12,13 @@ import java.util.stream.Stream;
 
 public class ScicatLive
     implements QuarkusTestResourceLifecycleManager, DevServicesContext.ContextAware {
+  // renovate: datasource=github-releases depName=scicatproject/scicatlive
+  static final String scicatliveVersion = "4.0.0";
   static final String[] cmd = {
     "docker",
     "compose",
     "-f",
-    "oci://ghcr.io/scicatproject/scicatlive:4.0.0-full",
+    String.format("oci://ghcr.io/scicatproject/scicatlive:%s-full", scicatliveVersion),
     "-f",
     "src/test/resources/scicatlive/compose.override.yaml",
   };
