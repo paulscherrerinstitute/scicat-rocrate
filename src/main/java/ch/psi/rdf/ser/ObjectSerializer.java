@@ -1,6 +1,5 @@
 package ch.psi.rdf.ser;
 
-import ch.psi.rdf.RdfSerializerProvider;
 import ch.psi.rdf.annotations.RdfClass;
 import ch.psi.rdf.annotations.RdfProperty;
 import ch.psi.rdf.annotations.RdfResourceUri;
@@ -18,14 +17,15 @@ import org.apache.jena.vocabulary.RDF;
 
 public class ObjectSerializer implements RdfSerializer<Object> {
   @Override
-  public List<RDFNode> serialize(Object value, Model model, RdfSerializerProvider provider)
+  public List<RDFNode> serialize(Object value, RdfSerializationContext context)
       throws RdfSerializationException {
     Class<?> clazz = value.getClass();
     @NonNull RdfClass rdfClass = validateClassAnnotation(clazz);
-    Resource serializedObject = createResourceWithUri(value, model);
+    Resource serializedObject =
+        context.setCurrentSubject(createResourceWithUri(value, context.getModel()));
 
     for (String type : rdfClass.typesUri()) {
-      serializedObject.addProperty(RDF.type, model.createResource(type));
+      serializedObject.addProperty(RDF.type, context.getModel().createResource(type));
     }
 
     for (Field field : clazz.getDeclaredFields()) {
@@ -40,19 +40,19 @@ public class ObjectSerializer implements RdfSerializer<Object> {
           continue;
         }
         RdfProperty rdfProperty = field.getAnnotation(RdfProperty.class);
-        Property property = model.createProperty(rdfProperty.uri());
+        Property property = context.getModel().createProperty(rdfProperty.uri());
 
-        @SuppressWarnings("unchecked")
         RdfSerializer<Object> serializer =
-            (RdfSerializer<Object>) provider.getSerializer(fieldValue.getClass());
+            (RdfSerializer<Object>) context.getSerializer(fieldValue.getClass());
         serializer
-            .serialize(fieldValue, model, provider)
+            .serialize(fieldValue, context)
             .forEach(node -> serializedObject.addProperty(property, node));
       } catch (Exception e) {
         throw new RdfSerializationException(
             "An error occured while serializing field " + field.getName(), e);
       }
     }
+    context.resetCurrentSubject();
 
     return List.of(serializedObject);
   }

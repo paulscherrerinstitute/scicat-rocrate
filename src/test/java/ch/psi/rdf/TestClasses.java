@@ -10,10 +10,10 @@ import ch.psi.rdf.annotations.RdfSerialize;
 import ch.psi.rdf.deser.RdfDeserializationContext;
 import ch.psi.rdf.deser.RdfDeserializationException;
 import ch.psi.rdf.deser.RdfDeserializer;
+import ch.psi.rdf.ser.RdfSerializationContext;
 import ch.psi.rdf.ser.RdfSerializationException;
 import ch.psi.rdf.ser.RdfSerializer;
 import java.util.List;
-import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
@@ -129,10 +129,9 @@ public class TestClasses {
 
     public static class customSerializer implements RdfSerializer<CustomClassLevelSer> {
       @Override
-      public List<RDFNode> serialize(
-          CustomClassLevelSer value, Model model, RdfSerializerProvider provider)
+      public List<RDFNode> serialize(CustomClassLevelSer value, RdfSerializationContext context)
           throws RdfSerializationException {
-        return List.of(model.createResource().addProperty(SchemaDO.value, value.a));
+        return List.of(context.getModel().createResource().addProperty(SchemaDO.value, value.a));
       }
     }
   }
