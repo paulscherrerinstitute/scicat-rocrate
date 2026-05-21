@@ -3,6 +3,7 @@ package ch.psi.rdf.ser;
 import ch.psi.rdf.annotations.RdfClass;
 import ch.psi.rdf.annotations.RdfProperty;
 import ch.psi.rdf.annotations.RdfResourceUri;
+import ch.psi.rdf.annotations.RdfSerialize;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -42,8 +43,18 @@ public class ObjectSerializer implements RdfSerializer<Object> {
         RdfProperty rdfProperty = field.getAnnotation(RdfProperty.class);
         Property property = context.getModel().createProperty(rdfProperty.uri());
 
-        RdfSerializer<Object> serializer =
-            (RdfSerializer<Object>) context.getSerializer(fieldValue.getClass());
+        RdfSerializer<Object> serializer;
+        if (field.isAnnotationPresent(RdfSerialize.class)) {
+          serializer =
+              (RdfSerializer<Object>)
+                  field
+                      .getAnnotation(RdfSerialize.class)
+                      .using()
+                      .getDeclaredConstructor()
+                      .newInstance();
+        } else {
+          serializer = (RdfSerializer<Object>) context.getSerializer(fieldValue.getClass());
+        }
         serializer
             .serialize(fieldValue, context)
             .forEach(node -> serializedObject.addProperty(property, node));
