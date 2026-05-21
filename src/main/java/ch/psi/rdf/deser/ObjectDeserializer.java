@@ -6,7 +6,6 @@ import ch.psi.rdf.annotations.RdfClass;
 import ch.psi.rdf.annotations.RdfDeserialize;
 import ch.psi.rdf.annotations.RdfProperty;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +48,13 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
           String.format("Expected node '%s' to be a resource", node.toString()));
     }
 
-    T obj = createInstance();
+    T obj;
+    try {
+      obj = RdfUtils.createInstance(clazz);
+    } catch (ReflectiveOperationException e) {
+      throw new RdfDeserializationException(
+          String.format("Failed to create an instance of %s", clazz.getName()), e);
+    }
     Resource subject = node.asResource();
     checkType(subject, rdfClassAnnotation.typesUri()).ifPresent(e -> context.addError(e));
 
@@ -82,17 +87,8 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
         if (field.isAnnotationPresent(RdfDeserialize.class)) {
           try {
             fieldDeserializer =
-                field
-                    .getAnnotation(RdfDeserialize.class)
-                    .using()
-                    .getDeclaredConstructor()
-                    .newInstance();
-          } catch (InstantiationException
-              | IllegalAccessException
-              | IllegalArgumentException
-              | InvocationTargetException
-              | NoSuchMethodException
-              | SecurityException e) {
+                RdfUtils.createInstance(field.getAnnotation(RdfDeserialize.class).using());
+          } catch (ReflectiveOperationException e) {
             throw new RdfDeserializationException(
                 String.format("Unable to instantiate custom field deserializer"), e);
           }
@@ -103,20 +99,6 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
     }
 
     return obj;
-  }
-
-  private T createInstance() throws RdfDeserializationException {
-    try {
-      return clazz.getDeclaredConstructor().newInstance();
-    } catch (InstantiationException
-        | IllegalAccessException
-        | IllegalArgumentException
-        | InvocationTargetException
-        | NoSuchMethodException
-        | SecurityException e) {
-      throw new RdfDeserializationException(
-          String.format("Failed to create an instance of %s", clazz.getName()), e);
-    }
   }
 
   private Optional<PropertyError> checkType(Resource subject, String[] expectedTypes) {

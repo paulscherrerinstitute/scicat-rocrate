@@ -39,11 +39,11 @@ public class RdfDeserializerProvider {
       RdfDeserialize annot = clazz.getAnnotation(RdfDeserialize.class);
       try {
         RdfDeserializer<T> customDeser =
-            (RdfDeserializer<T>) annot.using().getDeclaredConstructor().newInstance();
+            (RdfDeserializer<T>) RdfUtils.createInstance(annot.using());
 
         registry.put(clazz, customDeser);
         return customDeser;
-      } catch (Exception e) {
+      } catch (ReflectiveOperationException e) {
         throw new RdfDeserializationException(
             "Failed to instantiate custom deserializer for " + clazz.getName(), e);
       }

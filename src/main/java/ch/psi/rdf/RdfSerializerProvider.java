@@ -44,13 +44,9 @@ public class RdfSerializerProvider {
       try {
         RdfSerializer<T> serializer =
             (RdfSerializer<T>)
-                clazz
-                    .getAnnotation(RdfSerialize.class)
-                    .using()
-                    .getDeclaredConstructor()
-                    .newInstance();
+                RdfUtils.createInstance(clazz.getAnnotation(RdfSerialize.class).using());
         return register(clazz, serializer);
-      } catch (Exception e) {
+      } catch (ReflectiveOperationException e) {
         log.warn("Could not instantiate custom deserializer '{}'", clazz.getName(), e);
       }
     }
