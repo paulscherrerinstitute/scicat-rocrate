@@ -3,6 +3,7 @@ package ch.psi.rdf.deser;
 import ch.psi.ord.model.PropertyError;
 import ch.psi.rdf.RdfUtils;
 import ch.psi.rdf.annotations.RdfClass;
+import ch.psi.rdf.annotations.RdfDeserialize;
 import ch.psi.rdf.annotations.RdfProperty;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -76,7 +77,26 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
               field.getName(),
               clazz.getName());
         }
+
         RdfDeserializer<?> fieldDeserializer = context.getDeserializer(field.getType());
+        if (field.isAnnotationPresent(RdfDeserialize.class)) {
+          try {
+            fieldDeserializer =
+                field
+                    .getAnnotation(RdfDeserialize.class)
+                    .using()
+                    .getDeclaredConstructor()
+                    .newInstance();
+          } catch (InstantiationException
+              | IllegalAccessException
+              | IllegalArgumentException
+              | InvocationTargetException
+              | NoSuchMethodException
+              | SecurityException e) {
+            throw new RdfDeserializationException(
+                String.format("Unable to instantiate custom field deserializer"), e);
+          }
+        }
         Object value = fieldDeserializer.deserialize(values.getFirst(), context);
         setField(field, obj, value);
       }
