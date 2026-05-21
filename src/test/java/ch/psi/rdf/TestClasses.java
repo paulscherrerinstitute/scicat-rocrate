@@ -166,4 +166,19 @@ public class TestClasses {
       }
     }
   }
+
+  @RdfClass(typesUri = NS + "CustomDeserializer")
+  public static class CustomFieldLevelDeser {
+    @RdfProperty(uri = SchemaDO.NS + "name")
+    @RdfDeserialize(using = toLowerDeserializer.class)
+    String name;
+
+    public static class toLowerDeserializer implements RdfDeserializer<String> {
+      @Override
+      public String deserialize(RDFNode node, RdfDeserializationContext context)
+          throws RdfDeserializationException {
+        return node.asLiteral().getString().toLowerCase();
+      }
+    }
+  }
 }
