@@ -1,5 +1,6 @@
 package ch.psi.rdf.ser;
 
+import ch.psi.rdf.RdfUtils;
 import ch.psi.rdf.annotations.RdfClass;
 import ch.psi.rdf.annotations.RdfProperty;
 import ch.psi.rdf.annotations.RdfResourceUri;
@@ -47,11 +48,7 @@ public class ObjectSerializer implements RdfSerializer<Object> {
         if (field.isAnnotationPresent(RdfSerialize.class)) {
           serializer =
               (RdfSerializer<Object>)
-                  field
-                      .getAnnotation(RdfSerialize.class)
-                      .using()
-                      .getDeclaredConstructor()
-                      .newInstance();
+                  RdfUtils.createInstance(field.getAnnotation(RdfSerialize.class).using());
         } else {
           serializer = (RdfSerializer<Object>) context.getSerializer(fieldValue.getClass());
         }

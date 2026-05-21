@@ -1,5 +1,6 @@
 package ch.psi.rdf;
 
+import java.lang.reflect.InvocationTargetException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
@@ -57,5 +58,18 @@ public class RdfUtils {
     }
 
     return ResourceFactory.createProperty(switchScheme(uri));
+  }
+
+  public static <T> T createInstance(Class<T> clazz) throws ReflectiveOperationException {
+    try {
+      return clazz.getDeclaredConstructor().newInstance();
+    } catch (InstantiationException
+        | IllegalAccessException
+        | IllegalArgumentException
+        | InvocationTargetException
+        | NoSuchMethodException
+        | SecurityException e) {
+      throw new ReflectiveOperationException(e);
+    }
   }
 }
