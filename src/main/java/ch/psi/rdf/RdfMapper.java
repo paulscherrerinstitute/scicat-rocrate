@@ -4,11 +4,10 @@ import ch.psi.rdf.deser.DeserializationReport;
 import ch.psi.rdf.deser.RdfDeserializationContext;
 import ch.psi.rdf.deser.RdfDeserializationException;
 import ch.psi.rdf.deser.RdfDeserializer;
+import ch.psi.rdf.ser.RdfSerializationContext;
 import ch.psi.rdf.ser.RdfSerializationException;
 import ch.psi.rdf.ser.RdfSerializer;
 import java.util.List;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 
@@ -17,13 +16,11 @@ public class RdfMapper {
   private final RdfDeserializerProvider deserializerProvider = new RdfDeserializerProvider();
 
   public RDFNode serialize(Object obj) throws RdfSerializationException {
-    Model model = ModelFactory.createDefaultModel();
-
-    @SuppressWarnings("unchecked")
+    RdfSerializationContext context = new RdfSerializationContext(serializerProvider);
     RdfSerializer<Object> serializer =
-        (RdfSerializer<Object>) serializerProvider.getSerializer(obj.getClass());
+        (RdfSerializer<Object>) context.getSerializer(obj.getClass());
 
-    List<RDFNode> rootNode = serializer.serialize(obj, model, serializerProvider);
+    List<RDFNode> rootNode = serializer.serialize(obj, context);
     return rootNode.getFirst();
   }
 
