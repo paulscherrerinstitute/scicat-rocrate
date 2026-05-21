@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ch.psi.rdf.TestClasses.CustomClassLevelDeser;
 import ch.psi.rdf.TestClasses.CustomClassLevelSer;
+import ch.psi.rdf.TestClasses.CustomFieldLevelSer;
 import ch.psi.rdf.TestClasses.PrimitiveTypes;
 import ch.psi.rdf.deser.DeserializationReport;
 import ch.psi.rdf.deser.RdfDeserializationException;
@@ -211,5 +212,13 @@ public class RdfSerdeTest {
         () -> assertFalse(report1.get().hasName),
         () -> assertTrue(report2.isValid()),
         () -> assertTrue(report2.get().hasName));
+  }
+
+  @Test
+  @DisplayName("Field level custom serializer")
+  public void test10() {
+    CustomFieldLevelSer instance = new CustomFieldLevelSer();
+    Resource r = serializeToResource(instance);
+    assertEquals(instance.a.toUpperCase(), r.getProperty(SchemaDO.value).getString());
   }
 }

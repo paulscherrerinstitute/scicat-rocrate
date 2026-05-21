@@ -151,4 +151,19 @@ public class TestClasses {
       }
     }
   }
+
+  @RdfClass(typesUri = NS + "CustomSerializer")
+  public static class CustomFieldLevelSer {
+    @RdfProperty(uri = SchemaDO.NS + "value")
+    @RdfSerialize(using = toUpperSerializer.class)
+    String a = "value";
+
+    public static class toUpperSerializer implements RdfSerializer<String> {
+      @Override
+      public List<RDFNode> serialize(String value, RdfSerializationContext context)
+          throws RdfSerializationException {
+        return List.of(context.getModel().createLiteral(value.toUpperCase()));
+      }
+    }
+  }
 }
