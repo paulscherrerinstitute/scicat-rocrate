@@ -20,9 +20,14 @@ services:
       mongodb:
         condition: service_started
   s3-broker:
-    image: ghcr.io/paulscherrerinstitute/scicat-s3-broker:0.3.1
+    image: ghcr.io/paulscherrerinstitute/scicat-s3-broker:0.4.0
     labels:
       - traefik.http.services.s3-broker.loadbalancer.server.port=8080
+    configs:
+      - source: s3-config
+        target: /env/config
+      - source: s3-credentials
+        target: /env/credentials
     environment:
     - SCICAT_URL=http://backend:3000
     - JOB_MANAGER_USERNAME=admin
@@ -68,3 +73,13 @@ configs:
           "global": false
         }
       ]
+  s3-config:
+    content: |
+      [profile ceph]
+      endpoint_url = https://rgw.cscs.ch
+      region = us-east-1
+  s3-credentials:
+    content: |
+      [ceph]
+      aws_access_key_id=<your aws_access_key_id>
+      aws_secret_access_key=<your aws_secret_access_key>
