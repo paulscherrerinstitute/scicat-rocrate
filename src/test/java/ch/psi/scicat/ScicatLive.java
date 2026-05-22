@@ -24,7 +24,9 @@ public class ScicatLive
   };
 
   static final List<String> cmdUp =
-      Stream.concat(Arrays.stream(cmd), Arrays.stream(new String[] {"up", "--wait"}))
+      Stream.concat(
+              Arrays.stream(cmd),
+              Arrays.stream(new String[] {"up", "--wait", "--wait-timeout", "120"}))
           .collect(Collectors.toList());
 
   static final List<String> cmdDown =
