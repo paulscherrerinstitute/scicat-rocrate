@@ -28,9 +28,11 @@ jobs:
           imageName: ${{ env.devImage }}
           cacheFrom: ${{ env.devImage }}
           runCmd: |
-            docker login ghcr.io -u $GITHUB_ACTOR --password $GITHUB_TOKEN \
-            && npm install --prefix .github/semantic-release               \
-            && npx --prefix .github/semantic-release semantic-release
+            echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+            echo "$GITEA_PASSWORD" | docker login gitea.psi.ch -u "$GITEA_USERNAME" --password-stdin
+
+            npm install --prefix .github/semantic-release
+            npx --prefix .github/semantic-release semantic-release
           env: |
             CI=true
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
@@ -42,3 +44,5 @@ jobs:
             GITHUB_WORKFLOW=${{ github.workflow }}
             GITHUB_RUN_ID=${{ github.run_id }}
             GITHUB_RUN_NUMBER=${{ github.run_number }}
+            GITEA_USERNAME=${{ secrets.GITEA_USERNAME }}
+            GITEA_PASSWORD=${{ secrets.GITEA_PASSWORD }}
