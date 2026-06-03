@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 public class ScicatLive
     implements QuarkusTestResourceLifecycleManager, DevServicesContext.ContextAware {
   // renovate: datasource=github-releases depName=scicatproject/scicatlive
-  static final String scicatliveVersion = "4.1.3";
+  static final String scicatliveVersion = "4.1.4";
   static final String[] cmd = {
     "docker",
     "compose",
