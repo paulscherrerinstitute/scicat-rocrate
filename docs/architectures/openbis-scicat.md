@@ -38,7 +38,7 @@ sequenceDiagram
     rocrate->>scicat: POST rest.json to scicat (using datasetIDs for linking when required)
     scicat-->>rocrate: Return all rest.json IDs
     rocrate->>rocrate: Add DOI in JOBID status
- 
+
     arema->>scicat: Arema updates JOB when completed (PATCH /job/{id})
     openbis->>rocrate: Pull DOI (GET /rocrate/status -> DOI)
     openbis->>openbis: Update own record
