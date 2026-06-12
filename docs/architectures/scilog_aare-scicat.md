@@ -16,7 +16,7 @@ sequenceDiagram
     scicat-->>rocrate: Return JOBID
 
     scicat->>arema: Arema picks up create_job
-    
+
     loop For each metadata.json dataset in job payload
         arema->>arema: Check that user submitting the job has file permissions (or impersonate user)
         arema->>scicat-cli: Trigger ingest with filelist and metadata.json
