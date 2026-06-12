@@ -4,13 +4,13 @@
 sequenceDiagram
     autonumber
     participant openbis
-    
+
     %% The box visually groups them as sharing the same environment
     box Transparent Shared NFS Environment
     participant rocrate as rocrate (PSI)
     participant scicat-cli
     end
-    
+
     participant scicat
     participant arema
 
@@ -38,7 +38,7 @@ sequenceDiagram
     rocrate->>scicat: POST rest.json to scicat (using datasetIDs for linking when required)
     scicat-->>rocrate: Return all rest.json IDs
     rocrate->>rocrate: Add DOI in JOBID status
-    
+ 
     arema->>scicat: Arema updates JOB when completed (PATCH /job/{id})
     openbis->>rocrate: Pull DOI (GET /rocrate/status -> DOI)
     openbis->>openbis: Update own record
