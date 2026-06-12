@@ -36,6 +36,7 @@ sequenceDiagram
     end
 
     rocrate->>scicat: POST rest.json to scicat (using datasetIDs for linking when required)
+    rocrate->>scicat: POST /register published data to get DOI
     scicat-->>rocrate: Return all rest.json IDs
     rocrate->>rocrate: Add DOI in JOBID status
 
