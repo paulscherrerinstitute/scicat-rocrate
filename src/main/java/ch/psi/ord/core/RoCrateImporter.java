@@ -1,12 +1,16 @@
 package ch.psi.ord.core;
 
+import static ch.psi.rdf.RdfUtils.isOfType;
+import static ch.psi.rdf.RdfUtils.listProperties;
+import static ch.psi.rdf.RdfUtils.listResourcesOfType;
+
 import ch.psi.ord.model.MissingDataError;
 import ch.psi.ord.model.NoEntityFound;
 import ch.psi.ord.model.Publication;
+import ch.psi.ord.model.RootDataset;
 import ch.psi.ord.model.ValidationReport;
 import ch.psi.ord.model.ValidationReport.Entity;
 import ch.psi.rdf.RdfMapper;
-import ch.psi.rdf.RdfUtils;
 import ch.psi.rdf.deser.DeserializationReport;
 import ch.psi.rdf.deser.RdfDeserializationException;
 import ch.psi.scicat.client.ScicatClient;
@@ -29,19 +33,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ReasonerRegistry;
-import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.SchemaDO;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.modelmapper.ModelMapper;
@@ -153,21 +154,20 @@ public class RoCrateImporter {
       report.getErrors().addAll(dataErrors);
     }
 
-    List<Resource> potentialPublications = listPublications();
-    if (potentialPublications.isEmpty()) {
+    DeserializationReport<RootDataset> rootDataset =
+        rdfMapper.deserialize(
+            inferredModel.getResource(crate.getRoot().getURI()), RootDataset.class);
+
+    if (rootDataset.getValue() == null) {
       report.addError(new NoEntityFound());
       return report;
     }
 
-    for (Resource p : potentialPublications) {
-      var subreport = validatePublication(p);
-      if (subreport.isValid()) {
-        report.addEntity(
-            new Entity<>(p.isURIResource() ? p.getURI() : p.getId().toString(), subreport.get()));
-      } else {
-        report.getErrors().addAll(subreport.getErrors());
-      }
-    }
+    report.getErrors().addAll(rootDataset.getErrors());
+    rootDataset
+        .getValue()
+        .getHasPart()
+        .forEach((r, p) -> report.addEntity(new Entity<Publication>(r.toString(), p)));
 
     return report;
   }
@@ -175,11 +175,15 @@ public class RoCrateImporter {
   public List<MissingDataError> validateArchiveContent() {
     Set<Resource> referencedDatafiles =
         listResourcesOfType(
-            SchemaDO.Dataset, r -> r.getURI() != null && r.getURI().startsWith("file:///"));
+            inferredModel,
+            SchemaDO.Dataset,
+            r -> r.getURI() != null && r.getURI().startsWith("file:///"));
 
     referencedDatafiles.addAll(
         listResourcesOfType(
-            SchemaDO.MediaObject, r -> r.getURI() != null && r.getURI().startsWith("file:///")));
+            inferredModel,
+            SchemaDO.MediaObject,
+            r -> r.getURI() != null && r.getURI().startsWith("file:///")));
 
     Set<URI> extractedFiles =
         this.crate.listFiles().stream().map(Path::toUri).collect(Collectors.toSet());
@@ -199,59 +203,10 @@ public class RoCrateImporter {
   }
 
   public List<Resource> listPublications() {
-    return new ArrayList<>(listResourcesOfType(SchemaDO.Collection, this::isPublication));
-  }
-
-  private Set<Resource> listResourcesOfType(Resource type, Predicate<Resource> predicate) {
-    Set<Resource> res =
-        inferredModel.listResourcesWithProperty(RDF.type, type).filterKeep(predicate).toSet();
-
-    res.addAll(
-        inferredModel
-            .listResourcesWithProperty(RDF.type, RdfUtils.switchScheme(type))
-            .filterKeep(predicate)
-            .toSet());
-
-    return res;
-  }
-
-  private Set<RDFNode> listProperties(Resource subject, Property p) {
-    Set<RDFNode> res = inferredModel.listObjectsOfProperty(subject, p).toSet();
-    res.addAll(inferredModel.listObjectsOfProperty(subject, RdfUtils.switchScheme(p)).toSet());
-
-    return res;
-  }
-
-  private boolean isPublication(Resource subject) {
-    Set<RDFNode> identifierValues = listProperties(subject, SchemaDO.identifier);
-    if (identifierValues.size() < 1) {
-      log.info("{} has no property {}", subject, SchemaDO.identifier);
-      return false;
-    } else if (identifierValues.size() > 1) {
-      log.info(
-          "{} has too many values ({}) for the property {}",
-          subject,
-          identifierValues.size(),
-          SchemaDO.identifier);
-      return false;
-    }
-
-    RDFNode identifier = identifierValues.iterator().next();
-    if (!identifier.isLiteral()) {
-      log.info("{} has a property {} but it's not a literal", subject, SchemaDO.identifier);
-      return false;
-    }
-
-    if (!DoiUtils.isDoi(identifier.asLiteral().getString())) {
-      log.info("{} has a property {} but it's not a DOI", subject, SchemaDO.identifier);
-      return false;
-    }
-
-    return true;
-  }
-
-  public DeserializationReport<Publication> validatePublication(Resource subject)
-      throws RdfDeserializationException {
-    return rdfMapper.deserialize(subject, Publication.class);
+    return listProperties(inferredModel.getResource(crate.getRoot().toString()), SchemaDO.hasPart)
+        .stream()
+        .filter(node -> node.isResource() && isOfType(node.asResource(), SchemaDO.Collection))
+        .map(RDFNode::asResource)
+        .toList();
   }
 }

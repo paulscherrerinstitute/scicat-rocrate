@@ -26,15 +26,11 @@ public class RdfMapper {
 
   public <T> DeserializationReport<T> deserialize(Resource subject, Class<T> clazz)
       throws RdfDeserializationException {
-    DeserializationReport<T> report = new DeserializationReport<>();
+    DeserializationReport<T> report = new DeserializationReport<>(subject);
     RdfDeserializationContext context = new RdfDeserializationContext(deserializerProvider, report);
     RdfDeserializer<T> deserializer = deserializerProvider.getDeserializer(clazz);
     T result = deserializer.deserialize(subject, context);
-
-    if (report.getErrors().isEmpty() && result != null) {
-      report.set(result);
-    }
-
+    report.setValue(result);
     return report;
   }
 }

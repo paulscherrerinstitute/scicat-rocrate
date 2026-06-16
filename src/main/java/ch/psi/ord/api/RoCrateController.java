@@ -2,6 +2,7 @@ package ch.psi.ord.api;
 
 import ch.psi.ord.core.DoiUtils;
 import ch.psi.ord.core.RoCrate;
+import ch.psi.ord.core.RoCrate.RoCrateException;
 import ch.psi.ord.core.RoCrateExporter;
 import ch.psi.ord.core.RoCrateImporter;
 import ch.psi.ord.model.Error;
@@ -94,6 +95,11 @@ public class RoCrateController {
     return Response.status(Status.BAD_REQUEST).entity(new Error(e.getMessage())).build();
   }
 
+  @ServerExceptionMapper
+  public Response mapRoCrateException(RoCrateException e) {
+    return Response.status(Status.BAD_REQUEST).entity(new Error(e.getMessage())).build();
+  }
+
   @Target(ElementType.METHOD)
   @Retention(value = RetentionPolicy.RUNTIME)
   @NameBinding
@@ -165,7 +171,8 @@ public class RoCrateController {
   @Path("/validate")
   @Consumes(ExtraMediaType.APPLICATION_JSONLD)
   @Produces(MediaType.APPLICATION_JSON)
-  public Response validateCrate(InputStream body) throws RdfDeserializationException {
+  public Response validateCrate(InputStream body)
+      throws RdfDeserializationException, RiotException, RoCrateException {
     try (RoCrate crate = new RoCrate(body)) {
       importer.loadCrate(crate);
       return Response.ok(importer.validate()).build();
@@ -181,7 +188,8 @@ public class RoCrateController {
           FileNotFoundException,
           ZipException,
           IOException,
-          RdfDeserializationException {
+          RdfDeserializationException,
+          RoCrateException {
     try (ZipInputStream zip = new ZipInputStream(body);
         RoCrate crate = new RoCrate(zip)) {
       importer.loadCrate(crate);
@@ -195,7 +203,7 @@ public class RoCrateController {
   @Produces(MediaType.APPLICATION_JSON)
   @ScicatAuth
   public Response importCrate(@HeaderParam(value = "api-key") String scicatToken, InputStream body)
-      throws RdfDeserializationException {
+      throws RdfDeserializationException, RiotException, RoCrateException {
     try (RoCrate crate = new RoCrate(body)) {
       importer.loadCrate(crate);
       ValidationReport report = importer.validate();
@@ -221,7 +229,8 @@ public class RoCrateController {
           FileNotFoundException,
           ZipException,
           IOException,
-          RdfDeserializationException {
+          RdfDeserializationException,
+          RoCrateException {
     try (ZipInputStream zip = new ZipInputStream(body);
         RoCrate crate = new RoCrate(zip)) {
       importer.loadCrate(crate);

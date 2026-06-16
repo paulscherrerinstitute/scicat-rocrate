@@ -102,7 +102,7 @@ public class RdfSerdeTest {
     DeserializationReport<TestClasses.Arrays> report = getReport(r, TestClasses.Arrays.class);
     assertTrue(report.isValid());
 
-    TestClasses.Arrays actual = report.get();
+    TestClasses.Arrays actual = report.getValue();
     assertAll(
         "Collection equality (order insensitive)",
         () -> assertEquals(new HashSet<>(instance.stringArray), new HashSet<>(actual.stringArray)),
@@ -149,7 +149,7 @@ public class RdfSerdeTest {
 
     DeserializationReport<PrimitiveTypes> report = getReport(r, PrimitiveTypes.class);
     assertTrue(report.isValid());
-    assertEquals(expected, report.get());
+    assertEquals(expected, report.getValue());
   }
 
   @Test
@@ -179,7 +179,7 @@ public class RdfSerdeTest {
 
     var report = getReport(subject, TestClasses.PrimitiveTypes.class);
     assertTrue(report.isValid());
-    assertEquals(12.0, report.get().d);
+    assertEquals(12.0, report.getValue().d);
   }
 
   @Test
@@ -210,9 +210,9 @@ public class RdfSerdeTest {
     assertAll(
         "Custom deserializer was called",
         () -> assertTrue(report1.isValid()),
-        () -> assertFalse(report1.get().hasName),
+        () -> assertFalse(report1.getValue().hasName),
         () -> assertTrue(report2.isValid()),
-        () -> assertTrue(report2.get().hasName));
+        () -> assertTrue(report2.getValue().hasName));
   }
 
   @Test
@@ -233,6 +233,7 @@ public class RdfSerdeTest {
                 .addProperty(RDF.type, "https://testclasses.org/CustomDeserializer")
                 .addProperty(SchemaDO.name, "JOHN"),
             CustomFieldLevelDeser.class);
-    assertAll(() -> assertTrue(report.isValid()), () -> assertEquals("john", report.get().name));
+    assertAll(
+        () -> assertTrue(report.isValid()), () -> assertEquals("john", report.getValue().name));
   }
 }

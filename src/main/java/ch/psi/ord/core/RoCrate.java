@@ -1,5 +1,9 @@
 package ch.psi.ord.core;
 
+import static ch.psi.rdf.RdfUtils.hasProperty;
+import static ch.psi.rdf.RdfUtils.isOfType;
+import static ch.psi.rdf.RdfUtils.listProperties;
+
 import com.apicatalog.jsonld.JsonLdOptions;
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,14 +22,18 @@ import java.util.zip.ZipInputStream;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.RiotException;
 import org.apache.jena.riot.lang.LangJSONLD11;
 import org.apache.jena.sparql.util.Context;
+import org.apache.jena.vocabulary.SchemaDO;
 
 @Slf4j
 public class RoCrate implements AutoCloseable {
+  public static final String METADATA_DESCRIPTOR = "ro-crate-metadata.json";
   public static final Path DEFAULT_BASE = Path.of("/");
   private static final String FILE_KEY = "file";
   private static final String DIR_KEY = "directory";
@@ -34,13 +42,15 @@ public class RoCrate implements AutoCloseable {
       Map.of(FILE_KEY, new ArrayList<>(), DIR_KEY, new ArrayList<>());
   @Getter private Path base = DEFAULT_BASE;
   @Getter private Model model;
+  @Getter private Resource metadataDescriptor;
+  @Getter private Resource root;
 
   /**
    * @param metadataDescriptor
    * @throws RiotException
    * @throws IOException
    */
-  public RoCrate(InputStream metadataDescriptor) throws RiotException {
+  public RoCrate(InputStream metadataDescriptor) throws RiotException, RoCrateException {
     parseMetadataDescriptor(metadataDescriptor);
   }
 
@@ -51,7 +61,7 @@ public class RoCrate implements AutoCloseable {
    * @throws IOException
    */
   public RoCrate(ZipInputStream zip)
-      throws RiotException, FileNotFoundException, ZipException, IOException {
+      throws RiotException, FileNotFoundException, ZipException, IOException, RoCrateException {
     extract(zip);
     readMetadataDescriptor();
   }
@@ -137,7 +147,8 @@ public class RoCrate implements AutoCloseable {
     return l;
   }
 
-  private void parseMetadataDescriptor(InputStream document) throws RiotException {
+  private void parseMetadataDescriptor(InputStream document)
+      throws RiotException, RoCrateException {
     model =
         RDFParser.create()
             .source(document)
@@ -146,20 +157,60 @@ public class RoCrate implements AutoCloseable {
             .context(Context.create().set(LangJSONLD11.JSONLD_OPTIONS, new JsonLdOptions()))
             .build()
             .toModel();
+    findRoot();
   }
 
-  private void readMetadataDescriptor() throws IOException, FileNotFoundException {
+  private void readMetadataDescriptor()
+      throws IOException, FileNotFoundException, RoCrateException {
     if (base.equals(DEFAULT_BASE)) {
       throw new UnsupportedOperationException();
     }
 
-    Path metadataDescriptor = base.resolve("ro-crate-metadata.json");
+    Path metadataDescriptor = base.resolve(METADATA_DESCRIPTOR);
     if (!metadataDescriptor.toFile().exists()) {
-      throw new FileNotFoundException("Archive doesn't contain a \"ro-crate-metadata.json\" file");
+      throw new FileNotFoundException(
+          String.format("Archive doesn't contain a \"%s\" file", METADATA_DESCRIPTOR));
     }
 
     try (InputStream content = new FileInputStream(metadataDescriptor.toFile())) {
       parseMetadataDescriptor(content);
+    }
+  }
+
+  // See:
+  // https://www.researchobject.org/ro-crate/specification/1.2/appendix/relative-uris#finding-ro-crate-root-in-rdf-triple-stores
+  private Resource findRoot() throws RoCrateException {
+    List<Resource> metadataDescriptor =
+        model
+            .listSubjects()
+            .filterKeep(
+                subject ->
+                    subject.toString().contains(METADATA_DESCRIPTOR)
+                        && isOfType(subject, SchemaDO.CreativeWork)
+                        && hasProperty(subject, SchemaDO.about))
+            .toList();
+    if (metadataDescriptor.size() != 1) {
+      throw new RoCrateException(
+          "Expected exactly one metadata descriptor, but found " + metadataDescriptor.size());
+    }
+    this.metadataDescriptor = metadataDescriptor.getFirst();
+
+    List<Resource> root =
+        listProperties(this.metadataDescriptor, SchemaDO.about).stream()
+            .filter(node -> node.isResource() && isOfType(node.asResource(), SchemaDO.Dataset))
+            .map(RDFNode::asResource)
+            .toList();
+    if (root.size() != 1) {
+      throw new RoCrateException("Expected exactly one root dataset, but found " + root.size());
+    }
+
+    this.root = root.getFirst();
+    return this.root;
+  }
+
+  public class RoCrateException extends Exception {
+    public RoCrateException(String message) {
+      super(message);
     }
   }
 }

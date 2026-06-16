@@ -2,7 +2,9 @@ package ch.psi.ord.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
+import lombok.ToString;
 
+@ToString
 public class PropertyError implements ValidationError {
   @JsonProperty() private String nodeId;
   @JsonProperty() private String property;

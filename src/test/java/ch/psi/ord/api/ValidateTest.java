@@ -2,6 +2,7 @@ package ch.psi.ord.api;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
@@ -65,7 +66,7 @@ public class ValidateTest extends EndpointTest {
         .body("isValid", is(true))
         .body(
             "entities",
-            contains(
+            containsInAnyOrder(
                 "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5",
                 "https://doi.org/10.16907/4b55cbae-ac98-445a-a15e-1534b2a8b01f"))
         .body("errors", emptyIterable());
@@ -85,7 +86,7 @@ public class ValidateTest extends EndpointTest {
         .body("isValid", is(true))
         .body(
             "entities",
-            contains(
+            containsInAnyOrder(
                 "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5",
                 "https://doi.org/10.16907/4b55cbae-ac98-445a-a15e-1534b2a8b01f"))
         .body("errors", emptyIterable());
@@ -192,13 +193,9 @@ public class ValidateTest extends EndpointTest {
         .body("{}")
         .post("/ro-crate/validate")
         .then()
-        .statusCode(200)
+        .statusCode(400)
         .contentType(is(CONTENT_TYPE_JSON_RES))
-        .body("isValid", is(false))
-        .body("entities", emptyIterable())
-        .body("errors", hasSize(1))
-        .body("errors[0]", hasEntry("message", "No suitable entity found in the graph"))
-        .body("errors[0]", hasEntry("type", "NoEntityFound"));
+        .body("message", is("Expected exactly one metadata descriptor, but found 0"));
   }
 
   @Test
@@ -210,13 +207,9 @@ public class ValidateTest extends EndpointTest {
         .body(zipResource("empty.json"))
         .post("/ro-crate/validate")
         .then()
-        .statusCode(200)
+        .statusCode(400)
         .contentType(is(CONTENT_TYPE_JSON_RES))
-        .body("isValid", is(false))
-        .body("entities", emptyIterable())
-        .body("errors", hasSize(1))
-        .body("errors[0]", hasEntry("message", "No suitable entity found in the graph"))
-        .body("errors[0]", hasEntry("type", "NoEntityFound"));
+        .body("message", is("Expected exactly one metadata descriptor, but found 0"));
   }
 
   @Test

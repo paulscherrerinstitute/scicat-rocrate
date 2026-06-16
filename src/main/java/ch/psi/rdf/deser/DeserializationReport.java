@@ -2,16 +2,20 @@ package ch.psi.rdf.deser;
 
 import ch.psi.ord.model.ValidationError;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.apache.jena.rdf.model.Resource;
 
+@RequiredArgsConstructor
 public class DeserializationReport<T> {
   @Getter private Set<ValidationError> errors = new HashSet<>();
-  private Optional<T> value = Optional.empty();
+  @Getter @Setter private T value;
+  @Getter private final Resource subject;
 
   public boolean isValid() {
-    return errors.isEmpty() && value.isPresent();
+    return errors.isEmpty() && value != null;
   }
 
   public void addError(ValidationError e) {
@@ -20,15 +24,6 @@ public class DeserializationReport<T> {
 
   public void addErrors(DeserializationReport<?> report) {
     errors.addAll(report.getErrors());
-  }
-
-  public void set(T value) {
-    this.value = Optional.ofNullable(value);
-  }
-
-  public T get() {
-    return value.orElseThrow(
-        () -> new IllegalStateException("Invalid access to deserialized entity"));
   }
 
   @Override
