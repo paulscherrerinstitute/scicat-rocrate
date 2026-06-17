@@ -5,27 +5,31 @@ sequenceDiagram
     autonumber
     participant scilog as aare / scilog
     participant rocrate as rocrate (PSI)
+    participant scicat-cli
     participant scicat
     participant arema
-    participant scicat-cli
 
     scilog->>rocrate: Upload metadata.jsonld (POST HTTP /rocrate/import)
     rocrate->>rocrate: Flatten metadata.jsonld & split into<br/>1+ metadata.json (1 per Dataset) & rest.jsonld
 
-    rocrate->>scicat: POST 1 create_job (with payload containing archiving options & all metadata.json contents, each file listings)
+    loop For each metadata.json
+        rocrate->>scicat-cli: Send filelist and metadata.json without autoarchive and without origscreation (new flag)
+        scicat-cli->>scicat: POST dataset
+        scicat-->>scicat-cli: Return datasetID
+        scicat-cli-->>rocrate: Return datasetID
+    end
+
+    rocrate->>scicat: POST 1 create_origs (with datasetIds)
     scicat-->>rocrate: Return JOBID
 
-    scicat->>arema: Arema picks up create_job
+    scicat->>arema: Arema picks up create_origs job
 
-    loop For each metadata.json dataset in job payload
+    loop For each datasetIds in job payload
         arema->>arema: Check that user submitting the job has file permissions (or impersonate user)
-        arema->>scicat-cli: Trigger ingest with filelist and metadata.json
-        scicat-cli->>scicat-cli: Inspect files in NFS and compute file size
-        scicat-cli->>scicat: POST dataset and origdatablocks
-        scicat-->>scicat-cli: Return datasetID
-        scicat-cli-->>arema: Return datasetID
+        arema->>scicat-cli: Run datasetArchive with new flag createOrigs
+        scicat-cli->>scicat: POST origdatablocks
     end
-    arema->>scicat: PATCH job status to "entities_created"
+    arema->>scicat: PATCH job status ingest to "finishedSuccessful"
 
     loop Job Dependency Polling
         rocrate->>scicat: Get job status
