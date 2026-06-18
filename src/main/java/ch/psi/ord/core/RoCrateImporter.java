@@ -11,11 +11,11 @@ import ch.psi.ord.model.ValidationReport.Entity;
 import ch.psi.rdf.RdfMapper;
 import ch.psi.rdf.deser.DeserializationReport;
 import ch.psi.rdf.deser.RdfDeserializationException;
+import ch.psi.scicat.cli.ScicatCli;
 import ch.psi.scicat.client.ScicatClient;
 import ch.psi.scicat.model.v3.CountResponse;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
 import ch.psi.scicat.model.v3.CreatePublishedDataDto;
-import ch.psi.scicat.model.v3.Dataset;
 import ch.psi.scicat.model.v3.DatasetType;
 import ch.psi.scicat.model.v3.MyIdentity;
 import ch.psi.scicat.model.v3.PublishedData;
@@ -55,6 +55,7 @@ public class RoCrateImporter {
   private RdfMapper rdfMapper = new RdfMapper();
   @Inject private ModelMapper modelMapper;
   @Inject private ScicatClient scicatClient;
+  @Inject private ScicatCli scicatCli;
 
   public static String publicationExistsFilter =
       """
@@ -105,10 +106,9 @@ public class RoCrateImporter {
 
     if (dto.getPidArray().isEmpty()) {
       CreateDatasetDto datasetDto = createPlaceholderDataset(dto, scicatToken);
-      RestResponse<Dataset> createdDataset = scicatClient.createDataset(scicatToken, datasetDto);
-
-      dto.getPidArray().add(createdDataset.getEntity().getPid());
-      importMap.put(publication.getIdentifier(), createdDataset.getEntity().getPid());
+      String pid =
+          scicatCli.ingestDataset(scicatToken, datasetDto, List.of(RoCrate.METADATA_DESCRIPTOR));
+      importMap.put(RoCrate.METADATA_DESCRIPTOR, pid);
     }
 
     RestResponse<PublishedData> created = scicatClient.createPublishedData(scicatToken, dto);
@@ -128,7 +128,7 @@ public class RoCrateImporter {
         .setOwner(String.join("; ", publishedDatasetDto.getCreator()))
         .setPrincipalInvestigator(String.join("; ", publishedDatasetDto.getCreator()))
         .setContactEmail(userDetails.getProfile().getEmail())
-        .setSourceFolder("/")
+        .setSourceFolder(crate.getBase().toString())
         .setCreationLocation("")
         .setCreationTime(Instant.now())
         .setType(DatasetType.RAW)
