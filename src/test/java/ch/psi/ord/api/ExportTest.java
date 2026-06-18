@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 import ch.psi.ord.core.DoiUtils;
+import ch.psi.ord.core.RoCrate;
 import ch.psi.s3_broker.model.DatasetUrls;
 import ch.psi.scicat.TestData;
 import ch.psi.scicat.model.v3.PublishedData;
@@ -161,7 +162,7 @@ public class ExportTest extends EndpointTest {
     try (ZipInputStream zis = new ZipInputStream(response.asInputStream())) {
       ZipEntry entry;
       while ((entry = zis.getNextEntry()) != null) {
-        if ("ro-crate-metadata.json".equals(entry.getName())) {
+        if (RoCrate.METADATA_DESCRIPTOR.equals(entry.getName())) {
           ByteArrayOutputStream out = new ByteArrayOutputStream();
           byte[] buffer = new byte[1024];
           int len;
