@@ -230,7 +230,8 @@ public class RdfSerdeTest {
         getReport(
             model
                 .createResource()
-                .addProperty(RDF.type, "https://testclasses.org/CustomDeserializer")
+                .addProperty(
+                    RDF.type, model.createResource("https://testclasses.org/CustomDeserializer"))
                 .addProperty(SchemaDO.name, "JOHN"),
             CustomFieldLevelDeser.class);
     assertAll(() -> assertTrue(report.isValid()), () -> assertEquals("john", report.get().name));
