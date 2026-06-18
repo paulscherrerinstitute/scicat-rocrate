@@ -1,12 +1,14 @@
 package ch.psi.ord.core;
 
+import static ch.psi.rdf.RdfUtils.listProperties;
+import static ch.psi.rdf.RdfUtils.listResourcesOfType;
+
 import ch.psi.ord.model.MissingDataError;
 import ch.psi.ord.model.NoEntityFound;
 import ch.psi.ord.model.Publication;
 import ch.psi.ord.model.ValidationReport;
 import ch.psi.ord.model.ValidationReport.Entity;
 import ch.psi.rdf.RdfMapper;
-import ch.psi.rdf.RdfUtils;
 import ch.psi.rdf.deser.DeserializationReport;
 import ch.psi.rdf.deser.RdfDeserializationException;
 import ch.psi.scicat.client.ScicatClient;
@@ -29,19 +31,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ReasonerRegistry;
-import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.SchemaDO;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.modelmapper.ModelMapper;
@@ -174,11 +173,15 @@ public class RoCrateImporter {
   public List<MissingDataError> validateArchiveContent() {
     Set<Resource> referencedDatafiles =
         listResourcesOfType(
-            SchemaDO.Dataset, r -> r.getURI() != null && r.getURI().startsWith("file:///"));
+            inferredModel,
+            SchemaDO.Dataset,
+            r -> r.getURI() != null && r.getURI().startsWith("file:///"));
 
     referencedDatafiles.addAll(
         listResourcesOfType(
-            SchemaDO.MediaObject, r -> r.getURI() != null && r.getURI().startsWith("file:///")));
+            inferredModel,
+            SchemaDO.MediaObject,
+            r -> r.getURI() != null && r.getURI().startsWith("file:///")));
 
     Set<URI> extractedFiles =
         this.crate.listFiles().stream().map(Path::toUri).collect(Collectors.toSet());
@@ -198,27 +201,8 @@ public class RoCrateImporter {
   }
 
   public List<Resource> listPublications() {
-    return new ArrayList<>(listResourcesOfType(SchemaDO.Collection, this::isPublication));
-  }
-
-  private Set<Resource> listResourcesOfType(Resource type, Predicate<Resource> predicate) {
-    Set<Resource> res =
-        inferredModel.listResourcesWithProperty(RDF.type, type).filterKeep(predicate).toSet();
-
-    res.addAll(
-        inferredModel
-            .listResourcesWithProperty(RDF.type, RdfUtils.switchScheme(type))
-            .filterKeep(predicate)
-            .toSet());
-
-    return res;
-  }
-
-  private Set<RDFNode> listProperties(Resource subject, Property p) {
-    Set<RDFNode> res = inferredModel.listObjectsOfProperty(subject, p).toSet();
-    res.addAll(inferredModel.listObjectsOfProperty(subject, RdfUtils.switchScheme(p)).toSet());
-
-    return res;
+    return new ArrayList<>(
+        listResourcesOfType(this.inferredModel, SchemaDO.Collection, this::isPublication));
   }
 
   private boolean isPublication(Resource subject) {
