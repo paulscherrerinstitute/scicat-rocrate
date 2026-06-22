@@ -5,7 +5,7 @@ import ch.psi.rdf.TestClasses.CustomClassLevelSer.customSerializer;
 import ch.psi.rdf.annotations.RdfClass;
 import ch.psi.rdf.annotations.RdfDeserialize;
 import ch.psi.rdf.annotations.RdfProperty;
-import ch.psi.rdf.annotations.RdfResourceUri;
+import ch.psi.rdf.annotations.RdfResourceIdentifier;
 import ch.psi.rdf.annotations.RdfSerialize;
 import ch.psi.rdf.deser.RdfDeserializationContext;
 import ch.psi.rdf.deser.RdfDeserializationException;
@@ -56,7 +56,7 @@ public class TestClasses {
 
   @RdfClass(typesUri = NS + "CustomUri")
   public static class CustomUri {
-    @RdfResourceUri
+    @RdfResourceIdentifier
     public String customUri() {
       return NS + "generated-uri";
     }
@@ -180,5 +180,10 @@ public class TestClasses {
         return node.asLiteral().getString().toLowerCase();
       }
     }
+  }
+
+  @RdfClass(typesUri = NS + "ResourceIdentifier")
+  public static class ResourceIdentifier {
+    @RdfResourceIdentifier String id;
   }
 }
