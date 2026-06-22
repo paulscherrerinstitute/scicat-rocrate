@@ -2,7 +2,7 @@ package ch.psi.ord.model;
 
 import ch.psi.rdf.annotations.RdfClass;
 import ch.psi.rdf.annotations.RdfProperty;
-import ch.psi.rdf.annotations.RdfResourceUri;
+import ch.psi.rdf.annotations.RdfResourceIdentifier;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.jena.vocabulary.SchemaDO;
@@ -14,7 +14,7 @@ public class Organization {
   @RdfProperty(uri = SchemaDO.NS + "name", minCardinality = 1)
   public String name;
 
-  @RdfResourceUri()
+  @RdfResourceIdentifier()
   public String generateId() {
     if (this == PSI) {
       return "https://ror.org/03eh3y714";
