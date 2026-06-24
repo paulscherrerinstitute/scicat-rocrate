@@ -3,6 +3,7 @@ package ch.psi.ord.core;
 import static ch.psi.rdf.RdfUtils.listProperties;
 import static ch.psi.rdf.RdfUtils.listResourcesOfType;
 
+import ch.psi.ord.model.Dataset;
 import ch.psi.ord.model.MissingDataError;
 import ch.psi.ord.model.NoEntityFound;
 import ch.psi.ord.model.Publication;
@@ -27,6 +28,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -111,6 +113,13 @@ public class RoCrateImporter {
       importMap.put(RoCrate.METADATA_DESCRIPTOR, pid);
     }
 
+    for (Dataset ds : publication.getHasPart()) {
+      CreateDatasetDto datasetDto = modelMapper.map(ds, CreateDatasetDto.class);
+      String datasetPid = scicatCli.ingestDataset(scicatToken, datasetDto);
+      dto.getPidArray().add(datasetPid);
+      importMap.put(crate.toRelativeId(ds.getResourceIdentifier()), datasetPid);
+    }
+
     RestResponse<PublishedData> created = scicatClient.createPublishedData(scicatToken, dto);
     importMap.put(publication.getIdentifier(), created.getEntity().getDoi());
   }
@@ -171,6 +180,11 @@ public class RoCrateImporter {
   }
 
   public List<MissingDataError> validateArchiveContent() {
+    // NOTE: when only the metadata descriptor is uploaded we can't validate the archive content
+    if (crate.hasAttachedData()) {
+      return Collections.emptyList();
+    }
+
     Set<Resource> referencedDatafiles =
         listResourcesOfType(
             inferredModel,

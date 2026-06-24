@@ -14,6 +14,8 @@ import ch.psi.scicat.model.v3.Dataset;
 import ch.psi.scicat.model.v3.PublishedData;
 import io.quarkus.test.junit.QuarkusTest;
 import java.io.IOException;
+import java.math.BigInteger;
+import java.util.Map;
 import org.hamcrest.Matchers;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -95,7 +97,7 @@ public class ImportTest extends EndpointTest {
 
   @Test
   @DisplayName("One publication")
-  public void test05() {
+  public void test05() throws IOException {
     if (scicatClient != null) {
       when(scicatClient.checkTokenValidity(any())).thenReturn(true);
       when(scicatClient.countPublishedData(
@@ -113,9 +115,12 @@ public class ImportTest extends EndpointTest {
     }
 
     given()
-        .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
+        .header("Content-Type", ExtraMediaType.APPLICATION_ZIP)
         .header("api-key", accessToken)
-        .body(getClass().getClassLoader().getResourceAsStream("one-publication.json"))
+        .body(
+            zipResource(
+                "one-publication.json",
+                Map.of("analysis-result/small.dat", BigInteger.valueOf(5000))))
         .when()
         .post("/api/v1/ro-crate/import")
         .then()

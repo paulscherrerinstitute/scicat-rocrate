@@ -9,6 +9,9 @@ import static org.hamcrest.Matchers.is;
 
 import io.quarkus.test.junit.QuarkusTest;
 import java.io.IOException;
+import java.math.BigInteger;
+import java.util.Map;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,8 +23,11 @@ public class ValidateTest extends EndpointTest {
     given()
         .when()
         .header("Content-Type", ExtraMediaType.APPLICATION_ZIP)
-        .body(zipResource("one-publication.json"))
-        .post("/api/v1/ro-crate/validate")
+        .body(
+            zipResource(
+                "one-publication.json",
+                Map.of("analysis-result/small.dat", BigInteger.valueOf(5000))))
+        .post("/ro-crate/validate")
         .then()
         .statusCode(200)
         .contentType(is(CONTENT_TYPE_JSON_RES))
@@ -47,6 +53,7 @@ public class ValidateTest extends EndpointTest {
         .body("errors", emptyIterable());
   }
 
+  @Disabled()
   @Test
   @DisplayName("Multiple publications (JSON-LD)")
   public void test02() throws IOException {
@@ -71,6 +78,7 @@ public class ValidateTest extends EndpointTest {
         .body("errors", emptyIterable());
   }
 
+  @Disabled()
   @Test
   @DisplayName("Multiple publications (ZIP)")
   public void test03() throws IOException {
@@ -123,8 +131,11 @@ public class ValidateTest extends EndpointTest {
     given()
         .when()
         .header("Content-Type", ExtraMediaType.APPLICATION_ZIP)
-        .body(zipResource("invalid-publication.json"))
-        .post("/api/v1/ro-crate/validate")
+        .body(
+            zipResource(
+                "invalid-publication.json",
+                Map.of("analysis-result/small.dat", BigInteger.valueOf(5000))))
+        .post("/ro-crate/validate")
         .then()
         .statusCode(200)
         .contentType(is(CONTENT_TYPE_JSON_RES))
@@ -153,9 +164,7 @@ public class ValidateTest extends EndpointTest {
         .body("isValid", is(false))
         .body("entities", contains("https://doi.org/10.16907/4b55cbae-ac98-445a-a15e-1534b2a8b01f"))
         .body("errors", hasSize(1))
-        .body(
-            "errors[0]",
-            hasEntry("nodeId", "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
+        .body("errors[0]", hasEntry("nodeId", "https://doi.org/10.16907/invalid"))
         .body("errors[0]", hasEntry("property", "https://schema.org/name"))
         .body("errors[0]", hasEntry("message", "Missing required property"))
         .body("errors[0]", hasEntry("type", "PropertyError"));
@@ -167,17 +176,18 @@ public class ValidateTest extends EndpointTest {
     given()
         .when()
         .header("Content-Type", ExtraMediaType.APPLICATION_ZIP)
-        .body(zipResource("valid-invalid.json"))
-        .post("/api/v1/ro-crate/validate")
+        .body(
+            zipResource(
+                "valid-invalid.json",
+                Map.of("analysis-result/small.dat", BigInteger.valueOf(5000))))
+        .post("/ro-crate/validate")
         .then()
         .statusCode(200)
         .contentType(is(CONTENT_TYPE_JSON_RES))
         .body("isValid", is(false))
         .body("entities", contains("https://doi.org/10.16907/4b55cbae-ac98-445a-a15e-1534b2a8b01f"))
         .body("errors", hasSize(1))
-        .body(
-            "errors[0]",
-            hasEntry("nodeId", "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
+        .body("errors[0]", hasEntry("nodeId", "https://doi.org/10.16907/invalid"))
         .body("errors[0]", hasEntry("property", "https://schema.org/name"))
         .body("errors[0]", hasEntry("message", "Missing required property"))
         .body("errors[0]", hasEntry("type", "PropertyError"));

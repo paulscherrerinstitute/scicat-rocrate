@@ -13,9 +13,12 @@ public class Person {
   @RdfProperty(uri = SchemaDO.NS + "name", minCardinality = 1)
   public String name;
 
-  @RdfProperty(uri = SchemaDO.NS + "givenName")
+  @RdfProperty(uri = SchemaDO.NS + "givenName", minCardinality = 1)
   public String givenName;
 
-  @RdfProperty(uri = SchemaDO.NS + "familyName")
+  @RdfProperty(uri = SchemaDO.NS + "familyName", minCardinality = 1)
   public String familyName;
+
+  @RdfProperty(uri = SchemaDO.NS + "email", minCardinality = 1)
+  public String email;
 }
