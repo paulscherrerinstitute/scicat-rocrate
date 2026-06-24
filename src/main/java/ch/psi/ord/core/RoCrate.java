@@ -16,6 +16,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 import lombok.Getter;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
@@ -36,6 +37,10 @@ public class RoCrate implements AutoCloseable {
   @Getter private Path base = DEFAULT_BASE;
   @Getter private Model model;
 
+  @Getter
+  @Accessors(fluent = true)
+  private boolean hasAttachedData = false;
+
   /**
    * @param metadataDescriptor
    * @throws RiotException
@@ -43,6 +48,7 @@ public class RoCrate implements AutoCloseable {
    */
   public RoCrate(InputStream metadataDescriptor)
       throws RiotException, IOException, FileNotFoundException {
+    hasAttachedData = true;
     createTempDirectory();
     Files.write(base.resolve(METADATA_DESCRIPTOR), metadataDescriptor.readAllBytes());
     readMetadataDescriptor();
@@ -166,5 +172,9 @@ public class RoCrate implements AutoCloseable {
     try (InputStream content = new FileInputStream(metadataDescriptor.toFile())) {
       parseMetadataDescriptor(content);
     }
+  }
+
+  public String toRelativeId(String absoluteId) {
+    return absoluteId.replace(String.format("file://%s/", getBase().toAbsolutePath()), "");
   }
 }

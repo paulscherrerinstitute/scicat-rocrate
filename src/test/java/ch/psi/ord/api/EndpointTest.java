@@ -9,10 +9,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.InjectMock;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -53,16 +59,54 @@ public abstract class EndpointTest {
     }
   }
 
-  public byte[] zipResource(String name) throws IOException {
+  public byte[] zipResource(String resourceName) throws IOException {
+    return zipResource(resourceName, Collections.emptyMap());
+  }
+
+  public byte[] zipResource(String resourceName, Map<String, BigInteger> fileList)
+      throws IOException {
     ByteArrayOutputStream output = new ByteArrayOutputStream();
+    Random random = new Random();
+    Set<String> createdDirectories = new HashSet<>();
     try (ZipOutputStream zipStream = new ZipOutputStream(output)) {
       ZipEntry entry = new ZipEntry(RoCrate.METADATA_DESCRIPTOR);
       zipStream.putNextEntry(entry);
-      byte[] content = getClass().getClassLoader().getResourceAsStream(name).readAllBytes();
+      byte[] content = getClass().getClassLoader().getResourceAsStream(resourceName).readAllBytes();
       zipStream.write(content, 0, content.length);
       zipStream.closeEntry();
+
+      for (Map.Entry<String, BigInteger> file : fileList.entrySet()) {
+        createParentDirectories(file.getKey(), zipStream, createdDirectories);
+        zipStream.putNextEntry(new ZipEntry(file.getKey()));
+        byte[] randomBytes = new byte[file.getValue().intValue()];
+        random.nextBytes(randomBytes);
+        zipStream.write(randomBytes);
+        zipStream.closeEntry();
+      }
     }
 
     return output.toByteArray();
+  }
+
+  private void createParentDirectories(
+      String filePath, ZipOutputStream zipStream, Set<String> createdDirectories)
+      throws IOException {
+    int lastSlash = filePath.lastIndexOf('/');
+    if (lastSlash != -1) {
+      String dirPath = filePath.substring(0, lastSlash + 1); // e.g., "parent/child/"
+      if (!createdDirectories.contains(dirPath)) {
+        if (dirPath.length() > 1) {
+          String parentDir =
+              dirPath.substring(0, dirPath.lastIndexOf('/', dirPath.length() - 2) + 1);
+          if (!parentDir.isEmpty()) {
+            createParentDirectories(parentDir, zipStream, createdDirectories);
+          }
+        }
+        ZipEntry dirEntry = new ZipEntry(dirPath);
+        zipStream.putNextEntry(dirEntry);
+        zipStream.closeEntry();
+        createdDirectories.add(dirPath);
+      }
+    }
   }
 }
