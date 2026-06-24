@@ -9,6 +9,9 @@ import org.apache.jena.vocabulary.SchemaDO;
 @RdfClass(typesUri = SchemaDO.NS + "DataDownload")
 @Data
 public class DataDownload {
+  @RdfProperty(uri = SchemaDO.NS + "name")
+  public String name;
+
   @RdfProperty(uri = SchemaDO.NS + "contentUrl")
   public String contentUrl;
 
