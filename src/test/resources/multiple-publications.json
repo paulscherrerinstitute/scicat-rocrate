@@ -24,6 +24,7 @@
     "name": "https://schema.org/name",
     "Collection": "https://schema.org/Collection",
     "publisher": "https://schema.org/publisher",
+    "owner": "https://schema.org/owner",
     "conformsTo": "http://purl.org/dc/terms/conformsTo",
     "Person": "https://schema.org/Person"
   },
@@ -139,24 +140,36 @@
     {
       "name": "raw",
       "description": "",
+      "owner": [
+        { "@id": "98c78fd7-8f0b-491d-8b71-ac9b45525ad7" }
+      ],
       "@id": "https://dacat-development.psi.ch/datasets/PID.SAMPLE.PREFIX%2Fukri_ds5",
       "@type": "Dataset"
     },
     {
       "name": "files.zip",
       "description": "",
+      "owner": [
+        { "@id": "98c78fd7-8f0b-491d-8b71-ac9b45525ad7" }
+      ],
       "@id": "https://dacat-development.psi.ch/datasets/PID.SAMPLE.PREFIX%2Fmaxiv_ds2",
       "@type": "Dataset"
     },
     {
       "name": "Tests_Carto.tar",
       "description": "",
+      "owner": [
+        { "@id": "98c78fd7-8f0b-491d-8b71-ac9b45525ad7" }
+      ],
       "@id": "https://dacat-development.psi.ch/datasets/PID.SAMPLE.PREFIX%2Fsoleil_ds2",
       "@type": "Dataset"
     },
     {
       "name": "indexing",
       "description": "All 'hits' in hdf5 files (Cheetah slab format) together with geometries and all CrystFEL .stream files, .hkl files and .mtz files. Also all Phenix .pdb files together with log files. All scripts needed to reproduce the result are also included.",
+      "owner": [
+        { "@id": "98c78fd7-8f0b-491d-8b71-ac9b45525ad7" }
+      ],
       "@id": "https://dacat-development.psi.ch/datasets/PID.SAMPLE.PREFIX%2Fdesy_ds2",
       "@type": "Dataset"
     },

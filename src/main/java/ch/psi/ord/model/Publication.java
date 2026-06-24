@@ -41,6 +41,6 @@ public class Publication {
   @RdfProperty(uri = SchemaDO.NS + "description", minCardinality = 1)
   private String description;
 
-  @RdfProperty(uri = SchemaDO.NS + "hasPart")
+  @RdfProperty(uri = SchemaDO.NS + "hasPart", minCardinality = 1)
   private List<Dataset> hasPart = new ArrayList<>();
 }
