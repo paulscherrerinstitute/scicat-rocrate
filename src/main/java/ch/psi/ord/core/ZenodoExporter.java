@@ -64,7 +64,11 @@ public class ZenodoExporter {
     List<DataDownload> distribution = new ArrayList<>();
     for (DatasetUrls datasetUrls : brokerResponse.getUrls().values()) {
       if (datasetUrls.s3Uri != null) {
-        distribution.add(new DataDownload().setName("S3 URI").setContentUrl(datasetUrls.s3Uri));
+        distribution.add(
+            new DataDownload()
+                .setName("S3 URI")
+                .setContentUrl(datasetUrls.s3Uri)
+                .setExpirationDate(datasetUrls.getExpires()));
       }
 
       for (S3Url s3Url : datasetUrls.getUrls()) {

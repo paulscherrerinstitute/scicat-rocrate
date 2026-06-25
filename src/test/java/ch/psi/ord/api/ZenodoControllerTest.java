@@ -5,6 +5,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
@@ -69,8 +70,8 @@ public class ZenodoControllerTest extends EndpointTest {
             SchemaDO.distribution.getLocalName() + ".@type",
             everyItem(equalTo(SchemaDO.DataDownload.getLocalName())))
         .body(
-            SchemaDO.distribution.getLocalName() + "." + SchemaDO.expires.getLocalName(),
-            everyItem(not(isDateExpired())))
+            SchemaDO.distribution.getLocalName(),
+            everyItem(hasEntry(equalTo(SchemaDO.expires.getLocalName()), not(isDateExpired()))))
         .body(
             SchemaDO.distribution.getLocalName() + "." + SchemaDO.name.getLocalName(),
             hasItem("S3 URI"));
