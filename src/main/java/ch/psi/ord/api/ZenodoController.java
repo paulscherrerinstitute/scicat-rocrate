@@ -18,7 +18,7 @@ public class ZenodoController {
   @Produces(ExtraMediaType.APPLICATION_JSONLD)
   public Response exportDoi(@PathParam("doi") String doi) throws Exception {
     try {
-      return Response.ok(exporter.exportDoi(doi)).build();
+      return Response.ok(exporter.exportDoi(doi).toString()).build();
     } catch (WebApplicationException e) {
       Response res = e.getResponse();
       return Response.status(res.getStatus())

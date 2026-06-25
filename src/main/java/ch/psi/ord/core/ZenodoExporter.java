@@ -17,6 +17,7 @@ import com.apicatalog.jsonld.document.Document;
 import com.apicatalog.jsonld.document.JsonDocument;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -49,7 +50,10 @@ public class ZenodoExporter {
               new StringReader(
                   """
                       {
-                        "@context": {"@vocab": "https://schema.org/"},
+                        "@context": {
+                          "@vocab": "https://schema.org/",
+                          "distribution": { "@container": "@set" }
+                        },
                         "@type": "Dataset",
                         "@embed": "@always"
                       }
@@ -59,12 +63,16 @@ public class ZenodoExporter {
     }
   }
 
-  public String exportDoi(String doi) throws RdfSerializationException, JsonLdError {
+  public JsonObject exportDoi(String doi) throws RdfSerializationException, JsonLdError {
     PublishedDataUrls brokerResponse = s3BrokerService.getPublishedDataUrls(doi);
     List<DataDownload> distribution = new ArrayList<>();
     for (DatasetUrls datasetUrls : brokerResponse.getUrls().values()) {
       if (datasetUrls.s3Uri != null) {
-        distribution.add(new DataDownload().setName("S3 URI").setContentUrl(datasetUrls.s3Uri));
+        distribution.add(
+            new DataDownload()
+                .setName("S3 URI")
+                .setContentUrl(datasetUrls.s3Uri)
+                .setExpirationDate(datasetUrls.getExpires()));
       }
 
       for (S3Url s3Url : datasetUrls.getUrls()) {
@@ -90,6 +98,6 @@ public class ZenodoExporter {
         .output(sw);
     Document doc = JsonDocument.of(new StringReader(sw.toString()));
 
-    return JsonLd.frame(doc, zenodoFrame).get().toString();
+    return JsonLd.frame(doc, zenodoFrame).get();
   }
 }

@@ -119,10 +119,10 @@ public class ZenodoControllerTest extends EndpointTest {
             containsInAnyOrder(TestData.hzdrPub1.getCreator().toArray()))
         .body(
             SchemaDO.distribution.getLocalName() + ".@type",
-            equalTo(SchemaDO.DataDownload.getLocalName()))
+            everyItem(equalTo(SchemaDO.DataDownload.getLocalName())))
         .body(
             SchemaDO.distribution.getLocalName() + "." + SchemaDO.expires.getLocalName(),
-            isDateExpired());
+            everyItem(isDateExpired()));
   }
 
   @Test
