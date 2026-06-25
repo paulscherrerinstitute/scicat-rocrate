@@ -13,4 +13,6 @@ public class DatasetUrls {
   public Instant expires;
 
   @JsonProperty public List<S3Url> urls;
+
+  @JsonProperty public String s3Uri;
 }
