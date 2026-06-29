@@ -2,6 +2,7 @@ package ch.psi.ord.api;
 
 import static io.restassured.RestAssured.given;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
 
 import ch.psi.ord.core.DoiUtils;
@@ -98,7 +99,7 @@ public class ImportTest extends EndpointTest {
   @Test
   @DisplayName("One publication")
   public void test05() throws IOException {
-    if (scicatClient != null) {
+    if (mockingDetails(scicatClient).isMock()) {
       when(scicatClient.checkTokenValidity(any())).thenReturn(true);
       when(scicatClient.countPublishedData(
               String.format(
