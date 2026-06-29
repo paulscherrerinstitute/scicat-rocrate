@@ -2,6 +2,7 @@ package ch.psi.ord.api;
 
 import static io.restassured.RestAssured.given;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
 
 import ch.psi.ord.core.DoiUtils;
@@ -14,6 +15,8 @@ import ch.psi.scicat.model.v3.Dataset;
 import ch.psi.scicat.model.v3.PublishedData;
 import io.quarkus.test.junit.QuarkusTest;
 import java.io.IOException;
+import java.math.BigInteger;
+import java.util.Map;
 import org.hamcrest.Matchers;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -95,8 +98,8 @@ public class ImportTest extends EndpointTest {
 
   @Test
   @DisplayName("One publication")
-  public void test05() {
-    if (scicatClient != null) {
+  public void test05() throws IOException {
+    if (mockingDetails(scicatClient).isMock()) {
       when(scicatClient.checkTokenValidity(any())).thenReturn(true);
       when(scicatClient.countPublishedData(
               String.format(
@@ -113,9 +116,12 @@ public class ImportTest extends EndpointTest {
     }
 
     given()
-        .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
+        .header("Content-Type", ExtraMediaType.APPLICATION_ZIP)
         .header("api-key", accessToken)
-        .body(getClass().getClassLoader().getResourceAsStream("one-publication.json"))
+        .body(
+            zipResource(
+                "one-publication.json",
+                Map.of("analysis-result/small.dat", BigInteger.valueOf(5000))))
         .when()
         .post("/ro-crate/import")
         .then()

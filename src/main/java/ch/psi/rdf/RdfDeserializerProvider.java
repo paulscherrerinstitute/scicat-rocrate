@@ -13,6 +13,7 @@ import ch.psi.rdf.deser.RdfDeserializer;
 import ch.psi.rdf.deser.StringDeserializer;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.jena.rdf.model.Literal;
 
 public class RdfDeserializerProvider {
   private final Map<Class<?>, RdfDeserializer<?>> registry = new HashMap<>();
@@ -33,6 +34,11 @@ public class RdfDeserializerProvider {
     registry.put(double.class, DOUBLE);
     registry.put(Boolean.class, BOOLEAN);
     registry.put(boolean.class, BOOLEAN);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> RdfDeserializer<T> getDeserializer(Literal l) throws RdfDeserializationException {
+    return (RdfDeserializer<T>) getDeserializer(l.getDatatype().getJavaClass());
   }
 
   @SuppressWarnings("unchecked")
