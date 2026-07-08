@@ -53,11 +53,13 @@ public class TestData {
                   "PID.SAMPLE.PREFIX/psi_ds3",
                   new DatasetUrls()
                       .setExpires(Instant.parse("2036-02-28T09:55:19Z"))
+                      .setS3Uri(
+                          "https://example.com/tenant:bucket/?prefix=PID.SAMPLE.PREFIX/psi_ds3")
                       .setUrls(
                           List.of(
                               new S3Url()
                                   .setUrl(
-                                      "https://example.com/PID.SAMPLE.PREFIX/psi_ds3.tar?X-Amz-Date=20260302T095519Z&X-Amz-Expires=315360000")
+                                      "https://example.com/tenant:bucket/PID.SAMPLE.PREFIX/psi_ds3/461f1e85-08fe-4972-85e9-1a5d8b0431ee_0_2025-10-03-11-12-56.tar")
                                   .setExpires(Instant.parse("2036-02-28T09:55:19Z"))))));
 
   public static PublishedDataUrls hzdrPub1S3Response =
