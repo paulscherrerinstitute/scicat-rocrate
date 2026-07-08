@@ -67,6 +67,7 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
           String.format("Failed to create an instance of %s", clazz.getName()), e);
     }
     Resource subject = node.asResource();
+    context.setCurrentSubject(subject);
     setUriFields(subject, obj);
     checkType(subject, rdfClassAnnotation.typesUri()).ifPresent(e -> context.addError(e));
 
@@ -109,6 +110,7 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
         setField(field, obj, value);
       }
     }
+    context.resetCurrentSubject();
 
     return obj;
   }
@@ -161,6 +163,7 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
   }
 
   private void setUriFields(Resource subject, T obj) {
+    log.error("@id is : {}", subject.toString());
     String value = subject.toString();
     for (Field f : rdfResourceIdentifierFields) {
       this.setField(f, obj, value);

@@ -1,6 +1,5 @@
 package ch.psi.ord.core;
 
-import static ch.psi.rdf.RdfUtils.listProperties;
 import static ch.psi.rdf.RdfUtils.listResourcesOfType;
 
 import ch.psi.ord.model.Dataset;
@@ -16,16 +15,18 @@ import ch.psi.scicat.cli.ScicatCli;
 import ch.psi.scicat.client.ScicatClient;
 import ch.psi.scicat.model.v3.CountResponse;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
+import ch.psi.scicat.model.v3.CreateJobDto;
 import ch.psi.scicat.model.v3.CreatePublishedDataDto;
 import ch.psi.scicat.model.v3.DatasetType;
 import ch.psi.scicat.model.v3.MyIdentity;
+import ch.psi.scicat.model.v3.OutputJobDto;
 import ch.psi.scicat.model.v3.PublishedData;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
-import java.net.URI;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,7 +40,6 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ReasonerRegistry;
@@ -58,6 +58,7 @@ public class RoCrateImporter {
   @Inject private ModelMapper modelMapper;
   @Inject private ScicatClient scicatClient;
   @Inject private ScicatCli scicatCli;
+  private List<String> pidToArchive = new ArrayList<>();
 
   public static String publicationExistsFilter =
       """
@@ -86,6 +87,20 @@ public class RoCrateImporter {
       }
     }
 
+    OutputJobDto archiveJob =
+        scicatClient
+            .createJob(
+                scicatToken,
+                new CreateJobDto()
+                    .setType("archive")
+                    .setJobParams(new CreateJobDto.JobParameters().setTapeCopies("one"))
+                    .setDatasetList(
+                        pidToArchive.stream()
+                            .map(pid -> new CreateJobDto.DatasetEntry().setPid(pid))
+                            .toList()))
+            .getEntity();
+    log.info("Submitted archive job: {}", archiveJob.getId());
+
     return importMap;
   }
 
@@ -109,19 +124,45 @@ public class RoCrateImporter {
     if (dto.getPidArray().isEmpty()) {
       CreateDatasetDto datasetDto = createPlaceholderDataset(dto, scicatToken);
       String pid =
-          scicatCli.ingestDataset(scicatToken, datasetDto, List.of(RoCrate.METADATA_DESCRIPTOR));
+          scicatCli.ingestDataset(
+              scicatToken,
+              datasetDto,
+              List.of(
+                  crate
+                      .getBase()
+                      .resolve(RoCrate.METADATA_DESCRIPTOR)
+                      .toAbsolutePath()
+                      .toString()));
       importMap.put(RoCrate.METADATA_DESCRIPTOR, pid);
+      pidToArchive.add(pid);
     }
 
-    for (Dataset ds : publication.getHasPart()) {
+    if (!publication.getHasPart().getFiles().isEmpty()) {
+      CreateDatasetDto datasetDto = modelMapper.map(publication, CreateDatasetDto.class);
+      datasetDto.setSourceFolder(crate.getBase().toString());
+      String datasetPid =
+          scicatCli.ingestDataset(
+              scicatToken, datasetDto, publication.getHasPart().getFiles().values());
+      dto.getPidArray().add(datasetPid);
+      publication
+          .getHasPart()
+          .getFiles()
+          .keySet()
+          .forEach(id -> importMap.put(crate.toRelativeId(id), datasetPid));
+      pidToArchive.add(datasetPid);
+    }
+
+    for (Dataset ds : publication.getHasPart().getDatasets()) {
       CreateDatasetDto datasetDto = modelMapper.map(ds, CreateDatasetDto.class);
       String datasetPid = scicatCli.ingestDataset(scicatToken, datasetDto);
       dto.getPidArray().add(datasetPid);
       importMap.put(crate.toRelativeId(ds.getResourceIdentifier()), datasetPid);
+      pidToArchive.add(datasetPid);
     }
 
     RestResponse<PublishedData> created = scicatClient.createPublishedData(scicatToken, dto);
-    importMap.put(publication.getIdentifier(), created.getEntity().getDoi());
+    importMap.put(
+        crate.toRelativeId(publication.getResourceIdentifier()), created.getEntity().getDoi());
   }
 
   private CreateDatasetDto createPlaceholderDataset(
@@ -197,17 +238,18 @@ public class RoCrateImporter {
             SchemaDO.MediaObject,
             r -> r.getURI() != null && r.getURI().startsWith("file:///")));
 
-    Set<URI> extractedFiles =
-        this.crate.listFiles().stream().map(Path::toUri).collect(Collectors.toSet());
+    Set<Path> pathsToCheck =
+        referencedDatafiles.stream()
+            .map(r -> Paths.get(r.getURI().replace("file://", "/")).toAbsolutePath())
+            .collect(Collectors.toSet());
+
     List<MissingDataError> errors = new ArrayList<>();
-    referencedDatafiles.forEach(
-        r -> {
-          if (!extractedFiles.contains(URI.create(r.getURI()))) {
-            log.info("URI: {}", r.getURI());
-            log.info("Base: {}", this.crate.getBase());
-            errors.add(
-                new MissingDataError(
-                    r.getURI().replace("file://" + this.crate.getBase().toString(), "")));
+    pathsToCheck.forEach(
+        dataEntityPath -> {
+          if (!dataEntityPath.toFile().exists()) {
+            log.info("URI: {}", dataEntityPath);
+            log.info("Base: {}", crate.getBase());
+            errors.add(new MissingDataError(crate.getBase().relativize(dataEntityPath).toString()));
           }
         });
 
@@ -220,29 +262,29 @@ public class RoCrateImporter {
   }
 
   private boolean isPublication(Resource subject) {
-    Set<RDFNode> identifierValues = listProperties(subject, SchemaDO.identifier);
-    if (identifierValues.size() < 1) {
-      log.info("{} has no property {}", subject, SchemaDO.identifier);
-      return false;
-    } else if (identifierValues.size() > 1) {
-      log.info(
-          "{} has too many values ({}) for the property {}",
-          subject,
-          identifierValues.size(),
-          SchemaDO.identifier);
-      return false;
-    }
-
-    RDFNode identifier = identifierValues.iterator().next();
-    if (!identifier.isLiteral()) {
-      log.info("{} has a property {} but it's not a literal", subject, SchemaDO.identifier);
-      return false;
-    }
-
-    if (!DoiUtils.isDoi(identifier.asLiteral().getString())) {
-      log.info("{} has a property {} but it's not a DOI", subject, SchemaDO.identifier);
-      return false;
-    }
+    // Set<RDFNode> identifierValues = listProperties(subject, SchemaDO.identifier);
+    // if (identifierValues.size() < 1) {
+    // log.info("{} has no property {}", subject, SchemaDO.identifier);
+    // return false;
+    // } else if (identifierValues.size() > 1) {
+    // log.info(
+    // "{} has too many values ({}) for the property {}",
+    // subject,
+    // identifierValues.size(),
+    // SchemaDO.identifier);
+    // return false;
+    // }
+    //
+    // RDFNode identifier = identifierValues.iterator().next();
+    // if (!identifier.isLiteral()) {
+    // log.info("{} has a property {} but it's not a literal", subject, SchemaDO.identifier);
+    // return false;
+    // }
+    //
+    // if (!DoiUtils.isDoi(identifier.asLiteral().getString())) {
+    // log.info("{} has a property {} but it's not a DOI", subject, SchemaDO.identifier);
+    // return false;
+    // }
 
     return true;
   }

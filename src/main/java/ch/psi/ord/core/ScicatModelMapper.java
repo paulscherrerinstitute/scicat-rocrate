@@ -273,6 +273,24 @@ public class ScicatModelMapper {
               m.using(keywordsConverter).map(Dataset::getKeywords, CreateDatasetDto::setKeywords);
             });
 
+    mapper
+        .typeMap(Publication.class, CreateDatasetDto.class)
+        .addMappings(
+            m -> {
+              m.using(personListToOwnerString)
+                  .map(Publication::getCreator, CreateDatasetDto::setPrincipalInvestigator);
+              m.map(src -> "unx-fs_scicat_rocrate_dev_w", CreateDatasetDto::setOwnerGroup);
+              // m.map(src -> "rocrate", CreateDatasetDto::setOwnerGroup);
+              m.using(personListToOwnerString)
+                  .map(Publication::getCreator, CreateDatasetDto::setOwner);
+              m.map(Publication::getTitle, CreateDatasetDto::setDatasetName);
+              m.map(src -> "rocrate", CreateDatasetDto::setCreationLocation);
+              m.map(src -> DatasetType.RAW, CreateDatasetDto::setType);
+              m.using(personListToOwnerEmails)
+                  .map(Publication::getCreator, CreateDatasetDto::setContactEmail);
+              m.map(src -> Instant.now(), CreateDatasetDto::setCreationTime);
+              m.map(Publication::getDescription, CreateDatasetDto::setDescription);
+            });
     return mapper;
   }
 }

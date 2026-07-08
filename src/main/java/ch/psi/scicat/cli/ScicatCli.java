@@ -1,15 +1,20 @@
 package ch.psi.scicat.cli;
 
+import ch.psi.scicat.client.ScicatClient;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
+import ch.psi.scicat.model.v3.DatasetLifeCycle;
+import ch.psi.scicat.model.v3.UpdateDatasetDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.arc.Arc;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -21,6 +26,11 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class ScicatCli {
   @ConfigProperty(name = "quarkus.rest-client.scicat.url")
   private String scicatUrl;
+
+  @ConfigProperty(name = "rocrate.archive-directory", defaultValue = "/rocrate/archive")
+  private String archiveDirectory;
+
+  @Inject private ScicatClient scicatClient;
 
   private static final ObjectMapper mapper = Arc.container().instance(ObjectMapper.class).get();
   private static final Pattern PID_PATTERN = Pattern.compile("^[a-zA-Z0-9.-]+/[a-zA-Z0-9.-]+$");
@@ -41,7 +51,8 @@ public class ScicatCli {
    * @return The PID of the created dataset.
    * @throws DatasetCreationException if the process fails or PID is not found.
    */
-  public String ingestDataset(String scicatToken, CreateDatasetDto dto, List<String> fileList) {
+  public String ingestDataset(
+      String scicatToken, CreateDatasetDto dto, Collection<String> fileList) {
     Path metadataPath = null;
     Path fileListPath = null;
 
@@ -50,7 +61,13 @@ public class ScicatCli {
       mapper.writeValue(metadataPath.toFile(), dto);
       if (!fileList.isEmpty()) {
         fileListPath = Files.createTempFile("scicat-cli-filelist", ".tmp");
-        Files.write(fileListPath, fileList);
+        List<String> relativePaths =
+            fileList.stream()
+                .map(
+                    absolutePath ->
+                        Path.of(dto.getSourceFolder()).relativize(Path.of(absolutePath)).toString())
+                .toList();
+        Files.write(fileListPath, relativePaths);
       }
       ProcessBuilder pb =
           new ProcessBuilder(
@@ -63,6 +80,7 @@ public class ScicatCli {
                   "--nocopy",
                   "--ingest",
                   "--noninteractive",
+                  "--allowexistingsource",
                   metadataPath.toAbsolutePath().toString())
               .redirectErrorStream(true);
       if (fileListPath != null) {
@@ -87,16 +105,32 @@ public class ScicatCli {
             "scicat-cli execution failed with exit code: " + exitCode);
       }
 
-      return allLines.stream()
-          .map(String::trim)
-          .filter(line -> PID_PATTERN.matcher(line).matches())
-          .reduce((first, second) -> second)
-          .orElseThrow(
-              () ->
-                  new DatasetCreationException(
-                      "CLI reported success, but no valid PID matching pattern was found in"
-                          + " output."));
+      String pid =
+          allLines.stream()
+              .map(String::trim)
+              .filter(line -> PID_PATTERN.matcher(line).matches())
+              .reduce((first, second) -> second)
+              .orElseThrow(
+                  () ->
+                      new DatasetCreationException(
+                          "CLI reported success, but no valid PID matching pattern was found in"
+                              + " output."));
 
+      symlinkData(pid, dto.getSourceFolder(), fileList);
+
+      scicatClient.updateDataset(
+          scicatToken,
+          pid,
+          new UpdateDatasetDto()
+              .setSourceFolder("/")
+              .setDatasetlifecycle(
+                  new DatasetLifeCycle()
+                      .setArchivable(true)
+                      .setOnCentralDisk(false)
+                      .setRetrievable(false)
+                      .setArchiveStatusMessage("datasetCreated")));
+
+      return pid;
     } catch (IOException e) {
       throw new DatasetCreationException(
           "Failed to read/write filesystem dependencies or start process", e);
@@ -106,6 +140,25 @@ public class ScicatCli {
     } finally {
       cleanupFile(metadataPath);
       cleanupFile(fileListPath);
+    }
+  }
+
+  private void symlinkData(String pid, String sourceFolder, Collection<String> fileList)
+      throws IOException {
+    Path archiveRoot = Path.of(archiveDirectory, pid);
+    log.warn("archiveRoot: {}", archiveRoot.toString());
+    if (fileList.isEmpty()) {
+      Files.createDirectories(archiveRoot.getParent());
+      Files.createSymbolicLink(archiveRoot, Path.of(sourceFolder));
+    } else {
+      Files.createDirectories(archiveRoot);
+      for (String file : fileList) {
+        Path relativePath = Path.of(sourceFolder).relativize(Path.of(file));
+        Path linkPath = archiveRoot.resolve(relativePath);
+        log.warn("linkPath: {}", linkPath.toString());
+        Files.createDirectories(linkPath.getParent());
+        Files.createSymbolicLink(linkPath, Path.of(file));
+      }
     }
   }
 

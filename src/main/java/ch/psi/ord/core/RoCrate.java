@@ -1,7 +1,7 @@
 package ch.psi.ord.core;
 
 import com.apicatalog.jsonld.JsonLdOptions;
-import java.io.File;
+import com.apicatalog.jsonld.uri.UriValidationPolicy;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,9 +10,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.zip.ZipException;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -25,6 +25,7 @@ import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.RiotException;
 import org.apache.jena.riot.lang.LangJSONLD11;
 import org.apache.jena.sparql.util.Context;
+import org.eclipse.microprofile.config.ConfigProvider;
 
 @Slf4j
 public class RoCrate implements AutoCloseable {
@@ -37,6 +38,10 @@ public class RoCrate implements AutoCloseable {
       Map.of(FILE_KEY, new ArrayList<>(), DIR_KEY, new ArrayList<>());
   @Getter private Path base = DEFAULT_BASE;
   @Getter private Model model;
+  private String extractDir =
+      ConfigProvider.getConfig()
+          .getOptionalValue("rocrate.extract-directory", String.class)
+          .orElse("/rocrate/extract");
 
   @Getter
   @Accessors(fluent = true)
@@ -67,7 +72,8 @@ public class RoCrate implements AutoCloseable {
    */
   private void createTempDirectory() throws IOException {
     // Jena truncates the base to /tmp if the base doesn't end with a '/'
-    base = Path.of(Files.createTempDirectory("scicat-rocrate").toString(), "/");
+    Path extractionDir = Files.createTempDirectory(Path.of(extractDir), "scicat-rocrate");
+    base = Path.of(extractionDir.toString(), "/");
     log.info("Created extraction directory {}", base);
   }
 
@@ -115,26 +121,26 @@ public class RoCrate implements AutoCloseable {
 
   @Override
   public void close() {
-    if (base.equals(DEFAULT_BASE)) {
-      log.debug("Nothing to cleanup");
-      return;
-    }
+    // if (base.equals(DEFAULT_BASE)) {
+    //   log.debug("Nothing to cleanup");
+    //   return;
+    // }
 
-    try (var paths = Files.walk(base)) {
-      paths
-          .sorted(Comparator.reverseOrder())
-          .forEachOrdered(
-              path -> {
-                File f = path.toFile();
-                String key = f.isFile() ? FILE_KEY : DIR_KEY;
-                f.delete();
-                files.get(key).remove(path);
-                log.info("Deleted {} {}", key, path);
-              });
+    // try (var paths = Files.walk(base)) {
+    //   paths
+    //       .sorted(Comparator.reverseOrder())
+    //       .forEachOrdered(
+    //           path -> {
+    //             File f = path.toFile();
+    //             String key = f.isFile() ? FILE_KEY : DIR_KEY;
+    //             f.delete();
+    //             files.get(key).remove(path);
+    //             log.info("Deleted {} {}", key, path);
+    //           });
 
-    } catch (IOException e) {
-      log.error("Failed to cleanup crate located at {} ({})", base, e.getMessage());
-    }
+    // } catch (IOException e) {
+    //   log.error("Failed to cleanup crate located at {} ({})", base, e.getMessage());
+    // }
   }
 
   public List<Path> listFiles() {
@@ -147,12 +153,15 @@ public class RoCrate implements AutoCloseable {
   }
 
   private void parseMetadataDescriptor(InputStream document) throws RiotException {
+    JsonLdOptions options = new JsonLdOptions();
+    // https://github.com/apache/jena/issues/4025
+    options.setUriValidation(UriValidationPolicy.SchemeOnly);
     model =
         RDFParser.create()
             .source(document)
             .lang(Lang.JSONLD11)
             .base(String.format(base.toUri().toString()))
-            .context(Context.create().set(LangJSONLD11.JSONLD_OPTIONS, new JsonLdOptions()))
+            .context(Context.create().set(LangJSONLD11.JSONLD_OPTIONS, options))
             .build()
             .toModel();
   }
@@ -174,6 +183,8 @@ public class RoCrate implements AutoCloseable {
   }
 
   public String toRelativeId(String absoluteId) {
-    return absoluteId.replace(String.format("file://%s/", getBase().toAbsolutePath()), "");
+    String regex =
+        String.format("file://(%s/)?", Pattern.quote(getBase().toAbsolutePath().toString()));
+    return absoluteId.replaceFirst(regex, "");
   }
 }
