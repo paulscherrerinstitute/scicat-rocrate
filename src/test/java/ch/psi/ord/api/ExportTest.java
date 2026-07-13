@@ -140,7 +140,7 @@ public class ExportTest extends EndpointTest {
             .header("export", exportFormat)
             .body(identifiers)
             .when()
-            .post("/ro-crate/export")
+            .post("/api/v1/ro-crate/export")
             .then()
             .statusCode(200)
             .extract()
