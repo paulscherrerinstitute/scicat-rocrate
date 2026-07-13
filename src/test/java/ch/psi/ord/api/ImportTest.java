@@ -24,7 +24,7 @@ public class ImportTest extends EndpointTest {
   @Test
   @DisplayName("No Accept header")
   public void test00() {
-    given().when().post("/ro-crate/import").then().statusCode(415);
+    given().when().post("/api/v1/ro-crate/import").then().statusCode(415);
   }
 
   @Test
@@ -38,7 +38,7 @@ public class ImportTest extends EndpointTest {
         .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
         .header("api-key", accessToken)
         .when()
-        .post("/ro-crate/import")
+        .post("/api/v1/ro-crate/import")
         .then()
         .statusCode(400);
   }
@@ -55,7 +55,7 @@ public class ImportTest extends EndpointTest {
         .header("api-key", accessToken)
         .body("{")
         .when()
-        .post("/ro-crate/import")
+        .post("/api/v1/ro-crate/import")
         .then()
         .statusCode(400);
   }
@@ -72,7 +72,7 @@ public class ImportTest extends EndpointTest {
         .header("api-key", accessToken)
         .body("{}")
         .when()
-        .post("/ro-crate/import")
+        .post("/api/v1/ro-crate/import")
         .then()
         .statusCode(400);
   }
@@ -88,7 +88,7 @@ public class ImportTest extends EndpointTest {
         .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
         .body(getClass().getClassLoader().getResourceAsStream("one-publication.json"))
         .when()
-        .post("/ro-crate/import")
+        .post("/api/v1/ro-crate/import")
         .then()
         .statusCode(401);
   }
@@ -117,7 +117,7 @@ public class ImportTest extends EndpointTest {
         .header("api-key", accessToken)
         .body(getClass().getClassLoader().getResourceAsStream("one-publication.json"))
         .when()
-        .post("/ro-crate/import")
+        .post("/api/v1/ro-crate/import")
         .then()
         .statusCode(201)
         .body("$", Matchers.hasKey("10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"));
@@ -140,7 +140,7 @@ public class ImportTest extends EndpointTest {
         .header("api-key", accessToken)
         .body(getClass().getClassLoader().getResourceAsStream("one-publication.json"))
         .when()
-        .post("/ro-crate/import")
+        .post("/api/v1/ro-crate/import")
         .then()
         .statusCode(409);
   }
