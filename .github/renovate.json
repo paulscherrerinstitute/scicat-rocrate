@@ -23,6 +23,13 @@
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver-coerced{{/if}}",
       "extractVersionTemplate": "{{#if extractVersion}}{{{extractVersion}}}{{else}}^v?(?<version>.+)${{/if}}"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [ "/Dockerfile.*$/" ],
+      "matchStrings": [ "ARG SCICAT_CLI_VERSION=(?<currentValue>.*?)\\n" ],
+      "depNameTemplate": "paulscherrerinstitute/scicat-cli",
+      "datasourceTemplate": "github-releases"
     }
   ]
 }
