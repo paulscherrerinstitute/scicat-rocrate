@@ -104,20 +104,18 @@ public class RdfUtils {
   }
 
   public static Set<Resource> listResourcesOfType(Model model, Resource type) {
-    return listResourcesOfType(model, type, (a) -> true);
+    return model
+        .listResourcesWithProperty(RDF.type, type)
+        .andThen(model.listResourcesWithProperty(RDF.type, switchScheme(type)))
+        .toSet();
   }
 
   public static Set<Resource> listResourcesOfType(
       Model model, Resource type, Predicate<Resource> predicate) {
-    Set<Resource> res =
-        model.listResourcesWithProperty(RDF.type, type).filterKeep(predicate).toSet();
-
-    res.addAll(
-        model
-            .listResourcesWithProperty(RDF.type, switchScheme(type))
-            .filterKeep(predicate)
-            .toSet());
-
-    return res;
+    return model
+        .listResourcesWithProperty(RDF.type, type)
+        .andThen(model.listResourcesWithProperty(RDF.type, switchScheme(type)))
+        .filterKeep(predicate)
+        .toSet();
   }
 }
