@@ -9,7 +9,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
-@Path("zenodo")
+@Path("/api/v1/zenodo")
 public class ZenodoController {
   @Inject ZenodoExporter exporter;
 

@@ -45,7 +45,7 @@ import org.jboss.resteasy.reactive.RestHeader;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 import org.jboss.resteasy.reactive.server.ServerRequestFilter;
 
-@Path("ro-crate")
+@Path("/api/v1/ro-crate")
 @Tag(name = "ro-crate")
 @Slf4j
 public class RoCrateController {

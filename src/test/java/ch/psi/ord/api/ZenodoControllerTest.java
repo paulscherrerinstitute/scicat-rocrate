@@ -38,7 +38,7 @@ public class ZenodoControllerTest extends EndpointTest {
         .when()
         .accept(ExtraMediaType.APPLICATION_JSONLD)
         .pathParam("doi", TestData.psiPub1.getDoi())
-        .get("/zenodo/{doi}/export")
+        .get("/api/v1/zenodo/{doi}/export")
         .then()
         .statusCode(200)
         .body("@type", equalTo(SchemaDO.Dataset.getLocalName()))
@@ -93,7 +93,7 @@ public class ZenodoControllerTest extends EndpointTest {
         .when()
         .accept(ExtraMediaType.APPLICATION_JSONLD)
         .pathParam("doi", TestData.hzdrPub1.getDoi())
-        .get("/zenodo/{doi}/export")
+        .get("/api/v1/zenodo/{doi}/export")
         .then()
         .statusCode(200)
         .body("@type", equalTo(SchemaDO.Dataset.getLocalName()))
@@ -137,7 +137,7 @@ public class ZenodoControllerTest extends EndpointTest {
         .when()
         .accept(ExtraMediaType.APPLICATION_JSONLD)
         .pathParam("doi", "10.9999/non-existing")
-        .get("/zenodo/{doi}/export")
+        .get("/api/v1/zenodo/{doi}/export")
         .then()
         .statusCode(404);
   }
