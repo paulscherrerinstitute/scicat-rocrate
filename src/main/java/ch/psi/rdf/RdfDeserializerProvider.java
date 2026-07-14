@@ -1,5 +1,7 @@
 package ch.psi.rdf;
 
+import static ch.psi.rdf.RdfUtils.createInstance;
+
 import ch.psi.rdf.annotations.RdfDeserialize;
 import ch.psi.rdf.deser.BooleanDeserializer;
 import ch.psi.rdf.deser.DoubleDeserializer;
@@ -38,8 +40,7 @@ public class RdfDeserializerProvider {
     if (clazz.isAnnotationPresent(RdfDeserialize.class)) {
       RdfDeserialize annot = clazz.getAnnotation(RdfDeserialize.class);
       try {
-        RdfDeserializer<T> customDeser =
-            (RdfDeserializer<T>) RdfUtils.createInstance(annot.using());
+        RdfDeserializer<T> customDeser = (RdfDeserializer<T>) createInstance(annot.using());
 
         registry.put(clazz, customDeser);
         return customDeser;

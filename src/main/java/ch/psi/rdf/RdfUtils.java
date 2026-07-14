@@ -1,10 +1,16 @@
 package ch.psi.rdf;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
+import java.util.function.Predicate;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.vocabulary.RDF;
 
 @Slf4j
 public class RdfUtils {
@@ -71,5 +77,45 @@ public class RdfUtils {
         | SecurityException e) {
       throw new ReflectiveOperationException(e);
     }
+  }
+
+  public static boolean hasProperty(Resource subject, Property p) {
+    return subject.hasProperty(p) || subject.hasProperty(switchScheme(p));
+  }
+
+  public static boolean isOfType(Resource subject, Resource type) {
+    Resource typeSwitched = switchScheme(type);
+    return subject
+        .listProperties(RDF.type)
+        .mapWith(Statement::getObject)
+        .filterKeep(t -> t.equals(type) || t.equals(typeSwitched))
+        .hasNext();
+  }
+
+  public static boolean isOfType(Resource subject, String type) {
+    return isOfType(subject, ResourceFactory.createResource(type));
+  }
+
+  public static Set<RDFNode> listProperties(Resource subject, Property p) {
+    Set<RDFNode> res = subject.getModel().listObjectsOfProperty(subject, p).toSet();
+    res.addAll(subject.getModel().listObjectsOfProperty(subject, switchScheme(p)).toSet());
+
+    return res;
+  }
+
+  public static Set<Resource> listResourcesOfType(Model model, Resource type) {
+    return model
+        .listResourcesWithProperty(RDF.type, type)
+        .andThen(model.listResourcesWithProperty(RDF.type, switchScheme(type)))
+        .toSet();
+  }
+
+  public static Set<Resource> listResourcesOfType(
+      Model model, Resource type, Predicate<Resource> predicate) {
+    return model
+        .listResourcesWithProperty(RDF.type, type)
+        .andThen(model.listResourcesWithProperty(RDF.type, switchScheme(type)))
+        .filterKeep(predicate)
+        .toSet();
   }
 }
