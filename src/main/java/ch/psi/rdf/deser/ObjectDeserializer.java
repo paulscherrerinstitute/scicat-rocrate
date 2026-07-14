@@ -1,20 +1,24 @@
 package ch.psi.rdf.deser;
 
+import static ch.psi.rdf.RdfUtils.createInstance;
+import static ch.psi.rdf.RdfUtils.isOfType;
+import static ch.psi.rdf.RdfUtils.listProperties;
+
 import ch.psi.ord.model.PropertyError;
-import ch.psi.rdf.RdfUtils;
 import ch.psi.rdf.annotations.RdfClass;
 import ch.psi.rdf.annotations.RdfDeserialize;
 import ch.psi.rdf.annotations.RdfProperty;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
@@ -50,7 +54,7 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
 
     T obj;
     try {
-      obj = RdfUtils.createInstance(clazz);
+      obj = createInstance(clazz);
     } catch (ReflectiveOperationException e) {
       throw new RdfDeserializationException(
           String.format("Failed to create an instance of %s", clazz.getName()), e);
@@ -62,7 +66,8 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
       Field field = entry.getKey();
       RdfProperty propertyAnnotation = entry.getValue();
 
-      List<RDFNode> values = listValues(subject, propertyAnnotation.uri());
+      Set<RDFNode> values =
+          listProperties(subject, ResourceFactory.createProperty(propertyAnnotation.uri()));
       checkCardinalities(subject, propertyAnnotation, values.size())
           .ifPresent(e -> context.addError(e));
 
@@ -86,14 +91,13 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
         RdfDeserializer<?> fieldDeserializer = context.getDeserializer(field.getType());
         if (field.isAnnotationPresent(RdfDeserialize.class)) {
           try {
-            fieldDeserializer =
-                RdfUtils.createInstance(field.getAnnotation(RdfDeserialize.class).using());
+            fieldDeserializer = createInstance(field.getAnnotation(RdfDeserialize.class).using());
           } catch (ReflectiveOperationException e) {
             throw new RdfDeserializationException(
                 String.format("Unable to instantiate custom field deserializer"), e);
           }
         }
-        Object value = fieldDeserializer.deserialize(values.getFirst(), context);
+        Object value = fieldDeserializer.deserialize(values.iterator().next(), context);
         setField(field, obj, value);
       }
     }
@@ -102,35 +106,18 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
   }
 
   private Optional<PropertyError> checkType(Resource subject, String[] expectedTypes) {
-    List<String> normalizedExpectedTypes = new ArrayList<>();
-    for (String type : expectedTypes) {
-      normalizedExpectedTypes.add(type);
-      normalizedExpectedTypes.add(RdfUtils.switchScheme(type));
-    }
-
-    List<String> actualTypes =
-        subject.listProperties(RDF.type).mapWith(s -> s.getObject().toString()).toList();
-    if (normalizedExpectedTypes.stream().noneMatch(actualTypes::contains)) {
+    boolean typeMatch = Arrays.stream(expectedTypes).anyMatch(type -> isOfType(subject, type));
+    if (!typeMatch) {
+      List<String> actualTypes =
+          subject.listProperties(RDF.type).mapWith(s -> s.getObject().toString()).toList();
       String message =
           String.format(
               "Expected '@type' to be one of [ %s ] but is [ %s ]",
               String.join(", ", expectedTypes), String.join(", ", actualTypes));
       return Optional.of(new PropertyError(subject.getURI(), "@type", message));
     }
+
     return Optional.empty();
-  }
-
-  private List<RDFNode> listValues(Resource subject, String propertyUri) {
-    Property p = ResourceFactory.createProperty(propertyUri);
-    List<RDFNode> values = subject.listProperties(p).mapWith(s -> s.getObject()).toList();
-    if (values.size() == 0) {
-      log.info("{} has no property {}", subject.toString(), propertyUri);
-      p = ResourceFactory.createProperty(RdfUtils.switchScheme(propertyUri));
-      log.info("Trying to switch property scheme to: '{}' ", p.toString());
-      values = subject.listProperties(p).mapWith(s -> s.getObject()).toList();
-    }
-
-    return values;
   }
 
   private Optional<PropertyError> checkCardinalities(
