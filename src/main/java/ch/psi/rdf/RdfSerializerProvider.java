@@ -1,5 +1,7 @@
 package ch.psi.rdf;
 
+import static ch.psi.rdf.RdfUtils.createInstance;
+
 import ch.psi.rdf.annotations.RdfSerialize;
 import ch.psi.rdf.ser.BooleanSerializer;
 import ch.psi.rdf.ser.DoubleSerializer;
@@ -43,8 +45,7 @@ public class RdfSerializerProvider {
     } else if (clazz.isAnnotationPresent(RdfSerialize.class)) {
       try {
         RdfSerializer<T> serializer =
-            (RdfSerializer<T>)
-                RdfUtils.createInstance(clazz.getAnnotation(RdfSerialize.class).using());
+            (RdfSerializer<T>) createInstance(clazz.getAnnotation(RdfSerialize.class).using());
         return register(clazz, serializer);
       } catch (ReflectiveOperationException e) {
         log.warn("Could not instantiate custom deserializer '{}'", clazz.getName(), e);
