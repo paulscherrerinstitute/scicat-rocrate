@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.zip.ZipException;
-import java.util.zip.ZipInputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.riot.RiotException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -165,9 +164,8 @@ public class RoCrateController {
   @Path("/validate")
   @Consumes(ExtraMediaType.APPLICATION_JSONLD)
   @Produces(MediaType.APPLICATION_JSON)
-  public Response validateCrate(InputStream body)
-      throws RdfDeserializationException, RiotException, FileNotFoundException, IOException {
-    try (RoCrate crate = new RoCrate(body)) {
+  public Response validateCrate(InputStream body) throws RdfDeserializationException {
+    try (RoCrate crate = RoCrate.fromMetadata(body)) {
       importer.loadCrate(crate);
       return Response.ok(importer.validate()).build();
     }
@@ -183,8 +181,7 @@ public class RoCrateController {
           ZipException,
           IOException,
           RdfDeserializationException {
-    try (ZipInputStream zip = new ZipInputStream(body);
-        RoCrate crate = new RoCrate(zip)) {
+    try (RoCrate crate = RoCrate.fromZip(body)) {
       importer.loadCrate(crate);
       return Response.ok(importer.validate()).build();
     }
@@ -196,8 +193,8 @@ public class RoCrateController {
   @Produces(MediaType.APPLICATION_JSON)
   @ScicatAuth
   public Response importCrate(@HeaderParam(value = "api-key") String scicatToken, InputStream body)
-      throws RdfDeserializationException, RiotException, FileNotFoundException, IOException {
-    try (RoCrate crate = new RoCrate(body)) {
+      throws RdfDeserializationException {
+    try (RoCrate crate = RoCrate.fromMetadata(body)) {
       importer.loadCrate(crate);
       ValidationReport report = importer.validate();
       if (!report.isValid()) {
@@ -223,8 +220,7 @@ public class RoCrateController {
           ZipException,
           IOException,
           RdfDeserializationException {
-    try (ZipInputStream zip = new ZipInputStream(body);
-        RoCrate crate = new RoCrate(zip)) {
+    try (RoCrate crate = RoCrate.fromZip(body)) {
       importer.loadCrate(crate);
       ValidationReport report = importer.validate();
       if (!report.isValid()) {
