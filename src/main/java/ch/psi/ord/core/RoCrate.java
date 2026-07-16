@@ -39,9 +39,12 @@ public class RoCrate implements AutoCloseable {
 
   private RoCrate() {}
 
-  public static RoCrate fromMetadata(InputStream metadataDescriptor) throws RiotException {
+  public static RoCrate fromMetadata(InputStream metadataDescriptor)
+      throws RiotException, IOException {
     RoCrate crate = new RoCrate();
-    crate.parseMetadataDescriptor(metadataDescriptor);
+    crate.createTempDirectory();
+    Files.write(crate.base.resolve(METADATA_DESCRIPTOR), metadataDescriptor.readAllBytes());
+    crate.readMetadataDescriptor();
     return crate;
   }
 
