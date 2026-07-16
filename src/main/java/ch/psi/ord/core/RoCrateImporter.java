@@ -23,10 +23,11 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
-import java.net.URI;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -171,6 +172,11 @@ public class RoCrateImporter {
   }
 
   public List<MissingDataError> validateArchiveContent() {
+    // NOTE: when only the metadata descriptor is uploaded we can't validate the archive content
+    if (!crate.hasAttachedData()) {
+      return Collections.emptyList();
+    }
+
     Set<Resource> referencedDatafiles =
         listResourcesOfType(
             inferredModel,
@@ -183,17 +189,16 @@ public class RoCrateImporter {
             SchemaDO.MediaObject,
             r -> r.getURI() != null && r.getURI().startsWith("file:///")));
 
-    Set<URI> extractedFiles =
-        this.crate.listFiles().stream().map(Path::toUri).collect(Collectors.toSet());
+    Set<Path> pathsToCheck =
+        referencedDatafiles.stream()
+            .map(r -> Paths.get(r.getURI().replace("file://", "/")).toAbsolutePath())
+            .collect(Collectors.toSet());
+
     List<MissingDataError> errors = new ArrayList<>();
-    referencedDatafiles.forEach(
-        r -> {
-          if (!extractedFiles.contains(URI.create(r.getURI()))) {
-            log.info("URI: {}", r.getURI());
-            log.info("Base: {}", this.crate.getBase());
-            errors.add(
-                new MissingDataError(
-                    r.getURI().replace("file://" + this.crate.getBase().toString(), "")));
+    pathsToCheck.forEach(
+        dataEntityPath -> {
+          if (!dataEntityPath.toFile().exists()) {
+            errors.add(new MissingDataError(crate.getBase().relativize(dataEntityPath).toString()));
           }
         });
 

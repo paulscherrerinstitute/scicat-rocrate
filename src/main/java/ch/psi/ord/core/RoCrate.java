@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipException;
 import lombok.Getter;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
@@ -37,6 +38,10 @@ public class RoCrate implements AutoCloseable {
   @Getter private Path base = DEFAULT_BASE;
   @Getter private Model model;
 
+  @Getter
+  @Accessors(fluent = true)
+  private boolean hasAttachedData = false;
+
   private RoCrate() {}
 
   public static RoCrate fromMetadata(InputStream metadataDescriptor)
@@ -52,6 +57,7 @@ public class RoCrate implements AutoCloseable {
     RoCrate crate = new RoCrate();
     crate.extract(zip);
     crate.readMetadataDescriptor();
+    crate.hasAttachedData = true;
     return crate;
   }
 

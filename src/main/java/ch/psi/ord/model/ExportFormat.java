@@ -16,6 +16,11 @@ public enum ExportFormat {
     this.value = value;
   }
 
+  @Override
+  public String toString() {
+    return this.value;
+  }
+
   public static ExportFormat fromString(String value) {
     for (ExportFormat format : ExportFormat.values()) {
       if (format.value.equalsIgnoreCase(value)) {
