@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       rebuildDevContainer: ${{ steps.check_changes.outputs.devcontainer_any_changed }}
+      rebuildMavenCache: ${{ steps.check_changes.outputs.deps_any_changed }}
       lintWorkflows: ${{ steps.check_changes.outputs.workflow_any_changed }}
       runTests: ${{ steps.check_changes.outputs.src_any_changed }}
     steps:
@@ -27,6 +28,8 @@ jobs:
           files_yaml: |
             devcontainer:
               - .devcontainer/**
+            deps:
+              - pom.xml
             workflow:
               - .github/workflows/**
             src:
@@ -58,16 +61,45 @@ jobs:
           cacheFrom: ${{ env.devImage }}
           push: always
 
-  tests:
-    name: Unit + Integration tests
+  maven_cache:
+    name: Build Maven cache
     needs: check_changes
-    if: needs.check_changes.outputs.runTests == 'true'
+    if: needs.check_changes.outputs.rebuildMavenCache == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
       - name: Restore Maven cache volume
         id: restore_maven_cache
+        uses: BYK/docker-volume-cache-action/restore@0efa5cf5178c9906cb46ed8d1a357df8fd6b1a06 # v1
+        with:
+          key: maven-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: maven-m2-
+          volumes: ${{ env.mavenCacheVolume }}
+
+      - name: Download Maven dependencies
+        uses: devcontainers/ci@v0.3
+        with:
+          push: never
+          imageName: ${{ env.devImage }}
+          cacheFrom: ${{ env.devImage }}
+          runCmd: ./mvnw dependency:go-offline
+
+      - name: Save Maven cache volume
+        uses: BYK/docker-volume-cache-action/save@0efa5cf5178c9906cb46ed8d1a357df8fd6b1a06 # v1
+        with:
+          key: ${{ steps.restore_maven_cache.outputs.cache-primary-key }}
+          volumes: ${{ env.mavenCacheVolume }}
+
+  tests:
+    name: Unit + Integration tests
+    needs: [check_changes, maven_cache]
+    if: needs.check_changes.outputs.runTests == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Restore Maven cache volume
         uses: BYK/docker-volume-cache-action/restore@0efa5cf5178c9906cb46ed8d1a357df8fd6b1a06 # v1
         with:
           key: maven-m2-${{ hashFiles('**/pom.xml') }}
@@ -82,13 +114,6 @@ jobs:
           cacheFrom: ${{ env.devImage }}
           runCmd: ./mvnw verify -DskipITs=false
 
-      - name: Save Maven cache volume
-        if: always() && steps.restore_maven_cache.outputs.cache-hit != 'true'
-        uses: BYK/docker-volume-cache-action/save@0efa5cf5178c9906cb46ed8d1a357df8fd6b1a06 # v1
-        with:
-          key: ${{ steps.restore_maven_cache.outputs.cache-primary-key }}
-          volumes: ${{ env.mavenCacheVolume }}
-
   actionlint:
     runs-on: ubuntu-latest
     needs: check_changes
@@ -102,12 +127,12 @@ jobs:
 
   precommit:
     name: pre-commit
+    needs: maven_cache
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
       - name: Restore Maven cache volume
-        id: restore_maven_cache
         uses: BYK/docker-volume-cache-action/restore@0efa5cf5178c9906cb46ed8d1a357df8fd6b1a06 # v1
         with:
           key: maven-m2-${{ hashFiles('**/pom.xml') }}
