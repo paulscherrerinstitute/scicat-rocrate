@@ -9,6 +9,7 @@ permissions:
 
 env:
   devImage: ghcr.io/${{ github.repository }}-devcontainer
+  mavenCacheVolume: devcontainer-maven-cache-${{ github.event.repository.name }}
 
 jobs:
   check_changes:
@@ -65,6 +66,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Restore Maven cache volume
+        id: restore_maven_cache
+        uses: BYK/docker-volume-cache-action/restore@0efa5cf5178c9906cb46ed8d1a357df8fd6b1a06 # v1
+        with:
+          key: maven-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: maven-m2-
+          volumes: ${{ env.mavenCacheVolume }}
+
       - name: Run test suite
         uses: devcontainers/ci@v0.3
         with:
@@ -72,6 +81,13 @@ jobs:
           imageName: ${{ env.devImage }}
           cacheFrom: ${{ env.devImage }}
           runCmd: ./mvnw verify -DskipITs=false
+
+      - name: Save Maven cache volume
+        if: always() && steps.restore_maven_cache.outputs.cache-hit != 'true'
+        uses: BYK/docker-volume-cache-action/save@0efa5cf5178c9906cb46ed8d1a357df8fd6b1a06 # v1
+        with:
+          key: ${{ steps.restore_maven_cache.outputs.cache-primary-key }}
+          volumes: ${{ env.mavenCacheVolume }}
 
   actionlint:
     runs-on: ubuntu-latest
@@ -89,6 +105,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+
+      - name: Restore Maven cache volume
+        id: restore_maven_cache
+        uses: BYK/docker-volume-cache-action/restore@0efa5cf5178c9906cb46ed8d1a357df8fd6b1a06 # v1
+        with:
+          key: maven-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: maven-m2-
+          volumes: ${{ env.mavenCacheVolume }}
 
       - name: pre-commit
         uses: devcontainers/ci@v0.3
