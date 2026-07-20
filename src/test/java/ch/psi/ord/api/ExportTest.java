@@ -1,14 +1,13 @@
 package ch.psi.ord.api;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
 import ch.psi.ord.core.DoiUtils;
@@ -17,124 +16,187 @@ import ch.psi.s3_broker.model.DatasetUrls;
 import ch.psi.scicat.TestData;
 import ch.psi.scicat.model.v3.PublishedData;
 import io.quarkus.test.junit.QuarkusTest;
-import io.restassured.path.json.JsonPath;
+import io.restassured.builder.ResponseBuilder;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import io.restassured.response.ValidatableResponse;
 import jakarta.ws.rs.core.MediaType;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import lombok.Data;
 import org.apache.jena.vocabulary.SchemaDO;
 import org.jboss.resteasy.reactive.RestResponse;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.FieldSource;
 
 @QuarkusTest
 public class ExportTest extends EndpointTest {
-  @BeforeEach
-  public void setupMock() {
-    if (scicatClient != null) {
-      when(scicatClient.getPublishedDataById(TestData.psiPub1.getDoi()))
-          .thenReturn(RestResponse.ok(TestData.psiPub1));
-      when(scicatClient.getPublishedDataById(TestData.hzdrPub1.getDoi()))
-          .thenReturn(RestResponse.ok(TestData.hzdrPub1));
+  @Data
+  static class ExportTestCase {
+    String testName;
+    String exportFormat;
+    List<String> identifiers;
+    Consumer<ExportTest> mockSetup;
+    Consumer<ValidatableResponse> assertions;
 
-      when(scicatClient.getDatasetByPid(TestData.psiDs1.getPid()))
-          .thenReturn(RestResponse.ok(TestData.psiDs1));
-      when(scicatClient.getDatasetByPid(TestData.psiDs2.getPid()))
-          .thenReturn(RestResponse.ok(TestData.psiDs2));
-      when(scicatClient.getDatasetByPid(TestData.psiDs3.getPid()))
-          .thenReturn(RestResponse.ok(TestData.psiDs3));
-      when(scicatClient.getDatasetByPid(TestData.hzdrDs1.getPid()))
-          .thenReturn(RestResponse.ok(TestData.hzdrDs1));
-    }
-
-    if (s3BrokerService != null) {
-      when(s3BrokerService.getPublishedDataUrls(TestData.psiPub1.getDoi()))
-          .thenReturn(TestData.psiPub1S3Response);
-      when(s3BrokerService.getPublishedDataUrls(TestData.hzdrPub1.getDoi()))
-          .thenReturn(TestData.hzdrPub1S3Response);
+    @Override
+    public String toString() {
+      return String.format("[%s] - %s", testName, exportFormat);
     }
   }
 
-  @ParameterizedTest(name = "Export one publication: {0}")
-  @ValueSource(strings = {ExtraMediaType.APPLICATION_JSONLD, ExtraMediaType.APPLICATION_ZIP})
-  public void test00(String exportFormat) throws IOException {
-    PublishedData pub = TestData.psiPub1;
-    JsonPath jsonPath = executeExportRequest(List.of(pub.getDoi()), exportFormat);
-    final JsonPath pubPath =
-        jsonPath.setRootPath(
-            String.format(
-                "'@graph'.find { it.'@type' == 'Collection' && it.'@id' == '%s' }",
-                DoiUtils.buildStandardUrl(pub.getDoi())));
-    assertAll(
-        () -> assertNotNull(pubPath.get()),
-        () -> assertEquals(pubPath.get("identifier"), pub.getDoi()),
-        () -> assertEquals(pubPath.get("name"), pub.getTitle()),
-        () -> assertEquals(pubPath.get("abstract"), pub.getAbstract()),
-        () -> assertEquals(pubPath.get("description"), pub.getDataDescription()),
-        () -> assertEquals(pubPath.get("additionalType"), pub.getResourceType()),
-        () -> assertEquals(pubPath.get("creativeWorkStatus"), pub.getStatus().toString()),
-        () -> assertEquals(pubPath.get("dateCreated"), pub.getCreatedAt()),
-        () -> assertEquals(pubPath.get("dateModified"), pub.getUpdatedAt()),
-        () -> assertEquals(pubPath.get("datePublished"), String.valueOf(pub.getPublicationYear())),
-        () -> assertEquals(pubPath.get("sdDatePublished"), pub.getRegisteredTime().toString()),
-        () ->
-            assertEquals(
-                pubPath.get("expires"), TestData.psiPub1S3Response.getExpires().toString()),
-        () -> assertThat(pubPath.get("creator"), hasSize(pub.getCreator().size())),
-        () -> assertThat(pubPath.get("hasPart"), hasSize(pub.getPidArray().size())),
-        () -> assertNotNull(pubPath.get("publisher")),
-        () -> assertNotNull(pubPath.get("license")));
+  private static final Consumer<ExportTest> DEFAULT_MOCK_SETUP =
+      test -> {
+        if (test.scicatClient != null) {
+          when(test.scicatClient.getPublishedDataById(TestData.psiPub1.getDoi()))
+              .thenReturn(RestResponse.ok(TestData.psiPub1));
+          when(test.scicatClient.getPublishedDataById(TestData.hzdrPub1.getDoi()))
+              .thenReturn(RestResponse.ok(TestData.hzdrPub1));
+
+          when(test.scicatClient.getDatasetByPid(TestData.psiDs1.getPid()))
+              .thenReturn(RestResponse.ok(TestData.psiDs1));
+          when(test.scicatClient.getDatasetByPid(TestData.psiDs2.getPid()))
+              .thenReturn(RestResponse.ok(TestData.psiDs2));
+          when(test.scicatClient.getDatasetByPid(TestData.psiDs3.getPid()))
+              .thenReturn(RestResponse.ok(TestData.psiDs3));
+          when(test.scicatClient.getDatasetByPid(TestData.hzdrDs1.getPid()))
+              .thenReturn(RestResponse.ok(TestData.hzdrDs1));
+        }
+
+        if (test.s3BrokerService != null) {
+          when(test.s3BrokerService.getPublishedDataUrls(TestData.psiPub1.getDoi()))
+              .thenReturn(TestData.psiPub1S3Response);
+          when(test.s3BrokerService.getPublishedDataUrls(TestData.hzdrPub1.getDoi()))
+              .thenReturn(TestData.hzdrPub1S3Response);
+        }
+      };
+
+  private static List<ExportTestCase> createTestCase(
+      String testName, List<String> identifiers, Consumer<ValidatableResponse> assertions) {
+    return createTestCase(testName, identifiers, DEFAULT_MOCK_SETUP, assertions);
   }
 
-  @ParameterizedTest(name = "Should include S3 links if not expired: {0}")
-  @ValueSource(strings = {ExtraMediaType.APPLICATION_JSONLD, ExtraMediaType.APPLICATION_ZIP})
-  public void test01(String exportFormat) {
-    var expectedItems =
-        Stream.of(TestData.psiDs1, TestData.psiDs2, TestData.psiDs3)
-            .map(
-                ds -> {
-                  DatasetUrls dsUrls = TestData.psiPub1S3Response.getUrls().get(ds.getPid());
-                  return Map.of(
-                      "@id",
-                      dsUrls.getUrls().getFirst().getUrl(),
-                      "@type",
-                      SchemaDO.MediaObject.getLocalName(),
-                      "expires",
-                      dsUrls.getUrls().getFirst().getExpires().toString(),
-                      "encodingFormat",
-                      ExtraMediaType.APPLICATION_TAR);
-                })
-            .toArray();
-
-    JsonPath jsonPath = executeExportRequest(List.of(TestData.psiPub1.getDoi()), exportFormat);
-    assertThat(
-        jsonPath.get("'@graph'.findAll { it.'@type' == 'MediaObject' }"),
-        containsInAnyOrder(expectedItems));
+  private static List<ExportTestCase> createTestCase(
+      String testName,
+      List<String> identifiers,
+      Consumer<ExportTest> mockSetup,
+      Consumer<ValidatableResponse> assertions) {
+    return List.of(
+        new ExportTestCase()
+            .setTestName(testName)
+            .setExportFormat(ExtraMediaType.APPLICATION_JSONLD)
+            .setIdentifiers(identifiers)
+            .setMockSetup(mockSetup)
+            .setAssertions(assertions),
+        new ExportTestCase()
+            .setTestName(testName)
+            .setExportFormat(ExtraMediaType.APPLICATION_ZIP)
+            .setIdentifiers(identifiers)
+            .setMockSetup(mockSetup)
+            .setAssertions(assertions));
   }
 
-  @ParameterizedTest(name = "Should not include S3 links if expired: {0}")
-  @ValueSource(strings = {ExtraMediaType.APPLICATION_JSONLD, ExtraMediaType.APPLICATION_ZIP})
-  public void test02(String exportFormat) {
-    String s3Url =
-        TestData.hzdrPub1S3Response
-            .getUrls()
-            .get(TestData.hzdrDs1.getPid())
-            .getUrls()
-            .getFirst()
-            .getUrl();
+  static List<ExportTestCase> testMatrix =
+      new ArrayList<>() {
+        {
+          addAll(
+              createTestCase(
+                  "Export one publication",
+                  List.of(TestData.psiPub1.getDoi()),
+                  res -> {
+                    PublishedData pub = TestData.psiPub1;
+                    String rootPath =
+                        String.format(
+                            "'@graph'.find { it.'@type' == 'Collection' && it.'@id' == '%s' }",
+                            DoiUtils.buildStandardUrl(pub.getDoi()));
+                    res.body(rootPath, notNullValue())
+                        .body(rootPath + ".identifier", is(pub.getDoi()))
+                        .body(rootPath + ".name", is(pub.getTitle()))
+                        .body(rootPath + ".abstract", is(pub.getAbstract()))
+                        .body(rootPath + ".description", is(pub.getDataDescription()))
+                        .body(rootPath + ".additionalType", is(pub.getResourceType()))
+                        .body(rootPath + ".creativeWorkStatus", is(pub.getStatus().toString()))
+                        .body(rootPath + ".dateCreated", is(pub.getCreatedAt()))
+                        .body(rootPath + ".dateModified", is(pub.getUpdatedAt()))
+                        .body(
+                            rootPath + ".datePublished",
+                            is(String.valueOf(pub.getPublicationYear())))
+                        .body(rootPath + ".sdDatePublished", is(pub.getRegisteredTime().toString()))
+                        .body(
+                            rootPath + ".expires",
+                            is(TestData.psiPub1S3Response.getExpires().toString()))
+                        .body(rootPath + ".creator", hasSize(pub.getCreator().size()))
+                        .body(rootPath + ".hasPart", hasSize(pub.getPidArray().size()))
+                        .body(rootPath + ".publisher", notNullValue())
+                        .body(rootPath + ".license", notNullValue());
+                  }));
 
-    JsonPath jsonPath = executeExportRequest(List.of(TestData.hzdrPub1.getDoi()), exportFormat);
-    assertThat(jsonPath.get("@graph.@id"), not(hasItems(s3Url)));
+          addAll(
+              createTestCase(
+                  "Should include S3 links if not expired",
+                  List.of(TestData.psiPub1.getDoi()),
+                  res -> {
+                    var expectedItems =
+                        Stream.of(TestData.psiDs1, TestData.psiDs2, TestData.psiDs3)
+                            .map(
+                                ds -> {
+                                  DatasetUrls dsUrls =
+                                      TestData.psiPub1S3Response.getUrls().get(ds.getPid());
+                                  return Map.of(
+                                      "@id",
+                                      dsUrls.getUrls().getFirst().getUrl(),
+                                      "@type",
+                                      SchemaDO.MediaObject.getLocalName(),
+                                      "expires",
+                                      dsUrls.getUrls().getFirst().getExpires().toString(),
+                                      "encodingFormat",
+                                      ExtraMediaType.APPLICATION_TAR);
+                                })
+                            .toArray();
+
+                    res.body(
+                        "'@graph'.findAll { it.'@type' == 'MediaObject' }",
+                        containsInAnyOrder(expectedItems));
+                  }));
+
+          addAll(
+              createTestCase(
+                  "Should not include S3 links if expired",
+                  List.of(TestData.hzdrPub1.getDoi()),
+                  res -> {
+                    String s3Url =
+                        TestData.hzdrPub1S3Response
+                            .getUrls()
+                            .get(TestData.hzdrDs1.getPid())
+                            .getUrls()
+                            .getFirst()
+                            .getUrl();
+
+                    res.body("@graph.@id", not(hasItems(s3Url)));
+                  }));
+        }
+      };
+
+  @ParameterizedTest
+  @FieldSource("testMatrix")
+  @DisplayName("Export Matrix Execution")
+  public void testExportMatrix(ExportTestCase testCase) {
+    testCase.getMockSetup().accept(this);
+    ValidatableResponse response =
+        executeExportRequest(testCase.getIdentifiers(), testCase.getExportFormat());
+    testCase.getAssertions().accept(response);
   }
 
-  private JsonPath executeExportRequest(List<String> identifiers, String exportFormat) {
+  private ValidatableResponse executeExportRequest(List<String> identifiers, String exportFormat) {
     Response response =
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -148,17 +210,22 @@ public class ExportTest extends EndpointTest {
             .response();
 
     if (ExtraMediaType.APPLICATION_JSONLD.equals(exportFormat)) {
-      return JsonPath.from(response.asString());
+      return response.then();
     }
 
     return extractJsonFromZip(response)
-        .orElseThrow(
-            () ->
-                new IllegalArgumentException(
-                    "Target file 'ro-crate-metadata.json' not found in ZIP archive."));
+        .map(
+            json ->
+                new ResponseBuilder()
+                    .clone(response)
+                    .setContentType(ContentType.JSON)
+                    .setBody(json)
+                    .build()
+                    .then())
+        .orElseGet(() -> fail("Target file 'ro-crate-metadata.json' not found in ZIP archive."));
   }
 
-  private Optional<JsonPath> extractJsonFromZip(Response response) {
+  private Optional<String> extractJsonFromZip(Response response) {
     try (ZipInputStream zis = new ZipInputStream(response.asInputStream())) {
       ZipEntry entry;
       while ((entry = zis.getNextEntry()) != null) {
@@ -169,7 +236,7 @@ public class ExportTest extends EndpointTest {
           while ((len = zis.read(buffer)) > 0) {
             out.write(buffer, 0, len);
           }
-          return Optional.of(JsonPath.from(out.toString("UTF-8")));
+          return Optional.of(out.toString("UTF-8"));
         }
       }
     } catch (IOException e) {
