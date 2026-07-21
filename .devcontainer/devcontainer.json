@@ -30,5 +30,8 @@
   "postCreateCommand": "sudo -E chown -R $(id -u):$(id -g) ~/.m2",
   "onCreateCommand": {
     "install pre-commit hooks": "cd ${containerWorkspaceFolder} && pre-commit install"
+  },
+  "containerEnv": {
+    "QUARKUS_ANALYTICS_DISABLED": "true"
   }
 }
