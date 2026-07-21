@@ -2,12 +2,16 @@ package ch.psi.scicat.client;
 
 import ch.psi.scicat.model.v3.CountResponse;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
+import ch.psi.scicat.model.v3.CreateJobDto;
 import ch.psi.scicat.model.v3.CreatePublishedDataDto;
 import ch.psi.scicat.model.v3.Dataset;
 import ch.psi.scicat.model.v3.MyIdentity;
+import ch.psi.scicat.model.v3.OutputJobDto;
 import ch.psi.scicat.model.v3.PublishedData;
+import ch.psi.scicat.model.v3.UpdateDatasetDto;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -36,6 +40,13 @@ public interface ScicatService {
   public RestResponse<Dataset> createDataset(
       @HeaderParam("Authorization") String accessToken, CreateDatasetDto datasetDto);
 
+  @PATCH
+  @Path("/api/v3/datasets/{pid}")
+  public RestResponse<Dataset> updateDataset(
+      @HeaderParam("Authorization") String accessToken,
+      @PathParam("pid") String pid,
+      UpdateDatasetDto updateDatasetDto);
+
   @GET
   @Path("/api/v3/publisheddata/{doi}")
   public RestResponse<PublishedData> getPublishedDataById(@PathParam("doi") String doi);
@@ -54,4 +65,9 @@ public interface ScicatService {
   @Path("/api/v3/publisheddata")
   public RestResponse<PublishedData> createPublishedData(
       @HeaderParam("Authorization") String accessToken, CreatePublishedDataDto publishedData);
+
+  @POST
+  @Path("/api/v3/jobs")
+  public RestResponse<OutputJobDto> createJob(
+      @HeaderParam("Authorization") String accessToken, CreateJobDto createJobDto);
 }
