@@ -2,10 +2,13 @@ package ch.psi.scicat.client;
 
 import ch.psi.scicat.model.v3.CountResponse;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
+import ch.psi.scicat.model.v3.CreateJobDto;
 import ch.psi.scicat.model.v3.CreatePublishedDataDto;
 import ch.psi.scicat.model.v3.Dataset;
 import ch.psi.scicat.model.v3.MyIdentity;
+import ch.psi.scicat.model.v3.OutputJobDto;
 import ch.psi.scicat.model.v3.PublishedData;
+import ch.psi.scicat.model.v3.UpdateDatasetDto;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -40,6 +43,11 @@ public class ScicatClient {
     return api.createDataset(accessToken, datasetDto);
   }
 
+  public RestResponse<Dataset> updateDataset(
+      String accessToken, String pid, UpdateDatasetDto updateDatasetDto) {
+    return api.updateDataset(accessToken, pid, updateDatasetDto);
+  }
+
   public RestResponse<PublishedData> getPublishedDataById(String doi) {
     return api.getPublishedDataById(doi);
   }
@@ -59,5 +67,9 @@ public class ScicatClient {
 
   public RestResponse<Dataset> getDatasetByPid(String pid) {
     return api.getDatasetByPid(pid);
+  }
+
+  public RestResponse<OutputJobDto> createJob(String accessToken, CreateJobDto createJobDto) {
+    return api.createJob(accessToken, createJobDto);
   }
 }

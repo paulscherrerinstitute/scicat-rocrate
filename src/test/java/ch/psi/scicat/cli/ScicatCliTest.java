@@ -14,6 +14,6 @@ public class ScicatCliTest {
   @ParameterizedTest(name = "should throw if scicat.cli.path={0} is not a file or not executable")
   @ValueSource(strings = {"non-existing", "/usr", "/etc/localtime"})
   public void test00(String cliPath) {
-    assertThrows(IllegalStateException.class, () -> new ScicatCli(cliPath, null, null));
+    assertThrows(IllegalStateException.class, () -> new ScicatCli(cliPath, null, null, null));
   }
 }

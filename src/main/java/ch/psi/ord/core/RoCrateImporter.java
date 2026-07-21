@@ -14,9 +14,11 @@ import ch.psi.scicat.cli.ScicatCli;
 import ch.psi.scicat.client.ScicatClient;
 import ch.psi.scicat.model.v3.CountResponse;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
+import ch.psi.scicat.model.v3.CreateJobDto;
 import ch.psi.scicat.model.v3.CreatePublishedDataDto;
 import ch.psi.scicat.model.v3.DatasetType;
 import ch.psi.scicat.model.v3.MyIdentity;
+import ch.psi.scicat.model.v3.OutputJobDto;
 import ch.psi.scicat.model.v3.PublishedData;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -28,6 +30,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,6 +55,7 @@ public class RoCrateImporter {
   private Reasoner reasoner = ReasonerRegistry.getOWLMicroReasoner();
   private InfModel inferredModel = ModelFactory.createInfModel(reasoner, model);
   private RdfMapper rdfMapper = new RdfMapper();
+  private Set<String> datasetsToArchive = new HashSet<>();
   @Inject private ModelMapper modelMapper;
   @Inject private ScicatClient scicatClient;
   @Inject private ScicatCli scicatCli;
@@ -84,8 +88,30 @@ public class RoCrateImporter {
         throw new NotImplementedException("Only Publications are supported for now");
       }
     }
+    submitArchiveJob(scicatToken);
 
     return importMap;
+  }
+
+  private void submitArchiveJob(String scicatToken) {
+    if (datasetsToArchive.isEmpty()) {
+      return;
+    }
+
+    OutputJobDto archiveJob =
+        scicatClient
+            .createJob(
+                scicatToken,
+                new CreateJobDto()
+                    .setType("archive")
+                    .setJobParams(new CreateJobDto.JobParameters().setTapeCopies("one"))
+                    .setDatasetList(
+                        datasetsToArchive.stream()
+                            .map(pid -> new CreateJobDto.DatasetEntry().setPid(pid))
+                            .toList()))
+            .getEntity();
+    crate.setScheduledForArchival(true);
+    log.info("Submitted archive job: {}", archiveJob.getId());
   }
 
   public void importPublication(
@@ -118,6 +144,7 @@ public class RoCrateImporter {
                       .toAbsolutePath()
                       .toString()));
       importMap.put(RoCrate.METADATA_DESCRIPTOR, pid);
+      datasetsToArchive.add(pid);
     }
 
     if (!publication.getHasPart().getFiles().isEmpty()) {
@@ -128,6 +155,7 @@ public class RoCrateImporter {
       String datasetPid =
           scicatCli.ingestDataset(
               scicatToken, datasetDto, publication.getHasPart().getFiles().values());
+      datasetsToArchive.add(datasetPid);
       dto.getPidArray().add(datasetPid);
       publication
           .getHasPart()
