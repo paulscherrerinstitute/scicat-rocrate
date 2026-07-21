@@ -78,6 +78,7 @@ jobs:
           volumes: ${{ env.mavenCacheVolume }}
 
       - name: Download Maven dependencies
+        if: steps.restore_maven_cache.outputs.cache-hit != 'true'
         uses: devcontainers/ci@v0.3
         with:
           push: never
@@ -86,6 +87,7 @@ jobs:
           runCmd: ./mvnw dependency:go-offline
 
       - name: Save Maven cache volume
+        if: steps.restore_maven_cache.outputs.cache-hit != 'true'
         uses: BYK/docker-volume-cache-action/save@0efa5cf5178c9906cb46ed8d1a357df8fd6b1a06 # v1
         with:
           key: ${{ steps.restore_maven_cache.outputs.cache-primary-key }}

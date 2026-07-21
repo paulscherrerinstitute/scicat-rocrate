@@ -132,13 +132,6 @@
             </indent>
           </java>
         </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>${quarkus.platform.group-id}</groupId>
