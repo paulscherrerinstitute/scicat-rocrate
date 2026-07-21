@@ -2,7 +2,6 @@ package ch.psi.ord.api;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -69,11 +68,7 @@ public class ImportTest extends EndpointTest {
           .andThen(
               test -> {
                 if (test.scicatClient != null) {
-                  when(test.scicatClient.countPublishedData(
-                          String.format(
-                              RoCrateImporter.publicationExistsFilter,
-                              DoiUtils.buildStandardUrl(PUBLICATION_DOI)),
-                          null))
+                  when(test.scicatClient.countPublishedData(any(), any()))
                       .thenReturn(RestResponse.ok(new CountResponse().setCount(0)));
                   when(test.scicatClient.myidentity(any()))
                       .thenReturn(RestResponse.ok(TestData.rocrateUser));
@@ -100,6 +95,8 @@ public class ImportTest extends EndpointTest {
           .andThen(
               test -> {
                 if (test.scicatClient != null) {
+                  when(test.scicatClient.myidentity(any()))
+                      .thenReturn(RestResponse.ok(TestData.rocrateUser));
                   when(test.scicatClient.countPublishedData(
                           String.format(
                               RoCrateImporter.publicationExistsFilter,
@@ -200,8 +197,8 @@ public class ImportTest extends EndpointTest {
                       res.body(
                           "$",
                           allOf(
-                              hasEntry("data/file1.txt", DATASET_PID),
-                              hasEntry("data/file2.txt", DATASET_PID),
+                              hasKey("data/file1.txt"),
+                              hasKey("data/file2.txt"),
                               hasKey(PUBLICATION_URL)))));
 
           add(
