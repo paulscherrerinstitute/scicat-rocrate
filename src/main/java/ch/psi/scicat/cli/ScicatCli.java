@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -52,7 +53,8 @@ public class ScicatCli {
    * @return The PID of the created dataset.
    * @throws DatasetCreationException if the process fails or PID is not found.
    */
-  public String ingestDataset(String scicatToken, CreateDatasetDto dto, List<String> fileList) {
+  public String ingestDataset(
+      String scicatToken, CreateDatasetDto dto, Collection<String> fileList) {
     Path metadataPath = null;
     Path fileListPath = null;
 

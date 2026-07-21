@@ -56,24 +56,6 @@ public class RoCrateImporterTest {
     }
 
     @Test
-    @DisplayName("One Publication - invalid identifier")
-    public void test03() {
-      m.createResource(SchemaDO.Collection).addProperty(SchemaDO.identifier, invalidDoi);
-
-      importer.loadModel(m);
-      Assertions.assertEquals(0, importer.listPublications().size());
-    }
-
-    @Test
-    @DisplayName("Schema.org non-literal identifier")
-    public void test04() {
-      m.createResource(SchemaDO.Collection).addProperty(SchemaDO.identifier, m.createResource());
-
-      importer.loadModel(m);
-      Assertions.assertEquals(0, importer.listPublications().size());
-    }
-
-    @Test
     @DisplayName("Equivalent property")
     public void test05() {
       Property identifierEquivalent = m.createProperty("http://example.org/id");
@@ -82,17 +64,6 @@ public class RoCrateImporterTest {
 
       importer.loadModel(m);
       Assertions.assertEquals(1, importer.listPublications().size());
-    }
-
-    @Test
-    @DisplayName("Equivalent property - invalid identifier")
-    public void test06() {
-      Property identifierEquivalent = m.createProperty("http://example.org/id");
-      m.add(identifierEquivalent, OWL.equivalentProperty, SchemaDO.identifier);
-      m.createResource(SchemaDO.Collection).addProperty(identifierEquivalent, invalidDoi);
-
-      importer.loadModel(m);
-      Assertions.assertEquals(0, importer.listPublications().size());
     }
 
     @Test

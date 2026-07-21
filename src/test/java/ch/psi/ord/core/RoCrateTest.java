@@ -1,5 +1,6 @@
 package ch.psi.ord.core;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -31,6 +32,23 @@ public class RoCrateTest {
           RoCrate.fromZip(new ByteArrayInputStream(EndpointTest.zipResource("empty.json")))) {
         assertTrue(crate.hasAttachedData());
       }
+    }
+  }
+
+  @Test
+  @DisplayName("Percent encoded @id is not skipped by titanium json-ld")
+  public void test00() throws Exception {
+    try (RoCrate crate =
+        RoCrate.fromMetadata(
+            new ByteArrayInputStream(
+                """
+                  {
+                     "@id": "percent%20encoded%filename",
+                     "@type": "http://schema.org/Dataset"
+                  }
+                """
+                    .getBytes()))) {
+      assertEquals(1, crate.getModel().listSubjects().toList().size());
     }
   }
 }

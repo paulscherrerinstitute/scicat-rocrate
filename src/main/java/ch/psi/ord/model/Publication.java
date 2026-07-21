@@ -7,6 +7,7 @@ import ch.psi.ord.model.Publication.Parts.PartsDeserializer;
 import ch.psi.rdf.annotations.RdfClass;
 import ch.psi.rdf.annotations.RdfDeserialize;
 import ch.psi.rdf.annotations.RdfProperty;
+import ch.psi.rdf.annotations.RdfResourceIdentifier;
 import ch.psi.rdf.deser.RdfDeserializationContext;
 import ch.psi.rdf.deser.RdfDeserializationException;
 import ch.psi.rdf.deser.RdfDeserializer;
@@ -29,7 +30,9 @@ import org.apache.jena.vocabulary.SchemaDO;
 @Setter
 @RdfClass(typesUri = SchemaDO.NS + "Collection")
 public class Publication {
-  @RdfProperty(uri = SchemaDO.NS + "identifier", minCardinality = 1, maxCardinality = 1)
+  @RdfResourceIdentifier String resourceIdentifier;
+
+  @RdfProperty(uri = SchemaDO.NS + "identifier", maxCardinality = 1)
   private String identifier;
 
   @RdfProperty(uri = SchemaDO.NS + "creator", minCardinality = 1)
@@ -44,7 +47,7 @@ public class Publication {
   @RdfProperty(uri = SchemaDO.NS + "dateCreated", minCardinality = 0)
   private String dateCreated;
 
-  @RdfProperty(uri = SchemaDO.NS + "datePublished", minCardinality = 1)
+  @RdfProperty(uri = SchemaDO.NS + "datePublished")
   private String datePublished;
 
   @RdfProperty(uri = SchemaDO.NS + "dateModified", minCardinality = 0)

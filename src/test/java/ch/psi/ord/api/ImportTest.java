@@ -1,6 +1,8 @@
 package ch.psi.ord.api;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -15,8 +17,10 @@ import ch.psi.scicat.model.v3.Dataset;
 import ch.psi.scicat.model.v3.PublishedData;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.ValidatableResponse;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import lombok.Data;
 import org.jboss.resteasy.reactive.RestResponse;
@@ -48,6 +52,10 @@ public class ImportTest extends EndpointTest {
 
   private static final String PUBLICATION_DOI = "10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5";
 
+  private static final String PUBLICATION_URL = DoiUtils.buildStandardUrl(PUBLICATION_DOI);
+
+  private static final String DATASET_PID = "dataset-pid";
+
   private static Consumer<ImportTest> checkTokenValidity(boolean isValid) {
     return test -> {
       if (test.scicatClient != null) {
@@ -78,6 +86,14 @@ public class ImportTest extends EndpointTest {
                       .thenReturn(RestResponse.ok());
                 }
               });
+
+  private static final Consumer<ImportTest> MOCK_NEW_PUBLICATION_WITH_FILES =
+      MOCK_NEW_PUBLICATION.andThen(
+          test -> {
+            if (test.scicatCli != null) {
+              when(test.scicatCli.ingestDataset(any(), any(), any())).thenReturn(DATASET_PID);
+            }
+          });
 
   private static final Consumer<ImportTest> MOCK_EXISTING_PUBLICATION =
       checkTokenValidity(true)
@@ -166,7 +182,27 @@ public class ImportTest extends EndpointTest {
                   getResource("one-publication.json"),
                   201,
                   MOCK_NEW_PUBLICATION,
-                  res -> res.body("$", hasKey(PUBLICATION_DOI))));
+                  res -> res.body("$", hasKey(PUBLICATION_URL))));
+
+          add(
+              createTestCase(
+                  "Publication with attached files",
+                  ExtraMediaType.APPLICATION_ZIP,
+                  true,
+                  zipResource(
+                      "publication-with-files.json",
+                      Map.of(
+                          "data/file1.txt", BigInteger.valueOf(16),
+                          "data/file2.txt", BigInteger.valueOf(32))),
+                  201,
+                  MOCK_NEW_PUBLICATION_WITH_FILES,
+                  res ->
+                      res.body(
+                          "$",
+                          allOf(
+                              hasEntry("data/file1.txt", DATASET_PID),
+                              hasEntry("data/file2.txt", DATASET_PID),
+                              hasKey(PUBLICATION_URL)))));
 
           add(
               createTestCase(
