@@ -113,7 +113,6 @@ public class RoCrateImporter {
     }
 
     RestResponse<PublishedData> created = scicatClient.createPublishedData(scicatToken, dto);
-    scicatClient.registerPublishedData(created.getEntity().getDoi(), scicatToken);
     importMap.put(publication.getIdentifier(), created.getEntity().getDoi());
   }
 

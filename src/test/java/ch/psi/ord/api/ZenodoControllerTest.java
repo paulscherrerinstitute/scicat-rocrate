@@ -5,6 +5,8 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,7 +38,7 @@ public class ZenodoControllerTest extends EndpointTest {
         .when()
         .accept(ExtraMediaType.APPLICATION_JSONLD)
         .pathParam("doi", TestData.psiPub1.getDoi())
-        .get("/zenodo/{doi}/export")
+        .get("/api/v1/zenodo/{doi}/export")
         .then()
         .statusCode(200)
         .body("@type", equalTo(SchemaDO.Dataset.getLocalName()))
@@ -61,13 +63,18 @@ public class ZenodoControllerTest extends EndpointTest {
         .body(
             SchemaDO.creator.getLocalName() + "." + SchemaDO.name.getLocalName(),
             containsInAnyOrder(TestData.psiPub1.getCreator().toArray()))
-        .body(SchemaDO.distribution.getLocalName(), hasSize(TestData.psiPub1.getPidArray().size()))
+        .body(
+            SchemaDO.distribution.getLocalName(),
+            hasSize(TestData.psiPub1.getPidArray().size() + 1))
         .body(
             SchemaDO.distribution.getLocalName() + ".@type",
             everyItem(equalTo(SchemaDO.DataDownload.getLocalName())))
         .body(
-            SchemaDO.distribution.getLocalName() + "." + SchemaDO.expires.getLocalName(),
-            everyItem(not(isDateExpired())));
+            SchemaDO.distribution.getLocalName(),
+            everyItem(hasEntry(equalTo(SchemaDO.expires.getLocalName()), not(isDateExpired()))))
+        .body(
+            SchemaDO.distribution.getLocalName() + "." + SchemaDO.name.getLocalName(),
+            hasItem("S3 URI"));
   }
 
   @Test
@@ -86,7 +93,7 @@ public class ZenodoControllerTest extends EndpointTest {
         .when()
         .accept(ExtraMediaType.APPLICATION_JSONLD)
         .pathParam("doi", TestData.hzdrPub1.getDoi())
-        .get("/zenodo/{doi}/export")
+        .get("/api/v1/zenodo/{doi}/export")
         .then()
         .statusCode(200)
         .body("@type", equalTo(SchemaDO.Dataset.getLocalName()))
@@ -130,7 +137,7 @@ public class ZenodoControllerTest extends EndpointTest {
         .when()
         .accept(ExtraMediaType.APPLICATION_JSONLD)
         .pathParam("doi", "10.9999/non-existing")
-        .get("/zenodo/{doi}/export")
+        .get("/api/v1/zenodo/{doi}/export")
         .then()
         .statusCode(404);
   }
