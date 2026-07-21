@@ -208,8 +208,6 @@ public class ScicatModelMapper {
             m -> {
               m.using(personListToOwnerString)
                   .map(Publication::getCreator, CreateDatasetDto::setPrincipalInvestigator);
-              // FIXME
-              m.map(src -> "rocrate", CreateDatasetDto::setOwnerGroup);
               m.using(personListToOwnerString)
                   .map(Publication::getCreator, CreateDatasetDto::setOwner);
               m.map(Publication::getTitle, CreateDatasetDto::setDatasetName);
