@@ -18,4 +18,7 @@ public class Person {
 
   @RdfProperty(uri = SchemaDO.NS + "familyName")
   public String familyName;
+
+  @RdfProperty(uri = SchemaDO.NS + "email")
+  public String email;
 }
