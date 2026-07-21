@@ -23,13 +23,9 @@ sequenceDiagram
 
     loop For each datastIds in job payload
         arema->>arema: Check that user submitting the job has file permissions (or impersonate user)
-        arema->>arema: inspect files and create origdatablocks
-        arema->>scicat: POST origdatablocks
-    %%     arema->>scicat-cli: Trigger ingest with filelist and metadata.json
-    %%     scicat-cli->>scicat-cli: Inspect files in NFS and compute file size
-    %%     scicat-cli->>scicat: POST dataset and origdatablocks
-    %%     scicat-->>scicat-cli: Return datasetID
-    %%     scicat-cli-->>arema: Return datasetID
+        arema->>scicat-cli: Trigger scicat-cli with filelist and metadata.json
+        scicat-cli->>scicat-cli: Inspect files in NFS and compute file size
+        scicat-cli->>scicat: POST origdatablocks
     end
 
     arema->>arema: Move data to tape
