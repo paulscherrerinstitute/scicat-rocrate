@@ -1,9 +1,10 @@
 package ch.psi.rdf.ser;
 
-import ch.psi.rdf.RdfUtils;
+import static ch.psi.rdf.RdfUtils.createInstance;
+
 import ch.psi.rdf.annotations.RdfClass;
 import ch.psi.rdf.annotations.RdfProperty;
-import ch.psi.rdf.annotations.RdfResourceUri;
+import ch.psi.rdf.annotations.RdfResourceIdentifier;
 import ch.psi.rdf.annotations.RdfSerialize;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -48,7 +49,7 @@ public class ObjectSerializer implements RdfSerializer<Object> {
         if (field.isAnnotationPresent(RdfSerialize.class)) {
           serializer =
               (RdfSerializer<Object>)
-                  RdfUtils.createInstance(field.getAnnotation(RdfSerialize.class).using());
+                  createInstance(field.getAnnotation(RdfSerialize.class).using());
         } else {
           serializer = (RdfSerializer<Object>) context.getSerializer(fieldValue.getClass());
         }
@@ -88,7 +89,7 @@ public class ObjectSerializer implements RdfSerializer<Object> {
         Arrays.stream(obj.getClass().getDeclaredMethods())
             .filter(
                 m ->
-                    m.isAnnotationPresent(RdfResourceUri.class)
+                    m.isAnnotationPresent(RdfResourceIdentifier.class)
                         && m.getParameterCount() == 0
                         && m.getReturnType() == String.class)
             .toList();

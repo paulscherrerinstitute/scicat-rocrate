@@ -2,7 +2,7 @@ package ch.psi.ord.model;
 
 import ch.psi.rdf.annotations.RdfClass;
 import ch.psi.rdf.annotations.RdfProperty;
-import ch.psi.rdf.annotations.RdfResourceUri;
+import ch.psi.rdf.annotations.RdfResourceIdentifier;
 import java.time.Instant;
 import java.util.List;
 import lombok.Data;
@@ -14,7 +14,7 @@ public class ZenodoDataset {
   @RdfProperty(uri = SchemaDO.NS + "identifier", minCardinality = 1)
   public String identifier;
 
-  @RdfResourceUri()
+  @RdfResourceIdentifier()
   public String getIdentifier() {
     return this.identifier;
   }

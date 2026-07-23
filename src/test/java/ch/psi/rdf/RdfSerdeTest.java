@@ -12,6 +12,7 @@ import ch.psi.rdf.TestClasses.CustomClassLevelSer;
 import ch.psi.rdf.TestClasses.CustomFieldLevelDeser;
 import ch.psi.rdf.TestClasses.CustomFieldLevelSer;
 import ch.psi.rdf.TestClasses.PrimitiveTypes;
+import ch.psi.rdf.TestClasses.ResourceIdentifier;
 import ch.psi.rdf.deser.DeserializationReport;
 import ch.psi.rdf.deser.RdfDeserializationException;
 import ch.psi.rdf.ser.RdfSerializationException;
@@ -19,6 +20,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.LongAdder;
+import org.apache.jena.rdf.model.AnonId;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
@@ -230,9 +232,39 @@ public class RdfSerdeTest {
         getReport(
             model
                 .createResource()
-                .addProperty(RDF.type, "https://testclasses.org/CustomDeserializer")
+                .addProperty(
+                    RDF.type, model.createResource("https://testclasses.org/CustomDeserializer"))
                 .addProperty(SchemaDO.name, "JOHN"),
             CustomFieldLevelDeser.class);
     assertAll(() -> assertTrue(report.isValid()), () -> assertEquals("john", report.get().name));
+  }
+
+  @Test
+  @DisplayName("Deserialize resource identifier to field")
+  public void test12() {
+    AnonId anonId = new AnonId();
+    String uri = "http://example.com/my-resource";
+
+    DeserializationReport<ResourceIdentifier> report1 =
+        getReport(
+            model
+                .createResource(anonId)
+                .addProperty(
+                    RDF.type, model.createResource("https://testclasses.org/ResourceIdentifier")),
+            ResourceIdentifier.class);
+    DeserializationReport<ResourceIdentifier> report2 =
+        getReport(
+            model
+                .createResource(uri)
+                .addProperty(
+                    RDF.type, model.createResource("https://testclasses.org/ResourceIdentifier")),
+            ResourceIdentifier.class);
+
+    assertAll(
+        "",
+        () -> assertTrue(report1.isValid()),
+        () -> assertEquals(String.format("_:%s", anonId.toString()), report1.get().id),
+        () -> assertTrue(report2.isValid()),
+        () -> assertEquals(uri, report2.get().id));
   }
 }
