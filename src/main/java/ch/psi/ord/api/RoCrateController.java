@@ -164,7 +164,8 @@ public class RoCrateController {
   @Path("/validate")
   @Consumes(ExtraMediaType.APPLICATION_JSONLD)
   @Produces(MediaType.APPLICATION_JSON)
-  public Response validateCrate(InputStream body) throws RdfDeserializationException {
+  public Response validateCrate(InputStream body)
+      throws RdfDeserializationException, RiotException, IOException {
     try (RoCrate crate = RoCrate.fromMetadata(body)) {
       importer.loadCrate(crate);
       return Response.ok(importer.validate()).build();
@@ -193,7 +194,7 @@ public class RoCrateController {
   @Produces(MediaType.APPLICATION_JSON)
   @ScicatAuth
   public Response importCrate(@HeaderParam(value = "api-key") String scicatToken, InputStream body)
-      throws RdfDeserializationException {
+      throws RdfDeserializationException, RiotException, IOException {
     try (RoCrate crate = RoCrate.fromMetadata(body)) {
       importer.loadCrate(crate);
       ValidationReport report = importer.validate();

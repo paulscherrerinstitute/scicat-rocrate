@@ -1,6 +1,8 @@
 package ch.psi.ord.api;
 
+import ch.psi.ord.core.RoCrate;
 import ch.psi.s3_broker.client.S3BrokerService;
+import ch.psi.scicat.cli.ScicatCli;
 import ch.psi.scicat.client.ScicatClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,6 +20,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 public abstract class EndpointTest {
   @InjectMock protected ScicatClient scicatClient;
   @InjectMock @RestClient protected S3BrokerService s3BrokerService;
+  @InjectMock protected ScicatCli scicatCli;
 
   protected String accessToken = "";
 
@@ -53,7 +56,7 @@ public abstract class EndpointTest {
   public byte[] zipResource(String name) throws IOException {
     ByteArrayOutputStream output = new ByteArrayOutputStream();
     try (ZipOutputStream zipStream = new ZipOutputStream(output)) {
-      ZipEntry entry = new ZipEntry("ro-crate-metadata.json");
+      ZipEntry entry = new ZipEntry(RoCrate.METADATA_DESCRIPTOR);
       zipStream.putNextEntry(entry);
       byte[] content = getClass().getClassLoader().getResourceAsStream(name).readAllBytes();
       zipStream.write(content, 0, content.length);
