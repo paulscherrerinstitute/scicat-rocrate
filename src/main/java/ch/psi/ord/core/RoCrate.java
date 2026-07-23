@@ -27,6 +27,7 @@ import org.apache.jena.sparql.util.Context;
 
 @Slf4j
 public class RoCrate implements AutoCloseable {
+  public static final String METADATA_DESCRIPTOR = "ro-crate-metadata.json";
   public static final Path DEFAULT_BASE = Path.of("/");
   private static final String FILE_KEY = "file";
   private static final String DIR_KEY = "directory";
@@ -38,9 +39,12 @@ public class RoCrate implements AutoCloseable {
 
   private RoCrate() {}
 
-  public static RoCrate fromMetadata(InputStream metadataDescriptor) throws RiotException {
+  public static RoCrate fromMetadata(InputStream metadataDescriptor)
+      throws RiotException, IOException {
     RoCrate crate = new RoCrate();
-    crate.parseMetadataDescriptor(metadataDescriptor);
+    crate.createTempDirectory();
+    Files.write(crate.base.resolve(METADATA_DESCRIPTOR), metadataDescriptor.readAllBytes());
+    crate.readMetadataDescriptor();
     return crate;
   }
 
@@ -153,9 +157,10 @@ public class RoCrate implements AutoCloseable {
       throw new UnsupportedOperationException();
     }
 
-    Path metadataDescriptor = base.resolve("ro-crate-metadata.json");
+    Path metadataDescriptor = base.resolve(METADATA_DESCRIPTOR);
     if (!metadataDescriptor.toFile().exists()) {
-      throw new FileNotFoundException("Archive doesn't contain a \"ro-crate-metadata.json\" file");
+      throw new FileNotFoundException(
+          String.format("Archive doesn't contain a \"%s\" file", METADATA_DESCRIPTOR));
     }
 
     try (InputStream content = new FileInputStream(metadataDescriptor.toFile())) {
