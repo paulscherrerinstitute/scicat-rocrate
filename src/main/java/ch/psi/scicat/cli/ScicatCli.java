@@ -20,8 +20,9 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @ApplicationScoped
 public class ScicatCli {
   @Inject private ObjectMapper mapper;
-  private String cliPath;
-  private String scicatUrl;
+  private final String cliPath;
+  private final String scicatUrl;
+  private final Pattern pidPattern;
 
   @Inject
   public ScicatCli(
@@ -30,7 +31,9 @@ public class ScicatCli {
       @ConfigProperty(
               name = "quarkus.rest-client.scicat.url",
               defaultValue = "http://backend.localhost")
-          String scicatBaseUrl) {
+          String scicatBaseUrl,
+      @ConfigProperty(name = "scicat.pid-prefix", defaultValue = "PID.SAMPLE.PREFIX")
+          String pidPrefix) {
     Path p = Path.of(cliPath);
     if (Files.isDirectory(p) || !Files.isExecutable(p)) {
       throw new IllegalStateException(
@@ -39,9 +42,9 @@ public class ScicatCli {
 
     this.cliPath = cliPath;
     this.scicatUrl = String.format("%s/api/v3", scicatBaseUrl);
+    this.pidPattern =
+        Pattern.compile(String.format("^%s/[a-zA-Z0-9.-]+$", Pattern.quote(pidPrefix)));
   }
-
-  private static final Pattern PID_PATTERN = Pattern.compile("^[a-zA-Z0-9.-]+/[a-zA-Z0-9.-]+$");
 
   /**
    * Ingests a dataset using the scicat-cli.
@@ -97,7 +100,7 @@ public class ScicatCli {
 
       return allLines.stream()
           .map(String::trim)
-          .filter(line -> PID_PATTERN.matcher(line).matches())
+          .filter(line -> pidPattern.matcher(line).matches())
           .reduce((first, second) -> second)
           .orElseThrow(
               () ->
