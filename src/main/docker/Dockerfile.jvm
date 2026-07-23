@@ -94,8 +94,8 @@ COPY --chown=185 target/quarkus-app/quarkus/ /deployments/quarkus/
 USER root
 RUN microdnf install -y gzip \
     && microdnf clean all \
-   && curl -L -s "https://github.com/paulscherrerinstitute/scicat-cli/releases/download/v${SCICAT_CLI_VERSION}/scicat-cli_${SCICAT_CLI_VERSION}_Linux_x86_64.tar.gz" \
-   | tar -xzf - --strip-components=1 -C /usr/local/bin scicat-cli_${SCICAT_CLI_VERSION}_Linux_x86_64/scicat-cli
+    && curl -L -s "https://github.com/paulscherrerinstitute/scicat-cli/releases/download/v${SCICAT_CLI_VERSION}/scicat-cli_${SCICAT_CLI_VERSION}_Linux_x86_64.tar.gz" \
+    | tar -xzf - --strip-components=1 -C /usr/local/bin scicat-cli_${SCICAT_CLI_VERSION}_Linux_x86_64/scicat-cli
 
 EXPOSE 8080
 USER 185

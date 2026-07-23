@@ -1,6 +1,3 @@
-scicat:
-  url: &scicat-url http://backend.localhost
-
 quarkus:
   test:
     container:
@@ -19,7 +16,7 @@ quarkus:
     logging:
       scope: request-response
     scicat:
-      url: *scicat-url
+      url: http://backend.localhost
     s3broker:
       url: http://s3-broker.localhost
   smallrye-openapi:

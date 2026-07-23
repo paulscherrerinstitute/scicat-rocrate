@@ -38,8 +38,10 @@ quarkus build -Dquarkus.container-image.push=true
 
 This service can be configured using the following environment variables:
 
-| Name                               | Description                       | Example value             |
-|------------------------------------|-----------------------------------|---------------------------|
-| `QUARKUS_REST_CLIENT_SCICAT_URL`   | Base URL of the SciCat backend    | https://dacat.psi.ch/     |
-| `QUARKUS_REST_CLIENT_S3BROKER_URL` | Base URL of the S3 Broker         | https://s3-broker.psi.ch/ |
-| `TITANIUM_JSONLD_CACHE_SIZE`       | Size of the JSON-LD context cache | 10                        |
+| Name                               | Description                                                  | Default value               |
+|------------------------------------|--------------------------------------------------------------|-----------------------------|
+| `QUARKUS_REST_CLIENT_SCICAT_URL`   | Base URL of the SciCat backend                               | http://backend.localhost    |
+| `QUARKUS_REST_CLIENT_S3BROKER_URL` | Base URL of the S3 Broker                                    | https://s3-broker.localhost |
+| `SCICAT_CLI_PATH`                  | Path of the scicat-cli executable                            | /usr/local/bin/scicat-cli   |
+| `SCICAT_PID_PREFIX`                | PID prefix of the SciCat instance (used to match cli output) | PID.SAMPLE.PREFIX           |
+| `TITANIUM_JSONLD_CACHE_SIZE`       | Size of the JSON-LD context cache                            | 10                          |
