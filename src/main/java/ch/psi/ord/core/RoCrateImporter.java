@@ -20,6 +20,7 @@ import ch.psi.scicat.model.v3.DatasetType;
 import ch.psi.scicat.model.v3.MyIdentity;
 import ch.psi.scicat.model.v3.OutputJobDto;
 import ch.psi.scicat.model.v3.PublishedData;
+import io.vertx.ext.web.handler.HttpException;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -45,6 +46,7 @@ import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ReasonerRegistry;
 import org.apache.jena.vocabulary.SchemaDO;
 import org.jboss.resteasy.reactive.RestResponse;
+import org.jboss.resteasy.reactive.RestResponse.StatusCode;
 import org.modelmapper.ModelMapper;
 
 @RequestScoped
@@ -60,6 +62,7 @@ public class RoCrateImporter {
   @Inject private ScicatClient scicatClient;
   @Inject private ScicatCli scicatCli;
   private MyIdentity userIdentity;
+  private String ownerGroup;
 
   public static String publicationExistsFilter =
       """
@@ -78,9 +81,11 @@ public class RoCrateImporter {
     }
   }
 
-  public Map<String, String> importCrate(ValidationReport report, String scicatToken) {
+  public Map<String, String> importCrate(
+      ValidationReport report, String scicatToken, String ownerGroup) {
     Map<String, String> importMap = new HashMap<>();
     userIdentity = scicatClient.myidentity(scicatToken).getEntity();
+    this.ownerGroup = resolveOwnerGroup(ownerGroup);
     for (var entity : report.getEntities()) {
       if (entity.object() instanceof Publication publication) {
         importPublication(importMap, publication, scicatToken);
@@ -91,6 +96,19 @@ public class RoCrateImporter {
     submitArchiveJob(scicatToken);
 
     return importMap;
+  }
+
+  private String resolveOwnerGroup(String requestedOwnerGroup) {
+    if (requestedOwnerGroup != null && !requestedOwnerGroup.isBlank()) {
+      return requestedOwnerGroup;
+    }
+    List<String> accessGroups = userIdentity.getProfile().getAccessGroups();
+    if (!accessGroups.isEmpty()) {
+      return accessGroups.getFirst();
+    }
+    throw new HttpException(
+        StatusCode.BAD_REQUEST,
+        "User needs to be part of at least one group to create resources in SciCat");
   }
 
   private void submitArchiveJob(String scicatToken) {
@@ -149,9 +167,7 @@ public class RoCrateImporter {
 
     if (!publication.getHasPart().getFiles().isEmpty()) {
       CreateDatasetDto datasetDto = modelMapper.map(publication, CreateDatasetDto.class);
-      datasetDto
-          .setSourceFolder(crate.getBase().toString())
-          .setOwnerGroup(userIdentity.getProfile().getAccessGroups().getFirst());
+      datasetDto.setSourceFolder(crate.getBase().toString()).setOwnerGroup(ownerGroup);
       String datasetPid =
           scicatCli.ingestDataset(
               scicatToken, datasetDto, publication.getHasPart().getFiles().values());
@@ -184,14 +200,8 @@ public class RoCrateImporter {
         .setCreationLocation("")
         .setCreationTime(Instant.now())
         .setType(DatasetType.RAW)
-        .setPublished(false);
-    if (userIdentity.getProfile().getAccessGroups().size() > 0) {
-      datasetDto.setOwnerGroup(userIdentity.getProfile().getAccessGroups().getFirst());
-    } else {
-      log.error(
-          "User is part of no groups, will not be able to update the PublishedData status to"
-              + " 'registered'");
-    }
+        .setPublished(false)
+        .setOwnerGroup(ownerGroup);
 
     return datasetDto;
   }
