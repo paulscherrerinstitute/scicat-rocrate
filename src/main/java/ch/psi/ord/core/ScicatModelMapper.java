@@ -5,15 +5,21 @@ import static org.modelmapper.Conditions.isNotNull;
 import ch.psi.ord.model.Person;
 import ch.psi.ord.model.Publication;
 import ch.psi.ord.model.ZenodoDataset;
+import ch.psi.scicat.model.v3.CreateDatasetDto;
 import ch.psi.scicat.model.v3.CreatePublishedDataDto;
+import ch.psi.scicat.model.v3.DatasetType;
 import ch.psi.scicat.model.v3.PublishedData;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
+import java.net.URI;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
@@ -29,6 +35,26 @@ public class ScicatModelMapper {
           relatedPublications.add(
               String.format("%s (IsIdenticalTo)", DoiUtils.buildStandardUrl(context.getSource())));
           return relatedPublications;
+        }
+      };
+
+  Converter<List<Person>, String> personListToOwnerString =
+      new Converter<>() {
+        @Override
+        public String convert(MappingContext<List<Person>, String> context) {
+          return context.getSource().stream()
+              .map(p -> String.format("%s %s", p.getGivenName(), p.getFamilyName()))
+              .collect(Collectors.joining("; "));
+        }
+      };
+
+  Converter<List<Person>, String> personListToOwnerEmails =
+      new Converter<>() {
+        @Override
+        public String convert(MappingContext<List<Person>, String> context) {
+          return context.getSource().stream()
+              .map(Person::getEmail)
+              .collect(Collectors.joining("; "));
         }
       };
 
@@ -82,9 +108,52 @@ public class ScicatModelMapper {
         }
       };
 
+  Converter<List<String>, List<String>> keywordsConverter =
+      new Converter<List<String>, List<String>>() {
+
+        @Override
+        public List<String> convert(MappingContext<List<String>, List<String>> context) {
+          List<String> source = context.getSource();
+
+          if (source == null || source.isEmpty()) {
+            return new ArrayList<>();
+          }
+
+          return source.stream()
+              .filter(Objects::nonNull)
+              .map(entry -> entry.split(","))
+              .flatMap(Arrays::stream)
+              .map(String::trim)
+              .filter(str -> !str.isEmpty())
+              .collect(Collectors.toList());
+        }
+      };
+
+  Converter<String, String> uriPathExtractor =
+      context -> {
+        String sourceId = context.getSource();
+        try {
+          URI uri = new URI(sourceId);
+          return uri.getPath();
+        } catch (Exception e) {
+          return sourceId;
+        }
+      };
+  Converter<String, String> uriHostExtractor =
+      context -> {
+        String sourceId = context.getSource();
+        try {
+          URI uri = new URI(sourceId);
+          return uri.getHost();
+        } catch (Exception e) {
+          return sourceId;
+        }
+      };
+
   @Produces
   public ModelMapper createPublicationModelMapper() {
     ModelMapper mapper = new ModelMapper();
+    mapper.getConfiguration().setImplicitMappingEnabled(false);
 
     mapper
         .typeMap(Publication.class, CreatePublishedDataDto.class)
@@ -131,6 +200,23 @@ public class ScicatModelMapper {
               m.when(isNotNull())
                   .using(stringListToPerson)
                   .map(PublishedData::getCreator, ZenodoDataset::setCreators);
+            });
+
+    mapper
+        .typeMap(Publication.class, CreateDatasetDto.class)
+        .addMappings(
+            m -> {
+              m.using(personListToOwnerString)
+                  .map(Publication::getCreator, CreateDatasetDto::setPrincipalInvestigator);
+              m.using(personListToOwnerString)
+                  .map(Publication::getCreator, CreateDatasetDto::setOwner);
+              m.map(Publication::getTitle, CreateDatasetDto::setDatasetName);
+              m.map(src -> "rocrate", CreateDatasetDto::setCreationLocation);
+              m.map(src -> DatasetType.RAW, CreateDatasetDto::setType);
+              m.using(personListToOwnerEmails)
+                  .map(Publication::getCreator, CreateDatasetDto::setContactEmail);
+              m.map(src -> Instant.now(), CreateDatasetDto::setCreationTime);
+              m.map(Publication::getDescription, CreateDatasetDto::setDescription);
             });
 
     return mapper;
