@@ -11,6 +11,8 @@ quarkus:
   log:
     level: INFO
   http:
+    limits:
+      max-body-size: 10G
     test-port: 9999
   rest-client:
     logging:

@@ -1,6 +1,9 @@
 package ch.psi.scicat.cli;
 
+import ch.psi.scicat.client.ScicatClient;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
+import ch.psi.scicat.model.v3.DatasetLifeCycle;
+import ch.psi.scicat.model.v3.UpdateDatasetDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -24,6 +27,8 @@ public class ScicatCli {
   private final String cliPath;
   private final String scicatUrl;
   private final Pattern pidPattern;
+  private final String archiveDirectory;
+  @Inject private ScicatClient scicatClient;
 
   @Inject
   public ScicatCli(
@@ -34,7 +39,9 @@ public class ScicatCli {
               defaultValue = "http://backend.localhost")
           String scicatBaseUrl,
       @ConfigProperty(name = "scicat.pid-prefix", defaultValue = "PID.SAMPLE.PREFIX")
-          String pidPrefix) {
+          String pidPrefix,
+      @ConfigProperty(name = "rocrate.archive-directory", defaultValue = "/rocrate/archive")
+          String archiveDirectory) {
     Path p = Path.of(cliPath);
     if (Files.isDirectory(p) || !Files.isExecutable(p)) {
       throw new IllegalStateException(
@@ -45,6 +52,7 @@ public class ScicatCli {
     this.scicatUrl = String.format("%s/api/v3", scicatBaseUrl);
     this.pidPattern =
         Pattern.compile(String.format("^%s/[a-zA-Z0-9.-]+$", Pattern.quote(pidPrefix)));
+    this.archiveDirectory = archiveDirectory;
   }
 
   /**
@@ -100,15 +108,32 @@ public class ScicatCli {
         throw new ScicatCliException("scicat-cli execution failed with exit code: " + exitCode);
       }
 
-      return allLines.stream()
-          .map(String::trim)
-          .filter(line -> pidPattern.matcher(line).matches())
-          .reduce((first, second) -> second)
-          .orElseThrow(
-              () ->
-                  new ScicatCliException(
-                      "CLI reported success, but no valid PID matching pattern was found in"
-                          + " output."));
+      String pid =
+          allLines.stream()
+              .map(String::trim)
+              .filter(line -> pidPattern.matcher(line).matches())
+              .reduce((first, second) -> second)
+              .orElseThrow(
+                  () ->
+                      new ScicatCliException(
+                          "CLI reported success, but no valid PID matching pattern was found in"
+                              + " output."));
+
+      symlinkData(pid, dto.getSourceFolder(), fileList);
+
+      scicatClient.updateDataset(
+          scicatToken,
+          pid,
+          new UpdateDatasetDto()
+              .setSourceFolder("/")
+              .setDatasetlifecycle(
+                  new DatasetLifeCycle()
+                      .setArchivable(true)
+                      .setOnCentralDisk(false)
+                      .setRetrievable(false)
+                      .setArchiveStatusMessage("datasetCreated")));
+
+      return pid;
 
     } catch (IOException e) {
       throw new ScicatCliException(
@@ -124,6 +149,25 @@ public class ScicatCli {
 
   public String ingestDataset(String scicatToken, CreateDatasetDto dto) {
     return ingestDataset(scicatToken, dto, Collections.emptyList());
+  }
+
+  private void symlinkData(String pid, String sourceFolder, Collection<String> fileList)
+      throws IOException {
+    Path archiveRoot = Path.of(archiveDirectory, pid);
+    log.warn("archiveRoot: {}", archiveRoot.toString());
+    if (fileList.isEmpty()) {
+      Files.createDirectories(archiveRoot.getParent());
+      Files.createSymbolicLink(archiveRoot, Path.of(sourceFolder));
+    } else {
+      Files.createDirectories(archiveRoot);
+      for (String file : fileList) {
+        Path relativePath = Path.of(sourceFolder).relativize(Path.of(file));
+        Path linkPath = archiveRoot.resolve(relativePath);
+        log.warn("linkPath: {}", linkPath.toString());
+        Files.createDirectories(linkPath.getParent());
+        Files.createSymbolicLink(linkPath, Path.of(file));
+      }
+    }
   }
 
   private void cleanupFile(Path path) {
