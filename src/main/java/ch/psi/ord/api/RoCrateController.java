@@ -171,7 +171,10 @@ public class RoCrateController {
   @Consumes(ExtraMediaType.APPLICATION_JSONLD)
   @Produces(MediaType.APPLICATION_JSON)
   @ScicatAuth
-  public Response importCrate(@HeaderParam(value = "api-key") String scicatToken, InputStream body)
+  public Response importCrate(
+      @HeaderParam(value = "api-key") String scicatToken,
+      @HeaderParam(value = "ownerGroup") String ownerGroup,
+      InputStream body)
       throws RdfDeserializationException, RiotException, IOException {
     try (RoCrate crate = RoCrate.fromMetadata(body)) {
       importer.loadCrate(crate);
@@ -180,7 +183,7 @@ public class RoCrateController {
         return Response.status(Status.BAD_REQUEST).entity(report).build();
       }
 
-      Map<String, String> importMap = importer.importCrate(report, scicatToken);
+      Map<String, String> importMap = importer.importCrate(report, scicatToken, ownerGroup);
       return Response.status(importMap.isEmpty() ? Status.OK : Status.CREATED)
           .entity(importMap)
           .build();
@@ -193,7 +196,9 @@ public class RoCrateController {
   @Produces(MediaType.APPLICATION_JSON)
   @ScicatAuth
   public Response importZippedCrate(
-      @HeaderParam(value = "api-key") String scicatToken, InputStream body)
+      @HeaderParam(value = "api-key") String scicatToken,
+      @HeaderParam(value = "ownerGroup") String ownerGroup,
+      InputStream body)
       throws RiotException,
           FileNotFoundException,
           ZipException,
@@ -206,7 +211,7 @@ public class RoCrateController {
         return Response.status(Status.BAD_REQUEST).entity(report).build();
       }
 
-      Map<String, String> importMap = importer.importCrate(report, scicatToken);
+      Map<String, String> importMap = importer.importCrate(report, scicatToken, ownerGroup);
       return Response.status(importMap.isEmpty() ? Status.OK : Status.CREATED)
           .entity(importMap)
           .build();
