@@ -62,17 +62,27 @@ public class RoCrate implements AutoCloseable {
   public static RoCrate fromMetadata(InputStream metadataDescriptor)
       throws RiotException, IOException {
     RoCrate crate = new RoCrate();
-    crate.createTempDirectory();
-    Files.write(crate.base.resolve(METADATA_DESCRIPTOR), metadataDescriptor.readAllBytes());
-    crate.readMetadataDescriptor();
+    try {
+      crate.createTempDirectory();
+      Files.write(crate.base.resolve(METADATA_DESCRIPTOR), metadataDescriptor.readAllBytes());
+      crate.readMetadataDescriptor();
+    } catch (Throwable t) {
+      crate.close();
+      throw t;
+    }
     return crate;
   }
 
   public static RoCrate fromZip(InputStream zip) throws RiotException, ZipException, IOException {
     RoCrate crate = new RoCrate();
-    crate.extract(zip);
-    crate.readMetadataDescriptor();
-    crate.hasAttachedData = true;
+    try {
+      crate.extract(zip);
+      crate.readMetadataDescriptor();
+      crate.hasAttachedData = true;
+    } catch (Throwable t) {
+      crate.close();
+      throw t;
+    }
     return crate;
   }
 
@@ -132,6 +142,10 @@ public class RoCrate implements AutoCloseable {
 
   @Override
   public void close() {
+    if (base == null || !Files.exists(base)) {
+      return;
+    }
+
     if (scheduledForArchival) {
       log.info(
           "Crate at '{}' is scheduled for archival, skipping filesystem cleanup",
