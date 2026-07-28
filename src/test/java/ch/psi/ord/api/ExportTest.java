@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import ch.psi.ord.core.DoiUtils;
 import ch.psi.ord.core.RoCrate;
+import ch.psi.ord.model.ExportFormat;
 import ch.psi.s3_broker.model.DatasetUrls;
 import ch.psi.scicat.TestData;
 import ch.psi.scicat.model.v3.PublishedData;
@@ -43,7 +44,7 @@ public class ExportTest extends EndpointTest {
   @Data
   static class ExportTestCase {
     String testName;
-    String exportFormat;
+    ExportFormat exportFormat;
     List<String> identifiers;
     Consumer<ExportTest> mockSetup;
     Consumer<ValidatableResponse> assertions;
@@ -93,13 +94,13 @@ public class ExportTest extends EndpointTest {
     return List.of(
         new ExportTestCase()
             .setTestName(testName)
-            .setExportFormat(ExtraMediaType.APPLICATION_JSONLD)
+            .setExportFormat(ExportFormat.JSONLD)
             .setIdentifiers(identifiers)
             .setMockSetup(mockSetup)
             .setAssertions(assertions),
         new ExportTestCase()
             .setTestName(testName)
-            .setExportFormat(ExtraMediaType.APPLICATION_ZIP)
+            .setExportFormat(ExportFormat.ZIP)
             .setIdentifiers(identifiers)
             .setMockSetup(mockSetup)
             .setAssertions(assertions));
@@ -196,11 +197,12 @@ public class ExportTest extends EndpointTest {
     testCase.getAssertions().accept(response);
   }
 
-  private ValidatableResponse executeExportRequest(List<String> identifiers, String exportFormat) {
+  private ValidatableResponse executeExportRequest(
+      List<String> identifiers, ExportFormat exportFormat) {
     Response response =
         given()
             .contentType(MediaType.APPLICATION_JSON)
-            .header("export", exportFormat)
+            .header("export", exportFormat.toString())
             .body(identifiers)
             .when()
             .post("/api/v1/ro-crate/export")
@@ -209,7 +211,7 @@ public class ExportTest extends EndpointTest {
             .extract()
             .response();
 
-    if (ExtraMediaType.APPLICATION_JSONLD.equals(exportFormat)) {
+    if (exportFormat == ExportFormat.JSONLD) {
       return response.then();
     }
 
