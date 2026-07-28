@@ -97,7 +97,7 @@ public class Publication {
           throws RdfDeserializationException {
         Set<Resource> parts =
             listProperties(subject, SchemaDO.hasPart).stream()
-                .filter(node -> node.isResource())
+                .filter(node -> node.isURIResource())
                 .map(node -> node.asResource())
                 .collect(Collectors.toSet());
 

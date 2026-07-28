@@ -67,50 +67,54 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
           String.format("Failed to create an instance of %s", clazz.getName()), e);
     }
     Resource subject = node.asResource();
-    context.setCurrentSubject(subject);
-    setUriFields(subject, obj);
-    checkType(subject, rdfClassAnnotation.typesUri()).ifPresent(e -> context.addError(e));
+    context.pushCurrentSubject(subject);
+    try {
+      setUriFields(subject, obj);
+      checkType(subject, rdfClassAnnotation.typesUri()).ifPresent(e -> context.addError(e));
 
-    for (Map.Entry<Field, RdfProperty> entry : annotatedFields.entrySet()) {
-      Field field = entry.getKey();
-      RdfProperty propertyAnnotation = entry.getValue();
+      for (Map.Entry<Field, RdfProperty> entry : annotatedFields.entrySet()) {
+        Field field = entry.getKey();
+        RdfProperty propertyAnnotation = entry.getValue();
 
-      Set<RDFNode> values =
-          listProperties(subject, ResourceFactory.createProperty(propertyAnnotation.uri()));
-      checkCardinalities(subject, propertyAnnotation, values.size())
-          .ifPresent(e -> context.addError(e));
+        Set<RDFNode> values =
+            listProperties(subject, ResourceFactory.createProperty(propertyAnnotation.uri()));
+        checkCardinalities(subject, propertyAnnotation, values.size())
+            .ifPresent(e -> context.addError(e));
 
-      if (field.getType().isAssignableFrom(List.class)) {
-        Class<?> listType =
-            (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-        RdfDeserializer<?> elementDeserializer = context.getDeserializer(listType);
-        List<Object> collection = new ArrayList<>();
-        for (RDFNode value : values) {
-          collection.add(elementDeserializer.deserialize(value, context));
-        }
-        setField(field, obj, collection);
-      } else if (!values.isEmpty()) {
-        if (values.size() > 1) {
-          log.warn(
-              "Field '{}' of class '{}' is not a collection, only the first value will be assigned",
-              field.getName(),
-              clazz.getName());
-        }
-
-        RdfDeserializer<?> fieldDeserializer = context.getDeserializer(field.getType());
-        if (field.isAnnotationPresent(RdfDeserialize.class)) {
-          try {
-            fieldDeserializer = createInstance(field.getAnnotation(RdfDeserialize.class).using());
-          } catch (ReflectiveOperationException e) {
-            throw new RdfDeserializationException(
-                String.format("Unable to instantiate custom field deserializer"), e);
+        if (field.getType().isAssignableFrom(List.class)) {
+          Class<?> listType =
+              (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+          RdfDeserializer<?> elementDeserializer = context.getDeserializer(listType);
+          List<Object> collection = new ArrayList<>();
+          for (RDFNode value : values) {
+            collection.add(elementDeserializer.deserialize(value, context));
           }
+          setField(field, obj, collection);
+        } else if (!values.isEmpty()) {
+          if (values.size() > 1) {
+            log.warn(
+                "Field '{}' of class '{}' is not a collection, only the first value will be"
+                    + " assigned",
+                field.getName(),
+                clazz.getName());
+          }
+
+          RdfDeserializer<?> fieldDeserializer = context.getDeserializer(field.getType());
+          if (field.isAnnotationPresent(RdfDeserialize.class)) {
+            try {
+              fieldDeserializer = createInstance(field.getAnnotation(RdfDeserialize.class).using());
+            } catch (ReflectiveOperationException e) {
+              throw new RdfDeserializationException(
+                  String.format("Unable to instantiate custom field deserializer"), e);
+            }
+          }
+          Object value = fieldDeserializer.deserialize(values.iterator().next(), context);
+          setField(field, obj, value);
         }
-        Object value = fieldDeserializer.deserialize(values.iterator().next(), context);
-        setField(field, obj, value);
       }
+    } finally {
+      context.popCurrentSubject();
     }
-    context.resetCurrentSubject();
 
     return obj;
   }
