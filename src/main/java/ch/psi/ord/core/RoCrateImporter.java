@@ -90,20 +90,23 @@ public class RoCrateImporter {
 
   public void importPublication(
       Map<String, String> importMap, Publication publication, String scicatToken) {
-    CreatePublishedDataDto dto = modelMapper.map(publication, CreatePublishedDataDto.class);
-    CountResponse count =
-        scicatClient
-            .countPublishedData(
-                String.format(
-                    publicationExistsFilter,
-                    DoiUtils.buildStandardUrl(publication.getIdentifier())),
-                scicatToken)
-            .getEntity();
+    if (publication.getIdentifier() != null) {
+      CountResponse count =
+          scicatClient
+              .countPublishedData(
+                  String.format(
+                      publicationExistsFilter,
+                      DoiUtils.buildStandardUrl(publication.getIdentifier())),
+                  scicatToken)
+              .getEntity();
 
-    if (count.getCount() > 0) {
-      throw new WebApplicationException(
-          "This Publication has already been imported", Status.CONFLICT);
+      if (count.getCount() > 0) {
+        throw new WebApplicationException(
+            "This Publication has already been imported", Status.CONFLICT);
+      }
     }
+
+    CreatePublishedDataDto dto = modelMapper.map(publication, CreatePublishedDataDto.class);
 
     if (dto.getPidArray().isEmpty()) {
       CreateDatasetDto datasetDto = createPlaceholderDataset(dto, scicatToken);
