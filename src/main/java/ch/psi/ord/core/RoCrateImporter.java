@@ -1,6 +1,5 @@
 package ch.psi.ord.core;
 
-import static ch.psi.rdf.RdfUtils.listProperties;
 import static ch.psi.rdf.RdfUtils.listResourcesOfType;
 
 import ch.psi.ord.model.MissingDataError;
@@ -38,7 +37,6 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ReasonerRegistry;
@@ -57,6 +55,7 @@ public class RoCrateImporter {
   @Inject private ModelMapper modelMapper;
   @Inject private ScicatClient scicatClient;
   @Inject private ScicatCli scicatCli;
+  private MyIdentity userIdentity;
 
   public static String publicationExistsFilter =
       """
@@ -77,6 +76,7 @@ public class RoCrateImporter {
 
   public Map<String, String> importCrate(ValidationReport report, String scicatToken) {
     Map<String, String> importMap = new HashMap<>();
+    userIdentity = scicatClient.myidentity(scicatToken).getEntity();
     for (var entity : report.getEntities()) {
       if (entity.object() instanceof Publication publication) {
         importPublication(importMap, publication, scicatToken);
@@ -108,33 +108,57 @@ public class RoCrateImporter {
     if (dto.getPidArray().isEmpty()) {
       CreateDatasetDto datasetDto = createPlaceholderDataset(dto, scicatToken);
       String pid =
-          scicatCli.ingestDataset(scicatToken, datasetDto, List.of(RoCrate.METADATA_DESCRIPTOR));
+          scicatCli.ingestDataset(
+              scicatToken,
+              datasetDto,
+              List.of(
+                  crate
+                      .getBase()
+                      .resolve(RoCrate.METADATA_DESCRIPTOR)
+                      .toAbsolutePath()
+                      .toString()));
       importMap.put(RoCrate.METADATA_DESCRIPTOR, pid);
     }
 
+    if (!publication.getHasPart().getFiles().isEmpty()) {
+      CreateDatasetDto datasetDto = modelMapper.map(publication, CreateDatasetDto.class);
+      datasetDto
+          .setSourceFolder(crate.getBase().toString())
+          .setOwnerGroup(userIdentity.getProfile().getAccessGroups().getFirst());
+      String datasetPid =
+          scicatCli.ingestDataset(
+              scicatToken, datasetDto, publication.getHasPart().getFiles().values());
+      dto.getPidArray().add(datasetPid);
+      publication
+          .getHasPart()
+          .getFiles()
+          .keySet()
+          .forEach(id -> importMap.put(crate.toRelativeId(id), datasetPid));
+    }
+
     RestResponse<PublishedData> created = scicatClient.createPublishedData(scicatToken, dto);
-    importMap.put(publication.getIdentifier(), created.getEntity().getDoi());
+    importMap.put(
+        crate.toRelativeId(publication.getResourceIdentifier()), created.getEntity().getDoi());
   }
 
   private CreateDatasetDto createPlaceholderDataset(
       CreatePublishedDataDto publishedDatasetDto, String scicatToken) {
     CreateDatasetDto datasetDto = new CreateDatasetDto();
-    MyIdentity userDetails = scicatClient.myidentity(scicatToken).getEntity();
 
-    publishedDatasetDto.setScicatUser(userDetails.getProfile().getUsername());
+    publishedDatasetDto.setScicatUser(userIdentity.getProfile().getUsername());
 
     datasetDto
         .setDatasetName("Original RO-Crate")
         .setOwner(String.join("; ", publishedDatasetDto.getCreator()))
         .setPrincipalInvestigator(String.join("; ", publishedDatasetDto.getCreator()))
-        .setContactEmail(userDetails.getProfile().getEmail())
+        .setContactEmail(userIdentity.getProfile().getEmail())
         .setSourceFolder(crate.getBase().toString())
         .setCreationLocation("")
         .setCreationTime(Instant.now())
         .setType(DatasetType.RAW)
         .setPublished(false);
-    if (userDetails.getProfile().getAccessGroups().size() > 0) {
-      datasetDto.setOwnerGroup(userDetails.getProfile().getAccessGroups().getFirst());
+    if (userIdentity.getProfile().getAccessGroups().size() > 0) {
+      datasetDto.setOwnerGroup(userIdentity.getProfile().getAccessGroups().getFirst());
     } else {
       log.error(
           "User is part of no groups, will not be able to update the PublishedData status to"
@@ -207,35 +231,7 @@ public class RoCrateImporter {
 
   public List<Resource> listPublications() {
     return new ArrayList<>(
-        listResourcesOfType(this.inferredModel, SchemaDO.Collection, this::isPublication));
-  }
-
-  private boolean isPublication(Resource subject) {
-    Set<RDFNode> identifierValues = listProperties(subject, SchemaDO.identifier);
-    if (identifierValues.size() < 1) {
-      log.info("{} has no property {}", subject, SchemaDO.identifier);
-      return false;
-    } else if (identifierValues.size() > 1) {
-      log.info(
-          "{} has too many values ({}) for the property {}",
-          subject,
-          identifierValues.size(),
-          SchemaDO.identifier);
-      return false;
-    }
-
-    RDFNode identifier = identifierValues.iterator().next();
-    if (!identifier.isLiteral()) {
-      log.info("{} has a property {} but it's not a literal", subject, SchemaDO.identifier);
-      return false;
-    }
-
-    if (!DoiUtils.isDoi(identifier.asLiteral().getString())) {
-      log.info("{} has a property {} but it's not a DOI", subject, SchemaDO.identifier);
-      return false;
-    }
-
-    return true;
+        listResourcesOfType(this.inferredModel, SchemaDO.Collection, (subject) -> true));
   }
 
   public DeserializationReport<Publication> validatePublication(Resource subject)

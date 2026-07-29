@@ -1,6 +1,7 @@
 package ch.psi.ord.core;
 
 import com.apicatalog.jsonld.JsonLdOptions;
+import com.apicatalog.jsonld.uri.UriValidationPolicy;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.zip.ZipException;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -42,7 +44,13 @@ public class RoCrate implements AutoCloseable {
   @Accessors(fluent = true)
   private boolean hasAttachedData = false;
 
-  private RoCrate() {}
+  private JsonLdOptions jsonLdOptions = new JsonLdOptions();
+
+  private RoCrate() {
+    // required to support percent encoded @id's
+    // https://github.com/apache/jena/issues/4025
+    jsonLdOptions.setUriValidation(UriValidationPolicy.SchemeOnly);
+  }
 
   public static RoCrate fromMetadata(InputStream metadataDescriptor)
       throws RiotException, IOException {
@@ -153,7 +161,7 @@ public class RoCrate implements AutoCloseable {
             .source(document)
             .lang(Lang.JSONLD11)
             .base(String.format(base.toUri().toString()))
-            .context(Context.create().set(LangJSONLD11.JSONLD_OPTIONS, new JsonLdOptions()))
+            .context(Context.create().set(LangJSONLD11.JSONLD_OPTIONS, jsonLdOptions))
             .build()
             .toModel();
   }
@@ -172,5 +180,11 @@ public class RoCrate implements AutoCloseable {
     try (InputStream content = new FileInputStream(metadataDescriptor.toFile())) {
       parseMetadataDescriptor(content);
     }
+  }
+
+  public String toRelativeId(String absoluteId) {
+    String regex =
+        String.format("file://(%s/)?", Pattern.quote(getBase().toAbsolutePath().toString()));
+    return absoluteId.replaceFirst(regex, "");
   }
 }
