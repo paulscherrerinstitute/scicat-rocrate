@@ -3,6 +3,8 @@ FROM mcr.microsoft.com/devcontainers/java:25
 ARG SCICAT_CLI_VERSION=3.1.0
 ENV NVM_DIR="/usr/local/share/nvm"
 
+RUN mkdir --parents --mode=777 /rocrate/archive /rocrate/extract
+
 RUN apt-get update \
     && apt-get install -y  \
     pipx \

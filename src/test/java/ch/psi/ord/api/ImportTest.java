@@ -13,6 +13,7 @@ import ch.psi.scicat.model.v3.CountResponse;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
 import ch.psi.scicat.model.v3.CreatePublishedDataDto;
 import ch.psi.scicat.model.v3.Dataset;
+import ch.psi.scicat.model.v3.OutputJobDto;
 import ch.psi.scicat.model.v3.PublishedData;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.ValidatableResponse;
@@ -79,6 +80,8 @@ public class ImportTest extends EndpointTest {
                       .thenReturn(RestResponse.ok(new PublishedData().setDoi("some-pid")));
                   when(test.scicatClient.registerPublishedData(any(), any()))
                       .thenReturn(RestResponse.ok());
+                  when(test.scicatClient.createJob(any(), any()))
+                      .thenReturn(RestResponse.ok(new OutputJobDto().setId("job-1")));
                 }
               });
 
