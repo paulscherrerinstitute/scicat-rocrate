@@ -107,7 +107,7 @@ public class RoCrateImporter {
       return accessGroups.getFirst();
     }
     throw new HttpException(
-        StatusCode.BAD_REQUEST,
+        StatusCode.FORBIDDEN,
         "User needs to be part of at least one group to create resources in SciCat");
   }
 
@@ -128,26 +128,33 @@ public class RoCrateImporter {
                             .map(pid -> new CreateJobDto.DatasetEntry().setPid(pid))
                             .toList()))
             .getEntity();
-    crate.setScheduledForArchival(true);
     log.info("Submitted archive job: {}", archiveJob.getId());
+  }
+
+  private void scheduleForArchival(String pid) {
+    datasetsToArchive.add(pid);
+    crate.setScheduledForArchival(true);
   }
 
   public void importPublication(
       Map<String, String> importMap, Publication publication, String scicatToken) {
-    CreatePublishedDataDto dto = modelMapper.map(publication, CreatePublishedDataDto.class);
-    CountResponse count =
-        scicatClient
-            .countPublishedData(
-                String.format(
-                    publicationExistsFilter,
-                    DoiUtils.buildStandardUrl(publication.getIdentifier())),
-                scicatToken)
-            .getEntity();
+    if (publication.getIdentifier() != null) {
+      CountResponse count =
+          scicatClient
+              .countPublishedData(
+                  String.format(
+                      publicationExistsFilter,
+                      DoiUtils.buildStandardUrl(publication.getIdentifier())),
+                  scicatToken)
+              .getEntity();
 
-    if (count.getCount() > 0) {
-      throw new WebApplicationException(
-          "This Publication has already been imported", Status.CONFLICT);
+      if (count.getCount() > 0) {
+        throw new WebApplicationException(
+            "This Publication has already been imported", Status.CONFLICT);
+      }
     }
+
+    CreatePublishedDataDto dto = modelMapper.map(publication, CreatePublishedDataDto.class);
 
     if (dto.getPidArray().isEmpty()) {
       CreateDatasetDto datasetDto = createPlaceholderDataset(dto, scicatToken);
@@ -162,7 +169,7 @@ public class RoCrateImporter {
                       .toAbsolutePath()
                       .toString()));
       importMap.put(RoCrate.METADATA_DESCRIPTOR, pid);
-      datasetsToArchive.add(pid);
+      scheduleForArchival(pid);
     }
 
     if (!publication.getHasPart().getFiles().isEmpty()) {
@@ -171,7 +178,7 @@ public class RoCrateImporter {
       String datasetPid =
           scicatCli.ingestDataset(
               scicatToken, datasetDto, publication.getHasPart().getFiles().values());
-      datasetsToArchive.add(datasetPid);
+      scheduleForArchival(datasetPid);
       dto.getPidArray().add(datasetPid);
       publication
           .getHasPart()
