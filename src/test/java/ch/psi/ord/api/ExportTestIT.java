@@ -9,6 +9,6 @@ import io.quarkus.test.junit.QuarkusIntegrationTest;
 @WithTestResource(value = ScicatLive.class, scope = TestResourceScope.MATCHING_RESOURCES)
 public class ExportTestIT extends ExportTest {
   public ExportTestIT() {
-    accessToken = login();
+    accessToken = login(rocrateCredentials);
   }
 }
