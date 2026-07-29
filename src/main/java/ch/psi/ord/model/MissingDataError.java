@@ -14,7 +14,6 @@ public class MissingDataError implements ValidationError {
   @Override
   public String getMessage() {
     return String.format(
-        "The path '%s' is referenced in the metadata descriptor but absent from the archive ",
-        path);
+        "The path '%s' is referenced in the metadata descriptor but absent from the archive", path);
   }
 }

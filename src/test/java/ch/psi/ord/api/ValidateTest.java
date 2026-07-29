@@ -1,263 +1,173 @@
 package ch.psi.ord.api;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
+import ch.psi.ord.model.ExportFormat;
 import io.quarkus.test.junit.QuarkusTest;
-import java.io.IOException;
+import io.restassured.response.ValidatableResponse;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import lombok.Data;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.FieldSource;
 
 @QuarkusTest
 public class ValidateTest extends EndpointTest {
-  @Test
-  @DisplayName("One publication (ZIP)")
-  public void test00() throws IOException {
-    given()
-        .when()
-        .header("Content-Type", ExtraMediaType.APPLICATION_ZIP)
-        .body(zipResource("one-publication.json"))
-        .post("/api/v1/ro-crate/validate")
-        .then()
-        .statusCode(200)
-        .contentType(is(CONTENT_TYPE_JSON_RES))
-        .body("isValid", is(true))
-        .body("entities", contains("https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
-        .body("errors", emptyIterable());
+  @Data
+  static class ValidateTestCase {
+    String testName;
+    ExportFormat exportFormat;
+    byte[] body;
+    int expectedStatusCode;
+    Consumer<ValidatableResponse> assertions;
+
+    @Override
+    public String toString() {
+      return String.format("[%s] - %s", testName, exportFormat.name());
+    }
   }
 
-  @Test
-  @DisplayName("One publication (JSON-LD)")
-  public void test01() throws IOException {
-    given()
-        .when()
-        .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
-        .body(
-            getClass().getClassLoader().getResourceAsStream("one-publication.json").readAllBytes())
-        .post("/api/v1/ro-crate/validate")
-        .then()
-        .statusCode(200)
-        .contentType(is(CONTENT_TYPE_JSON_RES))
-        .body("isValid", is(true))
-        .body("entities", contains("https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
-        .body("errors", emptyIterable());
+  private static List<ValidateTestCase> createTestCase(
+      String testName,
+      String resourceName,
+      int statusCode,
+      Consumer<ValidatableResponse> assertions) {
+    return List.of(
+        new ValidateTestCase()
+            .setTestName(testName)
+            .setExportFormat(ExportFormat.JSONLD)
+            .setBody(getResource(resourceName))
+            .setExpectedStatusCode(statusCode)
+            .setAssertions(assertions),
+        new ValidateTestCase()
+            .setTestName(testName)
+            .setExportFormat(ExportFormat.ZIP)
+            .setBody(zipResource(resourceName))
+            .setExpectedStatusCode(statusCode)
+            .setAssertions(assertions));
   }
 
-  @Test
-  @DisplayName("Multiple publications (JSON-LD)")
-  public void test02() throws IOException {
-    given()
-        .when()
-        .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
-        .body(
-            getClass()
-                .getClassLoader()
-                .getResourceAsStream("multiple-publications.json")
-                .readAllBytes())
-        .post("/api/v1/ro-crate/validate")
-        .then()
-        .statusCode(200)
-        .contentType(is(CONTENT_TYPE_JSON_RES))
-        .body("isValid", is(true))
-        .body(
-            "entities",
-            contains(
-                "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5",
-                "https://doi.org/10.16907/4b55cbae-ac98-445a-a15e-1534b2a8b01f"))
-        .body("errors", emptyIterable());
-  }
+  static List<ValidateTestCase> testMatrix =
+      new ArrayList<>() {
+        {
+          addAll(
+              createTestCase(
+                  "One publication",
+                  "one-publication.json",
+                  200,
+                  res ->
+                      res.body("isValid", is(true))
+                          .body(
+                              "entities",
+                              Matchers.contains(
+                                  "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
+                          .body("errors", emptyIterable())));
 
-  @Test
-  @DisplayName("Multiple publications (ZIP)")
-  public void test03() throws IOException {
-    given()
-        .when()
-        .header("Content-Type", ExtraMediaType.APPLICATION_ZIP)
-        .body(zipResource("multiple-publications.json"))
-        .post("/api/v1/ro-crate/validate")
-        .then()
-        .statusCode(200)
-        .contentType(is(CONTENT_TYPE_JSON_RES))
-        .body("isValid", is(true))
-        .body(
-            "entities",
-            contains(
-                "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5",
-                "https://doi.org/10.16907/4b55cbae-ac98-445a-a15e-1534b2a8b01f"))
-        .body("errors", emptyIterable());
-  }
+          addAll(
+              createTestCase(
+                  "Multiple publications",
+                  "multiple-publications.json",
+                  200,
+                  res ->
+                      res.body("isValid", is(true))
+                          .body(
+                              "entities",
+                              Matchers.contains(
+                                  "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5",
+                                  "https://doi.org/10.16907/4b55cbae-ac98-445a-a15e-1534b2a8b01f"))
+                          .body("errors", emptyIterable())));
 
-  @Test
-  @DisplayName("Publication missing schema:name (JSON-LD)")
-  public void test04() throws IOException {
-    given()
-        .when()
-        .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
-        .body(
-            getClass()
-                .getClassLoader()
-                .getResourceAsStream("invalid-publication.json")
-                .readAllBytes())
-        .post("/api/v1/ro-crate/validate")
-        .then()
-        .statusCode(200)
-        .contentType(is(CONTENT_TYPE_JSON_RES))
-        .body("isValid", is(false))
-        .body("entities", emptyIterable())
-        .body("errors", hasSize(1))
-        .body(
-            "errors[0]",
-            hasEntry("nodeId", "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
-        .body("errors[0]", hasEntry("property", "https://schema.org/name"))
-        .body("errors[0]", hasEntry("message", "Missing required property"))
-        .body("errors[0]", hasEntry("type", "PropertyError"));
-  }
+          addAll(
+              createTestCase(
+                  "Publication missing schema:name",
+                  "invalid-publication.json",
+                  200,
+                  res ->
+                      res.body("isValid", is(false))
+                          .body("entities", emptyIterable())
+                          .body("errors", hasSize(1))
+                          .body(
+                              "errors[0]",
+                              hasEntry(
+                                  "nodeId",
+                                  "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
+                          .body("errors[0]", hasEntry("property", "https://schema.org/name"))
+                          .body("errors[0]", hasEntry("message", "Missing required property"))
+                          .body("errors[0]", hasEntry("type", "PropertyError"))));
 
-  @Test
-  @DisplayName("Publication missing schema:name (ZIP)")
-  public void test05() throws IOException {
-    given()
-        .when()
-        .header("Content-Type", ExtraMediaType.APPLICATION_ZIP)
-        .body(zipResource("invalid-publication.json"))
-        .post("/api/v1/ro-crate/validate")
-        .then()
-        .statusCode(200)
-        .contentType(is(CONTENT_TYPE_JSON_RES))
-        .body("isValid", is(false))
-        .body("entities", emptyIterable())
-        .body("errors", hasSize(1))
-        .body(
-            "errors[0]",
-            hasEntry("nodeId", "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
-        .body("errors[0]", hasEntry("property", "https://schema.org/name"))
-        .body("errors[0]", hasEntry("message", "Missing required property"))
-        .body("errors[0]", hasEntry("type", "PropertyError"));
-  }
+          addAll(
+              createTestCase(
+                  "Mix of valid/invalid publications",
+                  "valid-invalid.json",
+                  200,
+                  res ->
+                      res.body("isValid", is(false))
+                          .body(
+                              "entities",
+                              Matchers.contains(
+                                  "https://doi.org/10.16907/4b55cbae-ac98-445a-a15e-1534b2a8b01f"))
+                          .body("errors", hasSize(1))
+                          .body(
+                              "errors[0]",
+                              hasEntry(
+                                  "nodeId",
+                                  "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
+                          .body("errors[0]", hasEntry("property", "https://schema.org/name"))
+                          .body("errors[0]", hasEntry("message", "Missing required property"))
+                          .body("errors[0]", hasEntry("type", "PropertyError"))));
 
-  @Test
-  @DisplayName("Mix of valid/invalid publications (JSON-LD)")
-  public void test06() throws IOException {
-    given()
-        .when()
-        .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
-        .body(getClass().getClassLoader().getResourceAsStream("valid-invalid.json").readAllBytes())
-        .post("/api/v1/ro-crate/validate")
-        .then()
-        .statusCode(200)
-        .contentType(is(CONTENT_TYPE_JSON_RES))
-        .body("isValid", is(false))
-        .body("entities", contains("https://doi.org/10.16907/4b55cbae-ac98-445a-a15e-1534b2a8b01f"))
-        .body("errors", hasSize(1))
-        .body(
-            "errors[0]",
-            hasEntry("nodeId", "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
-        .body("errors[0]", hasEntry("property", "https://schema.org/name"))
-        .body("errors[0]", hasEntry("message", "Missing required property"))
-        .body("errors[0]", hasEntry("type", "PropertyError"));
-  }
+          addAll(
+              createTestCase(
+                  "Empty graph",
+                  "empty.json",
+                  200,
+                  res ->
+                      res.body("isValid", is(false))
+                          .body("entities", emptyIterable())
+                          .body("errors", hasSize(1))
+                          .body(
+                              "errors[0]",
+                              hasEntry("message", "No suitable entity found in the graph"))
+                          .body("errors[0]", hasEntry("type", "NoEntityFound"))));
 
-  @Test
-  @DisplayName("Mix of valid/invalid publications (ZIP)")
-  public void test07() throws IOException {
-    given()
-        .when()
-        .header("Content-Type", ExtraMediaType.APPLICATION_ZIP)
-        .body(zipResource("valid-invalid.json"))
-        .post("/api/v1/ro-crate/validate")
-        .then()
-        .statusCode(200)
-        .contentType(is(CONTENT_TYPE_JSON_RES))
-        .body("isValid", is(false))
-        .body("entities", contains("https://doi.org/10.16907/4b55cbae-ac98-445a-a15e-1534b2a8b01f"))
-        .body("errors", hasSize(1))
-        .body(
-            "errors[0]",
-            hasEntry("nodeId", "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
-        .body("errors[0]", hasEntry("property", "https://schema.org/name"))
-        .body("errors[0]", hasEntry("message", "Missing required property"))
-        .body("errors[0]", hasEntry("type", "PropertyError"));
-  }
+          addAll(
+              createTestCase(
+                  "Malformed metadata descriptor",
+                  "malformed.json",
+                  400,
+                  res -> res.body("message", is("Failed to parse the metadata descriptor"))));
 
-  @Test
-  @DisplayName("Empty graph (JSON-LD)")
-  public void test08() throws IOException {
-    given()
-        .when()
-        .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
-        .body("{}")
-        .post("/api/v1/ro-crate/validate")
-        .then()
-        .statusCode(200)
-        .contentType(is(CONTENT_TYPE_JSON_RES))
-        .body("isValid", is(false))
-        .body("entities", emptyIterable())
-        .body("errors", hasSize(1))
-        .body("errors[0]", hasEntry("message", "No suitable entity found in the graph"))
-        .body("errors[0]", hasEntry("type", "NoEntityFound"));
-  }
+          add(
+              new ValidateTestCase()
+                  .setTestName("Malformed zip archive")
+                  .setExportFormat(ExportFormat.ZIP)
+                  .setBody(new byte[0])
+                  .setExpectedStatusCode(400)
+                  .setAssertions(res -> res.body("message", is("Invalid or empty zip archive"))));
+        }
+      };
 
-  @Test
-  @DisplayName("Empty graph (ZIP)")
-  public void test09() throws IOException {
-    given()
-        .when()
-        .header("Content-Type", ExtraMediaType.APPLICATION_ZIP)
-        .body(zipResource("empty.json"))
-        .post("/api/v1/ro-crate/validate")
-        .then()
-        .statusCode(200)
-        .contentType(is(CONTENT_TYPE_JSON_RES))
-        .body("isValid", is(false))
-        .body("entities", emptyIterable())
-        .body("errors", hasSize(1))
-        .body("errors[0]", hasEntry("message", "No suitable entity found in the graph"))
-        .body("errors[0]", hasEntry("type", "NoEntityFound"));
-  }
+  @ParameterizedTest
+  @FieldSource("testMatrix")
+  @DisplayName("Validation Matrix Execution")
+  public void testValidationMatrix(ValidateTestCase testCase) {
+    ValidatableResponse response =
+        given()
+            .when()
+            .contentType(testCase.getExportFormat().toString())
+            .body(testCase.getBody())
+            .post("/api/v1/ro-crate/validate")
+            .then()
+            .statusCode(testCase.getExpectedStatusCode())
+            .contentType(is(CONTENT_TYPE_JSON_RES));
 
-  @Test
-  @DisplayName("Malformed metadata descriptor (JSON-LD)")
-  public void test10() throws IOException {
-    given()
-        .when()
-        .header("Content-Type", ExtraMediaType.APPLICATION_JSONLD)
-        .body(getClass().getClassLoader().getResourceAsStream("malformed.json").readAllBytes())
-        .post("/api/v1/ro-crate/validate")
-        .then()
-        .statusCode(400)
-        .contentType(is(CONTENT_TYPE_JSON_RES))
-        .body("message", is("Failed to parse the metadata descriptor"));
-  }
-
-  @Test
-  @DisplayName("Malformed metadata descriptor (ZIP)")
-  public void test11() throws IOException {
-    given()
-        .when()
-        .header("Content-Type", ExtraMediaType.APPLICATION_ZIP)
-        .body(zipResource("malformed.json"))
-        .post("/api/v1/ro-crate/validate")
-        .then()
-        .statusCode(400)
-        .contentType(is(CONTENT_TYPE_JSON_RES))
-        .body("message", is("Failed to parse the metadata descriptor"));
-  }
-
-  @Test
-  @DisplayName("Malformed zip archive (ZIP)")
-  public void test12() throws IOException {
-    given()
-        .when()
-        .header("Content-Type", ExtraMediaType.APPLICATION_ZIP)
-        .body(new byte[0])
-        .post("/api/v1/ro-crate/validate")
-        .then()
-        .statusCode(400)
-        .contentType(is(CONTENT_TYPE_JSON_RES))
-        .body("message", is("Invalid or empty zip archive"));
+    testCase.getAssertions().accept(response);
   }
 }

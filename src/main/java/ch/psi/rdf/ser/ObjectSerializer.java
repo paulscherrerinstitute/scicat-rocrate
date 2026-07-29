@@ -25,43 +25,46 @@ public class ObjectSerializer implements RdfSerializer<Object> {
     Class<?> clazz = value.getClass();
     @NonNull RdfClass rdfClass = validateClassAnnotation(clazz);
     Resource serializedObject =
-        context.setCurrentSubject(createResourceWithUri(value, context.getModel()));
+        context.pushCurrentSubject(createResourceWithUri(value, context.getModel()));
 
-    for (String type : rdfClass.typesUri()) {
-      serializedObject.addProperty(RDF.type, context.getModel().createResource(type));
-    }
-
-    for (Field field : clazz.getDeclaredFields()) {
-      if (!field.isAnnotationPresent(RdfProperty.class)) {
-        continue;
+    try {
+      for (String type : rdfClass.typesUri()) {
+        serializedObject.addProperty(RDF.type, context.getModel().createResource(type));
       }
 
-      try {
-        field.setAccessible(true);
-        Object fieldValue = field.get(value);
-        if (fieldValue == null) {
+      for (Field field : clazz.getDeclaredFields()) {
+        if (!field.isAnnotationPresent(RdfProperty.class)) {
           continue;
         }
-        RdfProperty rdfProperty = field.getAnnotation(RdfProperty.class);
-        Property property = context.getModel().createProperty(rdfProperty.uri());
 
-        RdfSerializer<Object> serializer;
-        if (field.isAnnotationPresent(RdfSerialize.class)) {
-          serializer =
-              (RdfSerializer<Object>)
-                  createInstance(field.getAnnotation(RdfSerialize.class).using());
-        } else {
-          serializer = (RdfSerializer<Object>) context.getSerializer(fieldValue.getClass());
+        try {
+          field.setAccessible(true);
+          Object fieldValue = field.get(value);
+          if (fieldValue == null) {
+            continue;
+          }
+          RdfProperty rdfProperty = field.getAnnotation(RdfProperty.class);
+          Property property = context.getModel().createProperty(rdfProperty.uri());
+
+          RdfSerializer<Object> serializer;
+          if (field.isAnnotationPresent(RdfSerialize.class)) {
+            serializer =
+                (RdfSerializer<Object>)
+                    createInstance(field.getAnnotation(RdfSerialize.class).using());
+          } else {
+            serializer = (RdfSerializer<Object>) context.getSerializer(fieldValue.getClass());
+          }
+          serializer
+              .serialize(fieldValue, context)
+              .forEach(node -> serializedObject.addProperty(property, node));
+        } catch (Exception e) {
+          throw new RdfSerializationException(
+              "An error occured while serializing field " + field.getName(), e);
         }
-        serializer
-            .serialize(fieldValue, context)
-            .forEach(node -> serializedObject.addProperty(property, node));
-      } catch (Exception e) {
-        throw new RdfSerializationException(
-            "An error occured while serializing field " + field.getName(), e);
       }
+    } finally {
+      context.popCurrentSubject();
     }
-    context.resetCurrentSubject();
 
     return List.of(serializedObject);
   }
