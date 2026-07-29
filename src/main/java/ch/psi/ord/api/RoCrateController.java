@@ -9,11 +9,6 @@ import ch.psi.ord.model.ExportFormat;
 import ch.psi.ord.model.ValidationReport;
 import ch.psi.rdf.deser.RdfDeserializationException;
 import ch.psi.scicat.client.ScicatClient;
-import com.apicatalog.jsonld.JsonLdOptions;
-import com.apicatalog.jsonld.JsonLdOptions.ProcessingPolicy;
-import com.apicatalog.jsonld.loader.HttpLoader;
-import com.apicatalog.jsonld.loader.LRUDocumentCache;
-import com.apicatalog.jsonld.uri.UriValidationPolicy;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.HeaderParam;
@@ -38,7 +33,6 @@ import java.util.Optional;
 import java.util.zip.ZipException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.riot.RiotException;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
 import org.jboss.resteasy.reactive.RestHeader;
@@ -49,31 +43,15 @@ import org.jboss.resteasy.reactive.server.ServerRequestFilter;
 @Tag(name = "ro-crate")
 @Slf4j
 public class RoCrateController {
-  private int cacheSize = 0;
-
   @Inject RoCrateExporter exporter;
 
   @Inject RoCrateImporter importer;
 
   @Inject ScicatClient scicatClient;
 
-  // Cache JSON-LD remote documents across requests
-  LRUDocumentCache documentLoader;
-
-  private JsonLdOptions jsonLdOptions = new JsonLdOptions();
-
-  public RoCrateController(
-      RoCrateExporter exporter,
-      RoCrateImporter importer,
-      @ConfigProperty(name = "titanium.jsonld.cache.size") int cacheSize) {
+  public RoCrateController(RoCrateExporter exporter, RoCrateImporter importer) {
     this.exporter = exporter;
     this.importer = importer;
-    this.cacheSize = cacheSize;
-    this.documentLoader = new LRUDocumentCache(HttpLoader.defaultInstance(), this.cacheSize);
-
-    jsonLdOptions.setUndefinedTermsPolicy(ProcessingPolicy.Warn);
-    jsonLdOptions.setDocumentLoader(documentLoader);
-    jsonLdOptions.setUriValidation(UriValidationPolicy.None);
   }
 
   @ServerExceptionMapper

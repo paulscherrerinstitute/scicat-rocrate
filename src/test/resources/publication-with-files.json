@@ -1,0 +1,133 @@
+{
+    "@context": {
+        "Organization": "https://schema.org/Organization",
+        "owl": "http://www.w3.org/2002/07/owl#",
+        "xsd": "http://www.w3.org/2001/XMLSchema#",
+        "CreativeWork": "https://schema.org/CreativeWork",
+        "about": "https://schema.org/about",
+        "description": "https://schema.org/description",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "dateCreated": "https://schema.org/dateCreated",
+        "creativeWorkStatus": "https://schema.org/creativeWorkStatus",
+        "identifier": "https://schema.org/identifier",
+        "creator": "https://schema.org/creator",
+        "hasPart": "https://schema.org/hasPart",
+        "Dataset": "https://schema.org/Dataset",
+        "MediaObject": "https://schema.org/MediaObject",
+        "dateModified": "https://schema.org/dateModified",
+        "abstract": "https://schema.org/abstract",
+        "sdDatePublished": "https://schema.org/sdDatePublished",
+        "datePublished": "https://schema.org/datePublished",
+        "license": "https://schema.org/license",
+        "additionalType": "https://schema.org/additionalType",
+        "name": "https://schema.org/name",
+        "Collection": "https://schema.org/Collection",
+        "publisher": "https://schema.org/publisher",
+        "givenName": "https://schema.org/givenName",
+        "familyName": "https://schema.org/familyName",
+        "email": "https://schema.org/email",
+        "conformsTo": "http://purl.org/dc/terms/conformsTo",
+        "Person": "https://schema.org/Person"
+    },
+    "@graph": [
+        {
+            "@id": "./",
+            "@type": "Dataset",
+            "name": "A publication with attached files",
+            "description": "A publication whose parts are individual files",
+            "license": {
+                "@id": "https://creativecommons.org/licenses/by-sa/4.0/"
+            },
+            "datePublished": "2023-01-01",
+            "hasPart": [
+                {
+                    "@id": "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"
+                }
+            ]
+        },
+        {
+            "about": {
+                "@id": "./"
+            },
+            "conformsTo": {
+                "@id": "https://w3id.org/ro/crate/1.1"
+            },
+            "@id": "ro-crate-metadata.json",
+            "@type": "CreativeWork"
+        },
+        {
+            "creator": [
+                {
+                    "@id": "eaf4cc90-2ea0-44c2-8c9f-a9f8ce448a2a"
+                },
+                {
+                    "@id": "284f40e5-72fe-4414-91f8-141abcd0ed9d"
+                }
+            ],
+            "publisher": {
+                "@id": "https://ror.org/03eh3y714"
+            },
+            "license": {
+                "@id": "https://creativecommons.org/licenses/by-sa/4.0/"
+            },
+            "datePublished": "2023",
+            "name": "A publication with attached files",
+            "abstract": "A publication whose parts are individual files",
+            "additionalType": "raw",
+            "sdDatePublished": "2023-01-26T13:02:38.341Z",
+            "creativeWorkStatus": "REGISTERED",
+            "dateCreated": "2023-01-26T13:02:13.639Z",
+            "dateModified": "2023-01-26T13:02:13.643Z",
+            "description": "A publication whose parts are individual files",
+            "hasPart": [
+                {
+                    "@id": "data/file1.txt"
+                },
+                {
+                    "@id": "data/file2.txt"
+                }
+            ],
+            "@id": "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5",
+            "@type": "Collection"
+        },
+        {
+            "name": "file1.txt",
+            "description": "",
+            "@id": "data/file1.txt",
+            "@type": "MediaObject"
+        },
+        {
+            "name": "file2.txt",
+            "description": "",
+            "@id": "data/file2.txt",
+            "@type": "MediaObject"
+        },
+        {
+            "name": "Paul Scherrer Institute",
+            "@id": "https://ror.org/03eh3y714",
+            "@type": "Organization"
+        },
+        {
+            "name": "Kahnt, Maik",
+            "givenName": "Maik",
+            "familyName": "Kahnt",
+            "email": "maik.kahnt@example.com",
+            "@id": "284f40e5-72fe-4414-91f8-141abcd0ed9d",
+            "@type": "Person"
+        },
+        {
+            "name": "Constantin, Doru",
+            "givenName": "Doru",
+            "familyName": "Constantin",
+            "email": "doru.constantin@example.com",
+            "@id": "eaf4cc90-2ea0-44c2-8c9f-a9f8ce448a2a",
+            "@type": "Person"
+        },
+        {
+            "identifier": "https://creativecommons.org/licenses/by-sa/4.0/",
+            "name": "Creative Commons Attribution Share Alike 4.0 International",
+            "@id": "https://creativecommons.org/licenses/by-sa/4.0/",
+            "@type": "CreativeWork"
+        }
+    ]
+}
