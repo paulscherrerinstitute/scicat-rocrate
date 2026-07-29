@@ -1,8 +1,6 @@
 package ch.psi.ord.api;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.hasKey;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -13,6 +11,7 @@ import ch.psi.scicat.model.v3.CountResponse;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
 import ch.psi.scicat.model.v3.CreatePublishedDataDto;
 import ch.psi.scicat.model.v3.Dataset;
+import ch.psi.scicat.model.v3.OutputJobDto;
 import ch.psi.scicat.model.v3.PublishedData;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.ValidatableResponse;
@@ -22,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import lombok.Data;
+import org.hamcrest.Matchers;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -79,6 +79,8 @@ public class ImportTest extends EndpointTest {
                       .thenReturn(RestResponse.ok(new PublishedData().setDoi("some-pid")));
                   when(test.scicatClient.registerPublishedData(any(), any()))
                       .thenReturn(RestResponse.ok());
+                  when(test.scicatClient.createJob(any(), any()))
+                      .thenReturn(RestResponse.ok(new OutputJobDto().setId("job-1")));
                 }
               });
 
@@ -179,7 +181,7 @@ public class ImportTest extends EndpointTest {
                   getResource("one-publication.json"),
                   201,
                   MOCK_NEW_PUBLICATION,
-                  res -> res.body("$", hasKey(PUBLICATION_URL))));
+                  res -> res.body("$", Matchers.hasKey(PUBLICATION_URL))));
 
           add(
               createTestCase(
@@ -196,10 +198,10 @@ public class ImportTest extends EndpointTest {
                   res ->
                       res.body(
                           "$",
-                          allOf(
-                              hasKey("data/file1.txt"),
-                              hasKey("data/file2.txt"),
-                              hasKey(PUBLICATION_URL)))));
+                          Matchers.allOf(
+                              Matchers.hasKey("data/file1.txt"),
+                              Matchers.hasKey("data/file2.txt"),
+                              Matchers.hasKey(PUBLICATION_URL)))));
 
           add(
               createTestCase(
