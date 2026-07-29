@@ -107,7 +107,7 @@ public class RoCrateImporter {
       return accessGroups.getFirst();
     }
     throw new HttpException(
-        StatusCode.BAD_REQUEST,
+        StatusCode.FORBIDDEN,
         "User needs to be part of at least one group to create resources in SciCat");
   }
 
