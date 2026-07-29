@@ -9,6 +9,6 @@ import io.quarkus.test.junit.QuarkusIntegrationTest;
 @WithTestResource(value = ScicatLive.class, scope = TestResourceScope.MATCHING_RESOURCES)
 public class ValidateTestIT extends ValidateTest {
   public ValidateTestIT() {
-    accessToken = login();
+    accessToken = login(rocrateCredentials);
   }
 }

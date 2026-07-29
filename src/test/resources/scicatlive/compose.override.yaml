@@ -73,7 +73,14 @@ configs:
           "username": "rocrate",
           "email": "rocrate@your.site",
           "password": "rocrate",
-          "role": "rocrate",
+          "role": ["rocrate", "group-1", "group-2", "group-3"],
+          "global": false
+        },
+        {
+          "username": "nogroup",
+          "email": "nogroup@your.site",
+          "password": "nogroup",
+          "role": [],
           "global": false
         }
       ]

@@ -17,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TestData {
   public static final MyIdentity rocrateUser;
+  public static final MyIdentity noGroupUser =
+      new MyIdentity().setProfile(new Profile().setUsername("nogroup").setAccessGroups(List.of()));
   public static final String validDoi = "10.000/abc";
   public static PublishedData psiPub1;
   public static PublishedData hzdrPub1;

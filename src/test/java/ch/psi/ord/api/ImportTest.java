@@ -3,6 +3,7 @@ package ch.psi.ord.api;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasKey;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -25,16 +26,21 @@ import java.util.function.Consumer;
 import lombok.Data;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.FieldSource;
 
 @QuarkusTest
+@TestInstance(Lifecycle.PER_CLASS)
 public class ImportTest extends EndpointTest {
   @Data
   static class ImportTestCase {
     String testName;
     String contentType;
     boolean includeApiKey;
+    boolean noGroupUser;
+    String ownerGroup;
     byte[] body;
     int expectedStatusCode;
     Consumer<ImportTest> mockSetup;
@@ -55,6 +61,8 @@ public class ImportTest extends EndpointTest {
   private static final String PUBLICATION_URL = DoiUtils.buildStandardUrl(PUBLICATION_DOI);
 
   private static final String DATASET_PID = "dataset-pid";
+
+  private static final String OWNER_GROUP = "group-2";
 
   private static Consumer<ImportTest> checkTokenValidity(boolean isValid) {
     return test -> {
@@ -109,6 +117,16 @@ public class ImportTest extends EndpointTest {
                 }
               });
 
+  private static final Consumer<ImportTest> MOCK_NO_GROUP_USER =
+      checkTokenValidity(true)
+          .andThen(
+              test -> {
+                if (test.scicatClient != null) {
+                  when(test.scicatClient.myidentity(any()))
+                      .thenReturn(RestResponse.ok(TestData.noGroupUser));
+                }
+              });
+
   private static ImportTestCase createTestCase(
       String testName,
       String contentType,
@@ -127,7 +145,7 @@ public class ImportTest extends EndpointTest {
         .setAssertions(assertions);
   }
 
-  static List<ImportTestCase> testMatrix =
+  List<ImportTestCase> testMatrix =
       new ArrayList<>() {
         {
           add(
@@ -206,6 +224,43 @@ public class ImportTest extends EndpointTest {
 
           add(
               createTestCase(
+                      "User without group",
+                      ExtraMediaType.APPLICATION_JSONLD,
+                      true,
+                      getResource("one-publication.json"),
+                      403,
+                      MOCK_NO_GROUP_USER,
+                      NO_ASSERTIONS)
+                  .setNoGroupUser(true));
+
+          add(
+              createTestCase(
+                      "Publication with a requested owner group",
+                      ExtraMediaType.APPLICATION_ZIP,
+                      true,
+                      zipResource(
+                          "publication-with-files.json",
+                          Map.of(
+                              "data/file1.txt", BigInteger.valueOf(16),
+                              "data/file2.txt", BigInteger.valueOf(32))),
+                      201,
+                      MOCK_NEW_PUBLICATION_WITH_FILES,
+                      res -> {
+                        if (scicatClient != null) {
+                          return;
+                        }
+                        Map<String, String> importMap = res.extract().jsonPath().getMap("$");
+                        importMap.values().stream()
+                            .filter(identifier -> !DoiUtils.isDoi(identifier))
+                            .forEach(
+                                pid ->
+                                    assertEquals(
+                                        OWNER_GROUP, getDatasetByPid(pid).getOwnerGroup()));
+                      })
+                  .setOwnerGroup(OWNER_GROUP));
+
+          add(
+              createTestCase(
                   "Import existing publication",
                   ExtraMediaType.APPLICATION_JSONLD,
                   true,
@@ -233,7 +288,12 @@ public class ImportTest extends EndpointTest {
     }
 
     if (testCase.isIncludeApiKey()) {
-      request = request.header("api-key", accessToken);
+      request =
+          request.header("api-key", testCase.isNoGroupUser() ? noGroupAccessToken : accessToken);
+    }
+
+    if (testCase.getOwnerGroup() != null) {
+      request = request.header("ownerGroup", testCase.getOwnerGroup());
     }
 
     if (testCase.getBody() != null) {

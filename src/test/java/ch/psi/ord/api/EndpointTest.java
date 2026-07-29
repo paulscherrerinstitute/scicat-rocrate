@@ -1,21 +1,19 @@
 package ch.psi.ord.api;
 
+import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import ch.psi.ord.core.RoCrate;
 import ch.psi.s3_broker.client.S3BrokerService;
 import ch.psi.scicat.cli.ScicatCli;
 import ch.psi.scicat.client.ScicatClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ch.psi.scicat.model.v3.CredentialsDto;
+import ch.psi.scicat.model.v3.Dataset;
 import io.quarkus.test.InjectMock;
+import io.restassured.http.ContentType;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,35 +29,42 @@ public abstract class EndpointTest {
   @InjectMock protected ScicatCli scicatCli;
 
   protected String accessToken = "";
+  protected String noGroupAccessToken = "";
+  protected CredentialsDto rocrateCredentials =
+      new CredentialsDto().setUsername("rocrate").setPassword("rocrate");
+  protected CredentialsDto noGroupCredentials =
+      new CredentialsDto().setUsername("nogroup").setPassword("nogroup");
 
   public static String CONTENT_TYPE_JSON_RES = "application/json;charset=UTF-8";
 
-  public String login() {
-    try {
-      String url = "http://backend.localhost/api/v3/auth/login";
-      String loginPayload =
-          """
-          {
-            "username":"rocrate",
-            "password":"rocrate"
-          }
-          """;
-      HttpClient client = HttpClient.newHttpClient();
-      HttpRequest request =
-          HttpRequest.newBuilder()
-              .uri(URI.create(url))
-              .header("Content-Type", "application/json")
-              .header("Accept", "application/json")
-              .POST(HttpRequest.BodyPublishers.ofString(loginPayload))
-              .build();
-      HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-      ObjectMapper objectMapper = new ObjectMapper();
-      JsonNode jsonResponse = objectMapper.readTree(response.body());
-      return jsonResponse.get("access_token").asText();
-    } catch (IOException | InterruptedException e) {
-      fail("Failed to fetch SciCat access token, aborting tests");
-      return "";
-    }
+  public String login(CredentialsDto credentials) {
+    return given()
+        .baseUri("http://backend.localhost")
+        .port(80)
+        .contentType(ContentType.JSON)
+        .accept(ContentType.JSON)
+        .body(credentials)
+        .when()
+        .post("/api/v3/auth/login")
+        .then()
+        .statusCode(201)
+        .extract()
+        .path("access_token");
+  }
+
+  public Dataset getDatasetByPid(String pid) {
+    return given()
+        .baseUri("http://backend.localhost")
+        .port(80)
+        .accept(ContentType.JSON)
+        .header("Authorization", String.format("Bearer %s", accessToken))
+        .pathParam("pid", pid)
+        .when()
+        .get("/api/v3/datasets/{pid}")
+        .then()
+        .statusCode(200)
+        .extract()
+        .as(Dataset.class);
   }
 
   public static byte[] getResource(String resourceName) {
