@@ -171,6 +171,22 @@ public class RoCrateImporter {
           .forEach(id -> importMap.put(crate.toRelativeId(id), datasetPid));
     }
 
+    if (!publication.getHasPart().getFiles().isEmpty()) {
+      CreateDatasetDto datasetDto = modelMapper.map(publication, CreateDatasetDto.class);
+      datasetDto
+          .setSourceFolder(crate.getBase().toString())
+          .setOwnerGroup(userIdentity.getProfile().getAccessGroups().getFirst());
+      String datasetPid =
+          scicatCli.ingestDataset(
+              scicatToken, datasetDto, publication.getHasPart().getFiles().values());
+      dto.getPidArray().add(datasetPid);
+      publication
+          .getHasPart()
+          .getFiles()
+          .keySet()
+          .forEach(id -> importMap.put(crate.toRelativeId(id), datasetPid));
+    }
+
     RestResponse<PublishedData> created = scicatClient.createPublishedData(scicatToken, dto);
     importMap.put(
         crate.toRelativeId(publication.getResourceIdentifier()), created.getEntity().getDoi());

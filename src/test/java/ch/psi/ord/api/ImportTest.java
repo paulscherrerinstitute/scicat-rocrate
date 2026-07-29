@@ -1,6 +1,8 @@
 package ch.psi.ord.api;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.hasKey;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -21,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import lombok.Data;
-import org.hamcrest.Matchers;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -181,7 +182,7 @@ public class ImportTest extends EndpointTest {
                   getResource("one-publication.json"),
                   201,
                   MOCK_NEW_PUBLICATION,
-                  res -> res.body("$", Matchers.hasKey(PUBLICATION_URL))));
+                  res -> res.body("$", hasKey(PUBLICATION_URL))));
 
           add(
               createTestCase(
@@ -198,10 +199,10 @@ public class ImportTest extends EndpointTest {
                   res ->
                       res.body(
                           "$",
-                          Matchers.allOf(
-                              Matchers.hasKey("data/file1.txt"),
-                              Matchers.hasKey("data/file2.txt"),
-                              Matchers.hasKey(PUBLICATION_URL)))));
+                          allOf(
+                              hasKey("data/file1.txt"),
+                              hasKey("data/file2.txt"),
+                              hasKey(PUBLICATION_URL)))));
 
           add(
               createTestCase(
