@@ -1,6 +1,8 @@
 package ch.psi.rdf.ser;
 
 import ch.psi.rdf.RdfSerializerProvider;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Optional;
 import lombok.Getter;
 import lombok.NonNull;
@@ -10,20 +12,24 @@ import org.apache.jena.rdf.model.Resource;
 
 public class RdfSerializationContext {
   private final RdfSerializerProvider serializerProvider;
-  @Getter private Optional<Resource> currentSubject;
   @Getter Model model = ModelFactory.createDefaultModel();
+  private final Deque<Resource> subjects = new ArrayDeque<>();
 
   public RdfSerializationContext(RdfSerializerProvider serializerProvider) {
     this.serializerProvider = serializerProvider;
   }
 
-  public Resource setCurrentSubject(@NonNull Resource subject) {
-    currentSubject = Optional.of(subject);
+  public Optional<Resource> getCurrentSubject() {
+    return Optional.ofNullable(subjects.peek());
+  }
+
+  public Resource pushCurrentSubject(@NonNull Resource subject) {
+    subjects.push(subject);
     return subject;
   }
 
-  public void resetCurrentSubject() {
-    currentSubject = Optional.empty();
+  public void popCurrentSubject() {
+    subjects.pop();
   }
 
   @SuppressWarnings("unchecked")

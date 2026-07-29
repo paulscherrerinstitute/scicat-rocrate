@@ -97,10 +97,11 @@ public class RdfUtils {
   }
 
   public static Set<RDFNode> listProperties(Resource subject, Property p) {
-    Set<RDFNode> res = subject.getModel().listObjectsOfProperty(subject, p).toSet();
-    res.addAll(subject.getModel().listObjectsOfProperty(subject, switchScheme(p)).toSet());
-
-    return res;
+    return subject
+        .getModel()
+        .listObjectsOfProperty(subject, p)
+        .andThen(subject.getModel().listObjectsOfProperty(subject, switchScheme(p)))
+        .toSet();
   }
 
   public static Set<Resource> listResourcesOfType(Model model, Resource type) {
