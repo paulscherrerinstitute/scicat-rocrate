@@ -44,3 +44,5 @@ This service can be configured using the following environment variables:
 | `QUARKUS_REST_CLIENT_S3BROKER_URL` | Base URL of the S3 Broker                                    | https://s3-broker.localhost |
 | `SCICAT_CLI_PATH`                  | Path of the scicat-cli executable                            | /usr/local/bin/scicat-cli   |
 | `SCICAT_PID_PREFIX`                | PID prefix of the SciCat instance (used to match cli output) | PID.SAMPLE.PREFIX           |
+| `ROCRATE_EXTRACT_DIRECTORY`        | Path where the service extracts crates                       | /rocrate/extract            |
+| `ROCRATE_ARCHIVE_DIRECTORY`        | Path where the service symlinks data for archival            | /rocrate/archive            |

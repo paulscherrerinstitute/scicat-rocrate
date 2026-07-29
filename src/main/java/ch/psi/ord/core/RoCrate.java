@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.zip.ZipException;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -27,22 +28,28 @@ import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.RiotException;
 import org.apache.jena.riot.lang.LangJSONLD11;
 import org.apache.jena.sparql.util.Context;
+import org.eclipse.microprofile.config.ConfigProvider;
 
 @Slf4j
 public class RoCrate implements AutoCloseable {
   public static final String METADATA_DESCRIPTOR = "ro-crate-metadata.json";
-  public static final Path DEFAULT_BASE = Path.of("/");
   private static final String FILE_KEY = "file";
   private static final String DIR_KEY = "directory";
+  private static String extractDir =
+      ConfigProvider.getConfig()
+          .getOptionalValue("rocrate.extract-directory", String.class)
+          .orElse("/rocrate/extract");
 
   private Map<String, List<Path>> files =
       Map.of(FILE_KEY, new ArrayList<>(), DIR_KEY, new ArrayList<>());
-  @Getter private Path base = DEFAULT_BASE;
+  @Getter private Path base;
   @Getter private Model model;
 
   @Getter
   @Accessors(fluent = true)
   private boolean hasAttachedData = false;
+
+  @Getter @Setter private boolean scheduledForArchival = false;
 
   private JsonLdOptions jsonLdOptions = new JsonLdOptions();
 
@@ -75,8 +82,9 @@ public class RoCrate implements AutoCloseable {
    * @throws IOException if the creation of the temporary directory fails
    */
   private void createTempDirectory() throws IOException {
-    // Jena truncates the base to /tmp if the base doesn't end with a '/'
-    base = Path.of(Files.createTempDirectory("scicat-rocrate").toString(), "/");
+    // Jena truncates the base to /${extractDir} if the base doesn't end with a '/'
+    Path extractionDir = Files.createTempDirectory(Path.of(extractDir), "scicat-rocrate");
+    base = Path.of(extractionDir.toString(), "/");
     log.info("Created extraction directory {}", base);
   }
 
@@ -124,8 +132,10 @@ public class RoCrate implements AutoCloseable {
 
   @Override
   public void close() {
-    if (base.equals(DEFAULT_BASE)) {
-      log.debug("Nothing to cleanup");
+    if (scheduledForArchival) {
+      log.info(
+          "Crate at '{}' is scheduled for archival, skipping filesystem cleanup",
+          base.toAbsolutePath());
       return;
     }
 
@@ -167,10 +177,6 @@ public class RoCrate implements AutoCloseable {
   }
 
   private void readMetadataDescriptor() throws IOException, FileNotFoundException {
-    if (base.equals(DEFAULT_BASE)) {
-      throw new UnsupportedOperationException();
-    }
-
     Path metadataDescriptor = base.resolve(METADATA_DESCRIPTOR);
     if (!metadataDescriptor.toFile().exists()) {
       throw new FileNotFoundException(
