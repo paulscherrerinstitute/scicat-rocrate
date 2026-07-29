@@ -110,8 +110,12 @@ public class RoCrateImporter {
                             .map(pid -> new CreateJobDto.DatasetEntry().setPid(pid))
                             .toList()))
             .getEntity();
-    crate.setScheduledForArchival(true);
     log.info("Submitted archive job: {}", archiveJob.getId());
+  }
+
+  private void scheduleForArchival(String pid) {
+    datasetsToArchive.add(pid);
+    crate.setScheduledForArchival(true);
   }
 
   public void importPublication(
@@ -147,7 +151,7 @@ public class RoCrateImporter {
                       .toAbsolutePath()
                       .toString()));
       importMap.put(RoCrate.METADATA_DESCRIPTOR, pid);
-      datasetsToArchive.add(pid);
+      scheduleForArchival(pid);
     }
 
     if (!publication.getHasPart().getFiles().isEmpty()) {
@@ -158,7 +162,7 @@ public class RoCrateImporter {
       String datasetPid =
           scicatCli.ingestDataset(
               scicatToken, datasetDto, publication.getHasPart().getFiles().values());
-      datasetsToArchive.add(datasetPid);
+      scheduleForArchival(datasetPid);
       dto.getPidArray().add(datasetPid);
       publication
           .getHasPart()
