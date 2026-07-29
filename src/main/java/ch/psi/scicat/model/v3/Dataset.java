@@ -11,4 +11,5 @@ public class Dataset {
   private String pid;
   private String datasetName;
   private String description;
+  private String ownerGroup;
 }
