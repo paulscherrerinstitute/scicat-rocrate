@@ -2,16 +2,20 @@ package ch.psi.ord.core;
 
 import com.apicatalog.jsonld.JsonLdOptions;
 import com.apicatalog.jsonld.uri.UriValidationPolicy;
+import io.smallrye.config.Config;
+import io.smallrye.config.SmallRyeConfig;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -35,10 +39,13 @@ public class RoCrate implements AutoCloseable {
   public static final String METADATA_DESCRIPTOR = "ro-crate-metadata.json";
   private static final String FILE_KEY = "file";
   private static final String DIR_KEY = "directory";
+  private static Config config = ConfigProvider.getConfig().unwrap(SmallRyeConfig.class);
   private static String extractDir =
-      ConfigProvider.getConfig()
-          .getOptionalValue("rocrate.extract-directory", String.class)
-          .orElse("/rocrate/extract");
+      config.getOptionalValue("rocrate.extract-directory", String.class).orElse("/rocrate/extract");
+  private static final int maxPathLength =
+      config.getOptionalValue("rocrate.max-path-length", Integer.class).orElse(4096);
+  private static final int maxPathSegmentLength =
+      config.getOptionalValue("rocrate.max-path-segment-length", Integer.class).orElse(256);
 
   private Map<String, List<Path>> files =
       Map.of(FILE_KEY, new ArrayList<>(), DIR_KEY, new ArrayList<>());
@@ -114,9 +121,8 @@ public class RoCrate implements AutoCloseable {
       while ((entry = zip.getNextEntry()) != null) {
         entryCount++;
 
-        Path resolvedPath = targetDir.resolve(entry.getName()).normalize();
-        if (!resolvedPath.startsWith(targetDir)) {
-          // see: https://snyk.io/research/zip-slip-vulnerability
+        Path resolvedPath = targetDir.resolve(entry.getName()).normalize().toAbsolutePath();
+        if (!isValidPath(resolvedPath)) {
           throw new RuntimeException("Entry with an illegal path: " + entry.getName());
         }
 
@@ -154,6 +160,7 @@ public class RoCrate implements AutoCloseable {
     }
 
     try (var paths = Files.walk(base)) {
+      Map<String, Integer> deleted = new HashMap<>(Map.of(FILE_KEY, 0, DIR_KEY, 0));
       paths
           .sorted(Comparator.reverseOrder())
           .forEachOrdered(
@@ -162,8 +169,14 @@ public class RoCrate implements AutoCloseable {
                 String key = f.isFile() ? FILE_KEY : DIR_KEY;
                 f.delete();
                 files.get(key).remove(path);
-                log.info("Deleted {} {}", key, path);
+                deleted.merge(key, 1, Integer::sum);
+                log.debug("Deleted {} {}", key, path);
               });
+      log.info(
+          "Deleted crate at {} ({} files, {} directories)",
+          base,
+          deleted.get(FILE_KEY),
+          deleted.get(DIR_KEY));
 
     } catch (IOException e) {
       log.error("Failed to cleanup crate located at {} ({})", base, e.getMessage());
@@ -206,5 +219,24 @@ public class RoCrate implements AutoCloseable {
     String regex =
         String.format("file://(%s/)?", Pattern.quote(getBase().toAbsolutePath().toString()));
     return absoluteId.replaceFirst(regex, "");
+  }
+
+  private boolean isValidPath(Path p) {
+    if (p.toString().getBytes(StandardCharsets.UTF_8).length >= maxPathLength) {
+      return false;
+    }
+
+    for (Path segment : p) {
+      if (segment.toString().getBytes(StandardCharsets.UTF_8).length >= maxPathSegmentLength) {
+        return false;
+      }
+    }
+
+    if (!p.startsWith(base)) {
+      // see: https://snyk.io/research/zip-slip-vulnerability
+      return false;
+    }
+
+    return true;
   }
 }
