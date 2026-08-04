@@ -26,8 +26,8 @@ public class ZenodoControllerTest extends EndpointTest {
   @Test
   @DisplayName("Export should succeed if the datasets are retrieved")
   public void test00() {
-    if (scicatClient != null) {
-      when(scicatClient.getPublishedDataById(any())).thenReturn(RestResponse.ok(TestData.psiPub1));
+    if (scicatService != null) {
+      when(scicatService.getPublishedDataById(any())).thenReturn(RestResponse.ok(TestData.psiPub1));
     }
     if (s3BrokerService != null) {
       when(s3BrokerService.getPublishedDataUrls(any())).thenReturn(TestData.psiPub1S3Response);
@@ -80,8 +80,8 @@ public class ZenodoControllerTest extends EndpointTest {
   @Test
   @DisplayName("Export should succeed if the datasets links are expired")
   public void test01() {
-    if (scicatClient != null) {
-      when(scicatClient.getPublishedDataById(TestData.hzdrPub1.getDoi()))
+    if (scicatService != null) {
+      when(scicatService.getPublishedDataById(TestData.hzdrPub1.getDoi()))
           .thenReturn(RestResponse.ok(TestData.hzdrPub1));
     }
     if (s3BrokerService != null) {
