@@ -1,6 +1,6 @@
 package ch.psi.scicat.cli;
 
-import ch.psi.scicat.client.ScicatClient;
+import ch.psi.scicat.client.ScicatService;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
 import ch.psi.scicat.model.v3.DatasetLifeCycle;
 import ch.psi.scicat.model.v3.UpdateDatasetDto;
@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 @Slf4j
 @ApplicationScoped
@@ -28,7 +29,7 @@ public class ScicatCli {
   private final String scicatUrl;
   private final Pattern pidPattern;
   private final String archiveDirectory;
-  @Inject private ScicatClient scicatClient;
+  @RestClient @Inject private ScicatService scicatService;
 
   @Inject
   public ScicatCli(
@@ -121,7 +122,7 @@ public class ScicatCli {
 
       symlinkData(pid, dto.getSourceFolder(), fileList);
 
-      scicatClient.updateDataset(
+      scicatService.updateDataset(
           scicatToken,
           pid,
           new UpdateDatasetDto()
