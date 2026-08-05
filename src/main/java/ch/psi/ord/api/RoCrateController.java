@@ -51,13 +51,9 @@ public class RoCrateController {
 
   @RestClient @Inject ScicatService scicatService;
 
-  public RoCrateController(RoCrateExporter exporter, RoCrateImporter importer) {
-    this.exporter = exporter;
-    this.importer = importer;
-  }
-
   @ServerExceptionMapper
   public Response mapRiotException(RiotException e) {
+    log.error("Failed to process the crate metadata", e);
     return Response.status(Status.BAD_REQUEST)
         .entity(new Error("Failed to parse the metadata descriptor"))
         .build();

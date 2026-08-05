@@ -267,7 +267,7 @@ public class RoCrateImporter {
     List<MissingDataError> errors = new ArrayList<>();
     pathsToCheck.forEach(
         dataEntityPath -> {
-          if (!dataEntityPath.toFile().exists()) {
+          if (!crate.contains(dataEntityPath)) {
             errors.add(new MissingDataError(crate.getBase().relativize(dataEntityPath).toString()));
           }
         });
