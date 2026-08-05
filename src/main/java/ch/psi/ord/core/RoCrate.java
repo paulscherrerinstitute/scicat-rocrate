@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -46,6 +47,8 @@ public class RoCrate implements AutoCloseable {
       config.getOptionalValue("rocrate.max-path-length", Integer.class).orElse(4096);
   private static final int maxPathSegmentLength =
       config.getOptionalValue("rocrate.max-path-segment-length", Integer.class).orElse(256);
+  private static Integer jsonLdTimeout =
+      config.getOptionalValue("jsonld.processing-timeout", Integer.class).orElse(10);
 
   private Map<String, List<Path>> files =
       Map.of(FILE_KEY, new ArrayList<>(), DIR_KEY, new ArrayList<>());
@@ -64,6 +67,7 @@ public class RoCrate implements AutoCloseable {
     // required to support percent encoded @id's
     // https://github.com/apache/jena/issues/4025
     jsonLdOptions.setUriValidation(UriValidationPolicy.SchemeOnly);
+    jsonLdOptions.setTimeout(Duration.ofSeconds(jsonLdTimeout));
   }
 
   public static RoCrate fromMetadata(InputStream metadataDescriptor)
@@ -183,13 +187,8 @@ public class RoCrate implements AutoCloseable {
     }
   }
 
-  public List<Path> listFiles() {
-    List<Path> l = new ArrayList<>();
-    l.add(base);
-    l.addAll(files.get(FILE_KEY));
-    l.addAll(files.get(DIR_KEY));
-
-    return l;
+  public boolean contains(Path p) {
+    return base.equals(p) || files.get(FILE_KEY).contains(p) || files.get(DIR_KEY).contains(p);
   }
 
   private void parseMetadataDescriptor(InputStream document) throws RiotException {

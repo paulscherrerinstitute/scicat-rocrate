@@ -57,19 +57,19 @@ public class ExportTest extends EndpointTest {
 
   private static final Consumer<ExportTest> DEFAULT_MOCK_SETUP =
       test -> {
-        if (test.scicatClient != null) {
-          when(test.scicatClient.getPublishedDataById(TestData.psiPub1.getDoi()))
+        if (test.scicatService != null) {
+          when(test.scicatService.getPublishedDataById(TestData.psiPub1.getDoi()))
               .thenReturn(RestResponse.ok(TestData.psiPub1));
-          when(test.scicatClient.getPublishedDataById(TestData.hzdrPub1.getDoi()))
+          when(test.scicatService.getPublishedDataById(TestData.hzdrPub1.getDoi()))
               .thenReturn(RestResponse.ok(TestData.hzdrPub1));
 
-          when(test.scicatClient.getDatasetByPid(TestData.psiDs1.getPid()))
+          when(test.scicatService.getDatasetByPid(TestData.psiDs1.getPid()))
               .thenReturn(RestResponse.ok(TestData.psiDs1));
-          when(test.scicatClient.getDatasetByPid(TestData.psiDs2.getPid()))
+          when(test.scicatService.getDatasetByPid(TestData.psiDs2.getPid()))
               .thenReturn(RestResponse.ok(TestData.psiDs2));
-          when(test.scicatClient.getDatasetByPid(TestData.psiDs3.getPid()))
+          when(test.scicatService.getDatasetByPid(TestData.psiDs3.getPid()))
               .thenReturn(RestResponse.ok(TestData.psiDs3));
-          when(test.scicatClient.getDatasetByPid(TestData.hzdrDs1.getPid()))
+          when(test.scicatService.getDatasetByPid(TestData.hzdrDs1.getPid()))
               .thenReturn(RestResponse.ok(TestData.hzdrDs1));
         }
 

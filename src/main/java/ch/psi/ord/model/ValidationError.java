@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 
 public interface ValidationError {
   @JsonGetter(value = "type")
-  public String getType();
+  String getType();
 
   @JsonGetter(value = "message")
-  public String getMessage();
+  String getMessage();
 }

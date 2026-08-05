@@ -48,3 +48,4 @@ This service can be configured using the following environment variables:
 | `ROCRATE_ARCHIVE_DIRECTORY`        | Path where the service symlinks data for archival                  | /rocrate/archive            |
 | `ROCRATE_MAX_PATH_LENGTH`          | Maximum length (in bytes) of an extracted path                     | 4096                        |
 | `ROCRATE_MAX_PATH_SEGMENT_LENGTH`  | Maximum length (in bytes) of a single segment of an extracted path | 256                         |
+| `JSONLD_PROCESSING_TIMEOUT`        | Maximum allowed time (in seconds) to process a JSON-LD document.   | 10                          |
