@@ -33,41 +33,41 @@ public interface ScicatService {
 
   @GET
   @Path("/api/v3/datasets/{pid}")
-  public RestResponse<Dataset> getDatasetByPid(@PathParam("pid") String pid);
+  RestResponse<Dataset> getDatasetByPid(@PathParam("pid") String pid);
 
   @POST
   @Path("/api/v3/datasets")
-  public RestResponse<Dataset> createDataset(
+  RestResponse<Dataset> createDataset(
       @HeaderParam("Authorization") String accessToken, CreateDatasetDto datasetDto);
 
   @PATCH
   @Path("/api/v3/datasets/{pid}")
-  public RestResponse<Dataset> updateDataset(
+  RestResponse<Dataset> updateDataset(
       @HeaderParam("Authorization") String accessToken,
       @PathParam("pid") String pid,
       UpdateDatasetDto updateDatasetDto);
 
   @GET
   @Path("/api/v3/publisheddata/{doi}")
-  public RestResponse<PublishedData> getPublishedDataById(@PathParam("doi") String doi);
+  RestResponse<PublishedData> getPublishedDataById(@PathParam("doi") String doi);
 
   @POST
   @Path("/api/v3/publisheddata/{doi}/register")
-  public RestResponse<Void> registerPublishedData(
+  RestResponse<Void> registerPublishedData(
       @PathParam("doi") String doi, @HeaderParam("Authorization") String accessToken);
 
   @GET
   @Path("/api/v3/publisheddata/count")
-  public RestResponse<CountResponse> countPublishedData(
+  RestResponse<CountResponse> countPublishedData(
       @QueryParam("filter") String where, @HeaderParam("Authorization") String accessToken);
 
   @POST
   @Path("/api/v3/publisheddata")
-  public RestResponse<PublishedData> createPublishedData(
+  RestResponse<PublishedData> createPublishedData(
       @HeaderParam("Authorization") String accessToken, CreatePublishedDataDto publishedData);
 
   @POST
   @Path("/api/v3/jobs")
-  public RestResponse<OutputJobDto> createJob(
+  RestResponse<OutputJobDto> createJob(
       @HeaderParam("Authorization") String accessToken, CreateJobDto createJobDto);
 }

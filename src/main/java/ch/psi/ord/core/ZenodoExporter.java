@@ -9,7 +9,7 @@ import ch.psi.s3_broker.client.S3BrokerService;
 import ch.psi.s3_broker.model.DatasetUrls;
 import ch.psi.s3_broker.model.PublishedDataUrls;
 import ch.psi.s3_broker.model.S3Url;
-import ch.psi.scicat.client.ScicatClient;
+import ch.psi.scicat.client.ScicatService;
 import ch.psi.scicat.model.v3.PublishedData;
 import com.apicatalog.jsonld.JsonLd;
 import com.apicatalog.jsonld.JsonLdError;
@@ -36,7 +36,7 @@ import org.modelmapper.ModelMapper;
 @Slf4j
 @ApplicationScoped
 public class ZenodoExporter {
-  @Inject ScicatClient scicatClient;
+  @RestClient @Inject ScicatService scicatService;
   @RestClient @Inject S3BrokerService s3BrokerService;
   @Inject private ModelMapper modelMapper;
   private RdfMapper rdfMapper = new RdfMapper();
@@ -80,7 +80,7 @@ public class ZenodoExporter {
       }
     }
 
-    RestResponse<PublishedData> res = scicatClient.getPublishedDataById(doi);
+    RestResponse<PublishedData> res = scicatService.getPublishedDataById(doi);
     PublishedData publishedData = res.getEntity();
     ZenodoDataset zenodoDataset = modelMapper.map(publishedData, ZenodoDataset.class);
     zenodoDataset.setDistribution(distribution).setExpires(brokerResponse.getExpires());
