@@ -49,11 +49,6 @@ public class RoCrateController {
 
   @Inject ScicatClient scicatClient;
 
-  public RoCrateController(RoCrateExporter exporter, RoCrateImporter importer) {
-    this.exporter = exporter;
-    this.importer = importer;
-  }
-
   @ServerExceptionMapper
   public Response mapRiotException(RiotException e) {
     log.error("Failed to process the crate metadata", e);
