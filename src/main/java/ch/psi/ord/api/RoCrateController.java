@@ -51,6 +51,7 @@ public class RoCrateController {
 
   @ServerExceptionMapper
   public Response mapRiotException(RiotException e) {
+    log.error("Failed to process the crate metadata", e);
     return Response.status(Status.BAD_REQUEST)
         .entity(new Error("Failed to parse the metadata descriptor"))
         .build();
