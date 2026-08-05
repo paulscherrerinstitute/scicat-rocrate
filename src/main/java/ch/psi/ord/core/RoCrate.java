@@ -170,13 +170,8 @@ public class RoCrate implements AutoCloseable {
     }
   }
 
-  public List<Path> listFiles() {
-    List<Path> l = new ArrayList<>();
-    l.add(base);
-    l.addAll(files.get(FILE_KEY));
-    l.addAll(files.get(DIR_KEY));
-
-    return l;
+  public boolean contains(Path p) {
+    return base.equals(p) || files.get(FILE_KEY).contains(p) || files.get(DIR_KEY).contains(p);
   }
 
   private void parseMetadataDescriptor(InputStream document) throws RiotException {
