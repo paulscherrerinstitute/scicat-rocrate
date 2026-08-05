@@ -223,17 +223,22 @@ public class RoCrate implements AutoCloseable {
 
   private boolean isValidPath(Path p) {
     if (p.toString().getBytes(StandardCharsets.UTF_8).length >= maxPathLength) {
+      log.error("Path '{}' exceeds 'rocrate.max-path-length' ({})", p, maxPathLength);
       return false;
     }
 
     for (Path segment : p) {
       if (segment.toString().getBytes(StandardCharsets.UTF_8).length >= maxPathSegmentLength) {
+        log.error(
+            "Path '{}' exceeds 'rocrate.max-path-segment-length' ({})", p, maxPathSegmentLength);
         return false;
       }
     }
 
     if (!p.startsWith(base)) {
       // see: https://snyk.io/research/zip-slip-vulnerability
+      log.error(
+          "Path '{}' is outside of of the base extraction directory of the crate '{}'", p, base);
       return false;
     }
 
