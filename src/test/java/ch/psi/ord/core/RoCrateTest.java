@@ -115,7 +115,7 @@ public class RoCrateTest {
         Path base = crate.getBase();
         for (String expected : expectedPaths) {
           assertTrue(
-              crate.listFiles().contains(base.resolve(expected)),
+              crate.contains(base.resolve(expected)),
               String.format("Path was not extracted: %s", expected));
         }
       }
