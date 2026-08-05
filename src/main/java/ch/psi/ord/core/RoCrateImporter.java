@@ -227,11 +227,11 @@ public class RoCrateImporter {
       return report;
     }
 
-    for (Resource p : potentialPublications) {
-      var subreport = validatePublication(p);
+    for (Resource r : potentialPublications) {
+      var subreport = validatePublication(r);
       if (subreport.isValid()) {
-        report.addEntity(
-            new Entity<>(p.isURIResource() ? p.getURI() : p.getId().toString(), subreport.get()));
+        Publication p = subreport.get();
+        report.addEntity(new Entity<>(crate.toRelativeId(p.getResourceIdentifier()), p));
       } else {
         report.getErrors().addAll(subreport.getErrors());
       }
