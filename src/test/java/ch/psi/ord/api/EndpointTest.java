@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import ch.psi.ord.core.RoCrate;
 import ch.psi.s3_broker.client.S3BrokerService;
 import ch.psi.scicat.cli.ScicatCli;
-import ch.psi.scicat.client.ScicatClient;
+import ch.psi.scicat.client.ScicatService;
 import ch.psi.scicat.model.v3.CredentialsDto;
 import ch.psi.scicat.model.v3.Dataset;
 import io.quarkus.test.InjectMock;
@@ -24,7 +24,7 @@ import java.util.zip.ZipOutputStream;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 public abstract class EndpointTest {
-  @InjectMock protected ScicatClient scicatClient;
+  @InjectMock @RestClient protected ScicatService scicatService;
   @InjectMock @RestClient protected S3BrokerService s3BrokerService;
   @InjectMock protected ScicatCli scicatCli;
 

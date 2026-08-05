@@ -4,7 +4,7 @@ import ch.psi.ord.api.ExtraMediaType;
 import ch.psi.s3_broker.client.S3BrokerService;
 import ch.psi.s3_broker.model.DatasetUrls;
 import ch.psi.s3_broker.model.PublishedDataUrls;
-import ch.psi.scicat.client.ScicatClient;
+import ch.psi.scicat.client.ScicatService;
 import ch.psi.scicat.model.v3.Dataset;
 import ch.psi.scicat.model.v3.PublishedData;
 import edu.kit.datamanager.ro_crate.RoCrate;
@@ -36,7 +36,7 @@ public class RoCrateExporter {
   private RoCrate crate = new RoCrate();
   private RoCrateMetadataContext context = new RoCrateMetadataContext(StaticEntities.CONTEXT_NODE);
 
-  @Inject ScicatClient scicatClient;
+  @RestClient @Inject ScicatService scicatService;
   @RestClient @Inject S3BrokerService s3BrokerService;
 
   public RoCrateExporter() {
@@ -46,7 +46,7 @@ public class RoCrateExporter {
   // FIXME: Use ExceptionMapper
   public void addPublications(List<String> dois) throws ClientWebApplicationException {
     for (int i = 0; i < dois.size(); i++) {
-      var res = scicatClient.getPublishedDataById(dois.get(i));
+      var res = scicatService.getPublishedDataById(dois.get(i));
       // NOTE: we make the first DOI in the list the root of the RO-Crate
       addPublication(res.getEntity(), i == 0);
     }
@@ -113,7 +113,7 @@ public class RoCrateExporter {
         .getPidArray()
         .forEach(
             pid -> {
-              Dataset dataset = scicatClient.getDatasetByPid(pid).getEntity();
+              Dataset dataset = scicatService.getDatasetByPid(pid).getEntity();
               DataEntityBuilder datasetBuilder =
                   new DataEntityBuilder()
                       .addType(SchemaDO.Dataset.getLocalName())

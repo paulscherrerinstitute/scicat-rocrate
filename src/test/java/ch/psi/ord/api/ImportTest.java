@@ -18,6 +18,7 @@ import ch.psi.scicat.model.v3.OutputJobDto;
 import ch.psi.scicat.model.v3.PublishedData;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.ValidatableResponse;
+import jakarta.ws.rs.core.Response.Status;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,8 +67,12 @@ public class ImportTest extends EndpointTest {
 
   private static Consumer<ImportTest> checkTokenValidity(boolean isValid) {
     return test -> {
-      if (test.scicatClient != null) {
-        when(test.scicatClient.checkTokenValidity(any())).thenReturn(isValid);
+      if (test.scicatService != null) {
+        when(test.scicatService.myidentity(any()))
+            .thenReturn(
+                isValid
+                    ? RestResponse.ok(TestData.rocrateUser)
+                    : RestResponse.status(Status.UNAUTHORIZED));
       }
     };
   }
@@ -76,19 +81,19 @@ public class ImportTest extends EndpointTest {
       checkTokenValidity(true)
           .andThen(
               test -> {
-                if (test.scicatClient != null) {
-                  when(test.scicatClient.countPublishedData(any(), any()))
+                if (test.scicatService != null) {
+                  when(test.scicatService.countPublishedData(any(), any()))
                       .thenReturn(RestResponse.ok(new CountResponse().setCount(0)));
-                  when(test.scicatClient.myidentity(any()))
+                  when(test.scicatService.myidentity(any()))
                       .thenReturn(RestResponse.ok(TestData.rocrateUser));
-                  when(test.scicatClient.createDataset(any(), any(CreateDatasetDto.class)))
+                  when(test.scicatService.createDataset(any(), any(CreateDatasetDto.class)))
                       .thenReturn(RestResponse.ok(new Dataset().setPid("some-pid")));
-                  when(test.scicatClient.createPublishedData(
+                  when(test.scicatService.createPublishedData(
                           any(), any(CreatePublishedDataDto.class)))
                       .thenReturn(RestResponse.ok(new PublishedData().setDoi("some-pid")));
-                  when(test.scicatClient.registerPublishedData(any(), any()))
+                  when(test.scicatService.registerPublishedData(any(), any()))
                       .thenReturn(RestResponse.ok());
-                  when(test.scicatClient.createJob(any(), any()))
+                  when(test.scicatService.createJob(any(), any()))
                       .thenReturn(RestResponse.ok(new OutputJobDto().setId("job-1")));
                 }
               });
@@ -105,10 +110,10 @@ public class ImportTest extends EndpointTest {
       checkTokenValidity(true)
           .andThen(
               test -> {
-                if (test.scicatClient != null) {
-                  when(test.scicatClient.myidentity(any()))
+                if (test.scicatService != null) {
+                  when(test.scicatService.myidentity(any()))
                       .thenReturn(RestResponse.ok(TestData.rocrateUser));
-                  when(test.scicatClient.countPublishedData(
+                  when(test.scicatService.countPublishedData(
                           String.format(
                               RoCrateImporter.publicationExistsFilter,
                               DoiUtils.buildStandardUrl(PUBLICATION_DOI)),
@@ -121,8 +126,8 @@ public class ImportTest extends EndpointTest {
       checkTokenValidity(true)
           .andThen(
               test -> {
-                if (test.scicatClient != null) {
-                  when(test.scicatClient.myidentity(any()))
+                if (test.scicatService != null) {
+                  when(test.scicatService.myidentity(any()))
                       .thenReturn(RestResponse.ok(TestData.noGroupUser));
                 }
               });
@@ -246,7 +251,7 @@ public class ImportTest extends EndpointTest {
                       201,
                       MOCK_NEW_PUBLICATION_WITH_FILES,
                       res -> {
-                        if (scicatClient != null) {
+                        if (scicatService != null) {
                           return;
                         }
                         Map<String, String> importMap = res.extract().jsonPath().getMap("$");

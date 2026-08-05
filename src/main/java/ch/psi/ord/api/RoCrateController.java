@@ -8,7 +8,7 @@ import ch.psi.ord.model.Error;
 import ch.psi.ord.model.ExportFormat;
 import ch.psi.ord.model.ValidationReport;
 import ch.psi.rdf.deser.RdfDeserializationException;
-import ch.psi.scicat.client.ScicatClient;
+import ch.psi.scicat.client.ScicatService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.HeaderParam;
@@ -16,6 +16,7 @@ import jakarta.ws.rs.NameBinding;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -34,6 +35,7 @@ import java.util.zip.ZipException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.riot.RiotException;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
 import org.jboss.resteasy.reactive.RestHeader;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
@@ -47,7 +49,7 @@ public class RoCrateController {
 
   @Inject RoCrateImporter importer;
 
-  @Inject ScicatClient scicatClient;
+  @RestClient @Inject ScicatService scicatService;
 
   @ServerExceptionMapper
   public Response mapRiotException(RiotException e) {
@@ -76,10 +78,18 @@ public class RoCrateController {
   @ServerRequestFilter()
   public Optional<Response> scicatAuthFilter(ContainerRequestContext requestContext) {
     String scicatToken = requestContext.getHeaderString("api-key");
-    if (!scicatClient.checkTokenValidity(scicatToken)) {
+    if (!isTokenValid(scicatToken)) {
       return Optional.of(Response.status(Status.UNAUTHORIZED).build());
     }
     return Optional.empty();
+  }
+
+  private boolean isTokenValid(String accessToken) {
+    try {
+      return scicatService.myidentity(accessToken).getStatus() == 200;
+    } catch (WebApplicationException e) {
+      return false;
+    }
   }
 
   private Optional<Response> export(List<String> identifiers) {

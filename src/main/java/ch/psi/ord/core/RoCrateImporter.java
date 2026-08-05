@@ -11,7 +11,7 @@ import ch.psi.rdf.RdfMapper;
 import ch.psi.rdf.deser.DeserializationReport;
 import ch.psi.rdf.deser.RdfDeserializationException;
 import ch.psi.scicat.cli.ScicatCli;
-import ch.psi.scicat.client.ScicatClient;
+import ch.psi.scicat.client.ScicatService;
 import ch.psi.scicat.model.v3.CountResponse;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
 import ch.psi.scicat.model.v3.CreateJobDto;
@@ -45,6 +45,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ReasonerRegistry;
 import org.apache.jena.vocabulary.SchemaDO;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.RestResponse.StatusCode;
 import org.modelmapper.ModelMapper;
@@ -59,7 +60,7 @@ public class RoCrateImporter {
   private RdfMapper rdfMapper = new RdfMapper();
   private Set<String> datasetsToArchive = new HashSet<>();
   @Inject private ModelMapper modelMapper;
-  @Inject private ScicatClient scicatClient;
+  @RestClient @Inject private ScicatService scicatService;
   @Inject private ScicatCli scicatCli;
   private MyIdentity userIdentity;
   private String ownerGroup;
@@ -84,7 +85,7 @@ public class RoCrateImporter {
   public Map<String, String> importCrate(
       ValidationReport report, String scicatToken, String ownerGroup) {
     Map<String, String> importMap = new HashMap<>();
-    userIdentity = scicatClient.myidentity(scicatToken).getEntity();
+    userIdentity = scicatService.myidentity(scicatToken).getEntity();
     this.ownerGroup = resolveOwnerGroup(ownerGroup);
     for (var entity : report.getEntities()) {
       if (entity.object() instanceof Publication publication) {
@@ -117,7 +118,7 @@ public class RoCrateImporter {
     }
 
     OutputJobDto archiveJob =
-        scicatClient
+        scicatService
             .createJob(
                 scicatToken,
                 new CreateJobDto()
@@ -140,7 +141,7 @@ public class RoCrateImporter {
       Map<String, String> importMap, Publication publication, String scicatToken) {
     if (publication.getIdentifier() != null) {
       CountResponse count =
-          scicatClient
+          scicatService
               .countPublishedData(
                   String.format(
                       publicationExistsFilter,
@@ -187,7 +188,7 @@ public class RoCrateImporter {
           .forEach(id -> importMap.put(crate.toRelativeId(id), datasetPid));
     }
 
-    RestResponse<PublishedData> created = scicatClient.createPublishedData(scicatToken, dto);
+    RestResponse<PublishedData> created = scicatService.createPublishedData(scicatToken, dto);
     importMap.put(
         crate.toRelativeId(publication.getResourceIdentifier()), created.getEntity().getDoi());
   }
