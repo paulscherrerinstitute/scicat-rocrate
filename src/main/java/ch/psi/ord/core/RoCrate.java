@@ -1,6 +1,7 @@
 package ch.psi.ord.core;
 
 import com.apicatalog.jsonld.JsonLdOptions;
+import com.apicatalog.jsonld.loader.DocumentLoader;
 import com.apicatalog.jsonld.uri.UriValidationPolicy;
 import io.smallrye.config.Config;
 import io.smallrye.config.SmallRyeConfig;
@@ -49,6 +50,7 @@ public class RoCrate implements AutoCloseable {
       config.getOptionalValue("rocrate.max-path-segment-length", Integer.class).orElse(256);
   private static Integer jsonLdTimeout =
       config.getOptionalValue("jsonld.processing-timeout", Integer.class).orElse(10);
+  private static final DocumentLoader documentLoader = new LoggingDocumentLoader();
 
   private Map<String, List<Path>> files =
       Map.of(FILE_KEY, new ArrayList<>(), DIR_KEY, new ArrayList<>());
@@ -68,6 +70,7 @@ public class RoCrate implements AutoCloseable {
     // https://github.com/apache/jena/issues/4025
     jsonLdOptions.setUriValidation(UriValidationPolicy.SchemeOnly);
     jsonLdOptions.setTimeout(Duration.ofSeconds(jsonLdTimeout));
+    jsonLdOptions.setDocumentLoader(documentLoader);
   }
 
   public static RoCrate fromMetadata(InputStream metadataDescriptor)
