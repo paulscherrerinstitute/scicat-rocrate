@@ -48,9 +48,10 @@ public class RoCrate implements AutoCloseable {
       config.getOptionalValue("rocrate.max-path-length", Integer.class).orElse(4096);
   private static final int maxPathSegmentLength =
       config.getOptionalValue("rocrate.max-path-segment-length", Integer.class).orElse(256);
-  private static Integer jsonLdTimeout =
-      config.getOptionalValue("jsonld.processing-timeout", Integer.class).orElse(10);
-  private static final DocumentLoader documentLoader = new LoggingDocumentLoader();
+  private static final Duration jsonLdTimeout =
+      Duration.ofSeconds(
+          config.getOptionalValue("jsonld.processing-timeout", Integer.class).orElse(10));
+  private static final DocumentLoader documentLoader = new LoggingDocumentLoader(jsonLdTimeout);
 
   private Map<String, List<Path>> files =
       Map.of(FILE_KEY, new ArrayList<>(), DIR_KEY, new ArrayList<>());
@@ -69,7 +70,7 @@ public class RoCrate implements AutoCloseable {
     // required to support percent encoded @id's
     // https://github.com/apache/jena/issues/4025
     jsonLdOptions.setUriValidation(UriValidationPolicy.SchemeOnly);
-    jsonLdOptions.setTimeout(Duration.ofSeconds(jsonLdTimeout));
+    jsonLdOptions.setTimeout(jsonLdTimeout);
     jsonLdOptions.setDocumentLoader(documentLoader);
   }
 
