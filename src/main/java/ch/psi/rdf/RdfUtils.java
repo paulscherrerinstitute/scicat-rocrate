@@ -104,6 +104,16 @@ public class RdfUtils {
         .toSet();
   }
 
+  public static Set<RDFNode> listProperties(
+      Resource subject, Property p, Predicate<RDFNode> predicate) {
+    return subject
+        .getModel()
+        .listObjectsOfProperty(subject, p)
+        .andThen(subject.getModel().listObjectsOfProperty(subject, switchScheme(p)))
+        .filterKeep(predicate)
+        .toSet();
+  }
+
   public static Set<Resource> listResourcesOfType(Model model, Resource type) {
     return model
         .listResourcesWithProperty(RDF.type, type)
