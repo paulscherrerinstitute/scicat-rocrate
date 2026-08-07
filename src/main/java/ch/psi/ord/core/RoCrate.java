@@ -96,7 +96,6 @@ public class RoCrate implements AutoCloseable {
       crate.createTempDirectory();
       Files.write(crate.base.resolve(METADATA_DESCRIPTOR), metadataDescriptor.readAllBytes());
       crate.readMetadataDescriptor();
-      log.warn("{}", crate.model.listSubjects().toList());
     } catch (Throwable t) {
       crate.close();
       throw t;
