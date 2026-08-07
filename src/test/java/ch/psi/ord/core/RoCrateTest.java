@@ -137,15 +137,67 @@ public class RoCrateTest {
   public void test00() throws Exception {
     try (RoCrate crate =
         RoCrate.fromMetadata(
-            new ByteArrayInputStream(
-                """
-                  {
-                     "@id": "percent%20encoded%filename",
-                     "@type": "http://schema.org/Dataset"
-                  }
-                """
-                    .getBytes()))) {
-      assertEquals(1, crate.getModel().listSubjects().toList().size());
+"""
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@type": "CreativeWork",
+      "@id": "ro-crate-metadata.json",
+      "conformsTo": { "@id": "https://w3id.org/ro/crate/1.1" },
+      "about": { "@id": "./" }
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "hasPart": [ { "@id": "percent%20encoded%20filename" } ]
+    },
+    {
+      "@id": "percent%20encoded%20filename",
+      "@type": "Dataset"
+    }
+  ]
+}
+""")) {
+      assertEquals(3, crate.getModel().listSubjects().toList().size());
+    }
+  }
+
+  @Nested
+  @DisplayName("Root discovery")
+  class RootDiscovery {
+    @Test
+    @DisplayName("The metadata descriptor and the root dataset are identified")
+    public void test00() throws Exception {
+      try (RoCrate crate =
+          RoCrate.fromMetadata(
+"""
+{
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "http://schema.org/CreativeWork",
+      "http://schema.org/about": { "@id": "./" }
+    },
+    {
+      "@id": "./",
+      "@type": "http://schema.org/Dataset"
+    }
+  ]
+}
+""")) {
+        assertTrue(
+            crate.getMetadataDescriptor().getURI().endsWith(RoCrate.METADATA_DESCRIPTOR),
+            String.format("Unexpected metadata descriptor: %s", crate.getMetadataDescriptor()));
+        assertEquals(crate.getBase().toUri().toString(), crate.getRoot().getURI());
+      }
+    }
+
+    @Test
+    @DisplayName("A crate without a root is rejected")
+    public void test01() {
+      RoCrateException e = assertThrows(RoCrateException.class, () -> RoCrate.fromMetadata("{ }"));
+      assertEquals("Expected exactly one metadata descriptor, but found 0", e.getMessage());
     }
   }
 }
