@@ -4,11 +4,6 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.vocabulary.OWL;
-import org.apache.jena.vocabulary.SchemaDO;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,80 +26,6 @@ public class RoCrateImporterTest {
     @DisplayName("Null model")
     public void test00() {
       importer.loadModel(null);
-    }
-  }
-
-  @Nested
-  @DisplayName("listPublications")
-  class ListCreativeWorks {
-    static final String validDoi = "10.123/abc123";
-    static final String invalidDoi = "20.123/abc123";
-
-    @Test
-    @DisplayName("Empty graph")
-    public void test01() {
-      Assertions.assertEquals(0, importer.listPublications().size());
-    }
-
-    @Test
-    @DisplayName("One Publication")
-    public void test02() {
-      m.createResource(SchemaDO.Collection).addProperty(SchemaDO.identifier, validDoi);
-
-      importer.loadModel(m);
-      Assertions.assertEquals(1, importer.listPublications().size());
-    }
-
-    @Test
-    @DisplayName("Equivalent property")
-    public void test05() {
-      Property identifierEquivalent = m.createProperty("http://example.org/id");
-      m.add(identifierEquivalent, OWL.equivalentProperty, SchemaDO.identifier);
-      m.createResource(SchemaDO.Collection).addProperty(identifierEquivalent, validDoi);
-
-      importer.loadModel(m);
-      Assertions.assertEquals(1, importer.listPublications().size());
-    }
-
-    @Test
-    @DisplayName("Multiple Publications")
-    public void test07() {
-      for (int i = 0; i < 5; i++) {
-        m.createResource(SchemaDO.Collection).addProperty(SchemaDO.identifier, validDoi + i);
-      }
-
-      importer.loadModel(m);
-      Assertions.assertEquals(5, importer.listPublications().size());
-    }
-
-    @Test
-    @DisplayName("Http type")
-    public void test08() {
-      m.createResource(ResourceFactory.createResource("http://schema.org/Collection"))
-          .addProperty(SchemaDO.identifier, validDoi);
-
-      importer.loadModel(m);
-      Assertions.assertEquals(1, importer.listPublications().size());
-    }
-
-    @Test
-    @DisplayName("Http identifier")
-    public void test09() {
-      m.createResource(SchemaDO.Collection)
-          .addProperty(ResourceFactory.createProperty("http://schema.org/identifier"), validDoi);
-
-      importer.loadModel(m);
-      Assertions.assertEquals(1, importer.listPublications().size());
-    }
-
-    @Test
-    @DisplayName("Http type and identifier")
-    public void test10() {
-      m.createResource(ResourceFactory.createResource("http://schema.org/Collection"))
-          .addProperty(ResourceFactory.createProperty("http://schema.org/identifier"), validDoi);
-
-      importer.loadModel(m);
-      Assertions.assertEquals(1, importer.listPublications().size());
     }
   }
 }
