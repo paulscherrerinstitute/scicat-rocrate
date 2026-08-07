@@ -72,7 +72,13 @@ public class ScicatCli {
       mapper.writeValue(metadataPath.toFile(), dto);
       if (!fileList.isEmpty()) {
         fileListPath = Files.createTempFile("scicat-cli-filelist", ".tmp");
-        Files.write(fileListPath, fileList);
+        List<String> relativePaths =
+            fileList.stream()
+                .map(
+                    absolutePath ->
+                        Path.of(dto.getSourceFolder()).relativize(Path.of(absolutePath)).toString())
+                .toList();
+        Files.write(fileListPath, relativePaths);
       }
       ProcessBuilder pb =
           new ProcessBuilder(
