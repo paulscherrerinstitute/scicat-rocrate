@@ -5,10 +5,10 @@ import static ch.psi.rdf.RdfUtils.listResourcesOfType;
 import ch.psi.ord.model.MissingDataError;
 import ch.psi.ord.model.NoEntityFound;
 import ch.psi.ord.model.Publication;
+import ch.psi.ord.model.RootDataset;
 import ch.psi.ord.model.ValidationReport;
 import ch.psi.ord.model.ValidationReport.Entity;
 import ch.psi.rdf.RdfMapper;
-import ch.psi.rdf.deser.DeserializationReport;
 import ch.psi.rdf.deser.RdfDeserializationException;
 import ch.psi.scicat.cli.ScicatCli;
 import ch.psi.scicat.client.ScicatService;
@@ -221,19 +221,28 @@ public class RoCrateImporter {
       report.getErrors().addAll(dataErrors);
     }
 
-    List<Resource> potentialPublications = listPublications();
-    if (potentialPublications.isEmpty()) {
+    RootDataset rootDataset =
+        rdfMapper
+            .deserialize(inferredModel.getResource(crate.getRoot().getURI()), RootDataset.class)
+            .get();
+
+    if (rootDataset.isEmpty()) {
       report.addError(new NoEntityFound());
       return report;
     }
 
-    for (Resource r : potentialPublications) {
-      var subreport = validatePublication(r);
-      if (subreport.isValid()) {
-        Publication p = subreport.get();
-        report.addEntity(new Entity<>(crate.toRelativeId(p.getResourceIdentifier()), p));
-      } else {
-        report.getErrors().addAll(subreport.getErrors());
+    for (Map.Entry<Class<?>, Set<Resource>> entry : rootDataset.getHasPart().entrySet()) {
+      Class<?> targetClass = entry.getKey();
+      Set<Resource> resources = entry.getValue();
+
+      for (Resource r : resources) {
+        var subreport = rdfMapper.deserialize(r, targetClass);
+        if (subreport.isValid()) {
+          String id = crate.toRelativeId(r.toString());
+          report.addEntity(new Entity<>(id, subreport.get()));
+        } else {
+          report.getErrors().addAll(subreport.getErrors());
+        }
       }
     }
 
@@ -272,15 +281,5 @@ public class RoCrateImporter {
         });
 
     return errors;
-  }
-
-  public List<Resource> listPublications() {
-    return new ArrayList<>(
-        listResourcesOfType(this.inferredModel, SchemaDO.Collection, (subject) -> true));
-  }
-
-  public DeserializationReport<Publication> validatePublication(Resource subject)
-      throws RdfDeserializationException {
-    return rdfMapper.deserialize(subject, Publication.class);
   }
 }
