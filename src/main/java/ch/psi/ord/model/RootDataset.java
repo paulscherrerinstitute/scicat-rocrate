@@ -40,12 +40,17 @@ public class RootDataset {
     public RootDataset deserialize(RDFNode node, RdfDeserializationContext context)
         throws RdfDeserializationException {
       RootDataset result = new RootDataset();
-      walkHasPartTree(result, node.asResource());
+      walkHasPartTree(result, node.asResource(), new HashSet<>());
 
       return result;
     }
 
-    private void walkHasPartTree(RootDataset result, Resource subject) {
+    private void walkHasPartTree(RootDataset result, Resource subject, Set<Resource> visited) {
+      if (!visited.add(subject)) {
+        log.warn("Skipping cyclic reference to '{}'", subject);
+        return;
+      }
+
       Set<Resource> parts =
           listProperties(subject, SchemaDO.hasPart).stream()
               .filter(node -> node.isResource())
@@ -58,7 +63,7 @@ public class RootDataset {
         } else if (isOfType(r, SchemaDO.Dataset)) {
           result.hasPart.get(Dataset.class).add(r);
         } else {
-          walkHasPartTree(result, r);
+          walkHasPartTree(result, r, visited);
         }
       }
     }
