@@ -30,8 +30,3 @@ quarkus:
   swagger-ui:
     path: /explorer
     always-include: true
-
-titanium:
-  jsonld:
-    cache:
-      size: 10
