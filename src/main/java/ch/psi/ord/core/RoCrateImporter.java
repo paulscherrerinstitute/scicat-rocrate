@@ -2,6 +2,7 @@ package ch.psi.ord.core;
 
 import static ch.psi.rdf.RdfUtils.listResourcesOfType;
 
+import ch.psi.ord.model.Dataset;
 import ch.psi.ord.model.MissingDataError;
 import ch.psi.ord.model.NoEntityFound;
 import ch.psi.ord.model.Publication;
@@ -90,8 +91,10 @@ public class RoCrateImporter {
     for (var entity : report.getEntities()) {
       if (entity.object() instanceof Publication publication) {
         importPublication(importMap, publication, scicatToken);
+      } else if (entity.object() instanceof Dataset dataset) {
+        importDataset(importMap, dataset, scicatToken);
       } else {
-        throw new NotImplementedException("Only Publications are supported for now");
+        throw new NotImplementedException("Only Publications and Datasets are supported for now");
       }
     }
     submitArchiveJob(scicatToken);
@@ -135,6 +138,14 @@ public class RoCrateImporter {
   private void scheduleForArchival(String pid) {
     datasetsToArchive.add(pid);
     crate.setScheduledForArchival(true);
+  }
+
+  private void importDataset(Map<String, String> importMap, Dataset dataset, String scicatToken) {
+    CreateDatasetDto dto = modelMapper.map(dataset, CreateDatasetDto.class);
+    dto.setOwnerGroup(ownerGroup);
+    String pid = scicatCli.ingestDataset(scicatToken, dto);
+    scheduleForArchival(pid);
+    importMap.put(crate.toRelativeId(dataset.getResourceIdentifier()), pid);
   }
 
   public void importPublication(
