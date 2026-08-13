@@ -42,8 +42,12 @@
       },
       "datePublished": "2023-01-01",
       "hasPart": [
-        { "@id": "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5" },
-        { "@id": "https://doi.org/10.16907/4b55cbae-ac98-445a-a15e-1534b2a8b01f" }
+        {
+          "@id": "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"
+        },
+        {
+          "@id": "https://doi.org/10.16907/4b55cbae-ac98-445a-a15e-1534b2a8b01f"
+        }
       ]
     },
     {
@@ -155,44 +159,44 @@
     },
     {
       "name": "Oleksandr Yefanov",
-      "@id": "03528919-10f3-4727-9307-5db64bb4a14d",
-      "@type": "Person",
       "givenName": "Oleksandr",
       "familyName": "Yefanov",
       "email": "oleksandr.yefanov@example.com",
+      "@id": "03528919-10f3-4727-9307-5db64bb4a14d",
+      "@type": "Person",
       "affiliation": {
         "@id": "https://ror.org/03eh3y714"
       }
     },
     {
       "name": "Gabriel Bernardo",
-      "@id": "8d7b0d43-ff13-43cf-a3bc-1f8243c96027",
-      "@type": "Person",
       "givenName": "Gabriel",
       "familyName": "Bernardo",
       "email": "gabriel.bernardo@example.com",
+      "@id": "8d7b0d43-ff13-43cf-a3bc-1f8243c96027",
+      "@type": "Person",
       "affiliation": {
         "@id": "https://ror.org/03eh3y714"
       }
     },
     {
       "name": "Doru Constantin",
-      "@id": "98c78fd7-8f0b-491d-8b71-ac9b45525ad7",
-      "@type": "Person",
       "givenName": "Doru",
       "familyName": "Constantin",
       "email": "doru.constantin@example.com",
+      "@id": "98c78fd7-8f0b-491d-8b71-ac9b45525ad7",
+      "@type": "Person",
       "affiliation": {
         "@id": "https://ror.org/03eh3y714"
       }
     },
     {
       "name": "Maik Kahnt",
-      "@id": "83738cc6-de96-440c-abee-884210d34d02",
-      "@type": "Person",
       "givenName": "Maik",
       "familyName": "Kahnt",
       "email": "maik.kahnt@example.com",
+      "@id": "83738cc6-de96-440c-abee-884210d34d02",
+      "@type": "Person",
       "affiliation": {
         "@id": "https://ror.org/03eh3y714"
       }
