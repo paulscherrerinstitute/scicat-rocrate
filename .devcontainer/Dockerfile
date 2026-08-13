@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/devcontainers/java:25
 
-ARG SCICAT_CLI_VERSION=3.1.0
+ARG SCICAT_CLI_VERSION=3.4.0-alpha1
 ENV NVM_DIR="/usr/local/share/nvm"
 
 RUN mkdir --parents --mode=777 /rocrate/archive /rocrate/extract

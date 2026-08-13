@@ -92,7 +92,10 @@ public class ScicatCli {
       String scicatToken, CreateDatasetDto dto, Collection<String> fileList) {
     Path metadataPath = null;
     Path fileListPath = null;
-
+    boolean remoteFiles =
+        !(dto.getSourceFolderHost() == null
+            || dto.getSourceFolderHost().isEmpty()
+            || dto.getSourceFolderHost().isBlank());
     try {
       metadataPath = Files.createTempFile("scicat-cli-metadata", ".tmp");
       mapper.writeValue(metadataPath.toFile(), dto);
@@ -106,6 +109,7 @@ public class ScicatCli {
                 .toList();
         Files.write(fileListPath, relativePaths);
       }
+
       ProcessBuilder pb =
           new ProcessBuilder(
                   cliPath,
@@ -114,7 +118,7 @@ public class ScicatCli {
                   scicatUrl,
                   "--token",
                   scicatToken,
-                  "--nocopy",
+                  remoteFiles ? "--remote-files" : "--nocopy",
                   "--ingest",
                   "--noninteractive",
                   "--allowexistingsource",
@@ -152,22 +156,22 @@ public class ScicatCli {
                           "CLI reported success, but no valid PID matching pattern was found in"
                               + " output."));
 
-      moveData(pid, dto.getSourceFolder(), fileList);
+      if (!remoteFiles) {
+        moveData(pid, dto.getSourceFolder(), fileList);
 
-      scicatService.updateDataset(
-          scicatToken,
-          pid,
-          new UpdateDatasetDto()
-              .setSourceFolder("/")
-              .setDatasetlifecycle(
-                  new DatasetLifeCycle()
-                      .setArchivable(true)
-                      .setOnCentralDisk(false)
-                      .setRetrievable(false)
-                      .setArchiveStatusMessage("datasetCreated")));
+        scicatService.updateDataset(
+            scicatToken,
+            pid,
+            new UpdateDatasetDto()
+                .setSourceFolder("/")
+                .setDatasetlifecycle(
+                    new DatasetLifeCycle()
+                        .setArchivable(true)
+                        .setOnCentralDisk(false)
+                        .setRetrievable(false)));
+      }
 
       return pid;
-
     } catch (IOException e) {
       throw new ScicatCliException(
           "Failed to read/write filesystem dependencies or start process", e);
