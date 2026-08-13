@@ -2,14 +2,12 @@ package ch.psi.ord.model;
 
 import ch.psi.rdf.annotations.RdfClass;
 import ch.psi.rdf.annotations.RdfProperty;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Data;
 import org.apache.jena.vocabulary.SchemaDO;
 
 @Data
 @RdfClass(typesUri = SchemaDO.NS + "Person")
-public class Person {
+public class Person2 {
   @RdfProperty(uri = SchemaDO.NS + "name", minCardinality = 1)
   public String name;
 
@@ -21,7 +19,4 @@ public class Person {
 
   @RdfProperty(uri = SchemaDO.NS + "email", minCardinality = 1)
   public String email;
-
-  @RdfProperty(uri = SchemaDO.NS + "affiliation", minCardinality = 1)
-  public List<Organization> affiliation = new ArrayList<>();
 }
