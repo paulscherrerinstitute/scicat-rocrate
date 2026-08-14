@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.zip.ZipException;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -61,8 +60,6 @@ public class RoCrate implements AutoCloseable {
   @Getter
   @Accessors(fluent = true)
   private boolean hasAttachedData = false;
-
-  @Getter @Setter private boolean scheduledForArchival = false;
 
   private JsonLdOptions jsonLdOptions = new JsonLdOptions();
 
@@ -157,13 +154,6 @@ public class RoCrate implements AutoCloseable {
   @Override
   public void close() {
     if (base == null || !Files.exists(base)) {
-      return;
-    }
-
-    if (scheduledForArchival) {
-      log.info(
-          "Crate at '{}' is scheduled for archival, skipping filesystem cleanup",
-          base.toAbsolutePath());
       return;
     }
 

@@ -38,14 +38,14 @@ quarkus build -Dquarkus.container-image.push=true
 
 This service can be configured using the following environment variables:
 
-| Name                               | Description                                                        | Default value               |
-|------------------------------------|--------------------------------------------------------------------|-----------------------------|
-| `QUARKUS_REST_CLIENT_SCICAT_URL`   | Base URL of the SciCat backend                                     | http://backend.localhost    |
-| `QUARKUS_REST_CLIENT_S3BROKER_URL` | Base URL of the S3 Broker                                          | https://s3-broker.localhost |
-| `SCICAT_CLI_PATH`                  | Path of the scicat-cli executable                                  | /usr/local/bin/scicat-cli   |
-| `SCICAT_PID_PREFIX`                | PID prefix of the SciCat instance (used to match cli output)       | PID.SAMPLE.PREFIX           |
-| `ROCRATE_EXTRACT_DIRECTORY`        | Path where the service extracts crates                             | /rocrate/extract            |
-| `ROCRATE_ARCHIVE_DIRECTORY`        | Path where the service symlinks data for archival                  | /rocrate/archive            |
-| `ROCRATE_MAX_PATH_LENGTH`          | Maximum length (in bytes) of an extracted path                     | 4096                        |
-| `ROCRATE_MAX_PATH_SEGMENT_LENGTH`  | Maximum length (in bytes) of a single segment of an extracted path | 256                         |
-| `JSONLD_PROCESSING_TIMEOUT`        | Maximum allowed time (in seconds) to process a JSON-LD document.   | 10                          |
+| Name                               | Description                                                                                              | Default value               |
+|------------------------------------|----------------------------------------------------------------------------------------------------------|-----------------------------|
+| `QUARKUS_REST_CLIENT_SCICAT_URL`   | Base URL of the SciCat backend                                                                           | http://backend.localhost    |
+| `QUARKUS_REST_CLIENT_S3BROKER_URL` | Base URL of the S3 Broker                                                                                | https://s3-broker.localhost |
+| `SCICAT_CLI_PATH`                  | Path of the scicat-cli executable                                                                        | /usr/local/bin/scicat-cli   |
+| `SCICAT_PID_PREFIX`                | PID prefix of the SciCat instance (used to match cli output)                                             | PID.SAMPLE.PREFIX           |
+| `ROCRATE_EXTRACT_DIRECTORY`        | Path where the service extracts crates                                                                   | /rocrate/extract            |
+| `ROCRATE_ARCHIVE_DIRECTORY`        | Path where the service moves data for archival (must be on the same filesystem as the extract directory) | /rocrate/archive            |
+| `ROCRATE_MAX_PATH_LENGTH`          | Maximum length (in bytes) of an extracted path                                                           | 4096                        |
+| `ROCRATE_MAX_PATH_SEGMENT_LENGTH`  | Maximum length (in bytes) of a single segment of an extracted path                                       | 256                         |
+| `JSONLD_PROCESSING_TIMEOUT`        | Maximum allowed time (in seconds) to process a JSON-LD document.                                         | 10                          |
