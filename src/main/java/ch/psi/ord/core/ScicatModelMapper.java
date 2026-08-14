@@ -305,6 +305,7 @@ public class ScicatModelMapper {
         .addMappings(
             m -> {
               m.when(isNotNull()).map(Dataset::getName, CreateDatasetDto::setDatasetName);
+              m.when(isNotNull()).map(Dataset::getDescription, CreateDatasetDto::setDescription);
               m.when(isNotNull()).map(src -> DatasetType.BASE, CreateDatasetDto::setType);
               m.when(isNotNull())
                   .using(uriPathExtractor)
