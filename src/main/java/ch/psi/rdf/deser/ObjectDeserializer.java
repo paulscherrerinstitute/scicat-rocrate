@@ -81,7 +81,14 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
         checkCardinalities(subject, propertyAnnotation, values.size())
             .ifPresent(e -> context.addError(e));
 
-        if (field.getType().isAssignableFrom(List.class)) {
+        if (field.isAnnotationPresent(RdfDeserialize.class)) {
+          if (!values.isEmpty()) {
+            setField(
+                field,
+                obj,
+                customDeserializer(field).deserialize(values.iterator().next(), context));
+          }
+        } else if (field.getType().isAssignableFrom(List.class)) {
           Class<?> listType =
               (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
           RdfDeserializer<?> elementDeserializer = context.getDeserializer(listType);
@@ -100,14 +107,6 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
           }
 
           RdfDeserializer<?> fieldDeserializer = context.getDeserializer(field.getType());
-          if (field.isAnnotationPresent(RdfDeserialize.class)) {
-            try {
-              fieldDeserializer = createInstance(field.getAnnotation(RdfDeserialize.class).using());
-            } catch (ReflectiveOperationException e) {
-              throw new RdfDeserializationException(
-                  String.format("Unable to instantiate custom field deserializer"), e);
-            }
-          }
           Object value = fieldDeserializer.deserialize(values.iterator().next(), context);
           setField(field, obj, value);
         }
@@ -117,6 +116,18 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
     }
 
     return obj;
+  }
+
+  private RdfDeserializer<?> customDeserializer(Field field) throws RdfDeserializationException {
+    try {
+      return createInstance(field.getAnnotation(RdfDeserialize.class).using());
+    } catch (ReflectiveOperationException e) {
+      throw new RdfDeserializationException(
+          String.format(
+              "Unable to instantiate the custom deserializer of field '%s' of class '%s'",
+              field.getName(), clazz.getName()),
+          e);
+    }
   }
 
   private Optional<PropertyError> checkType(Resource subject, String[] expectedTypes) {
