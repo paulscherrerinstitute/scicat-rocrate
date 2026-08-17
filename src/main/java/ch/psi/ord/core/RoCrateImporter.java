@@ -134,7 +134,6 @@ public class RoCrateImporter {
 
   private void scheduleForArchival(String pid) {
     datasetsToArchive.add(pid);
-    crate.setScheduledForArchival(true);
   }
 
   public void importPublication(
