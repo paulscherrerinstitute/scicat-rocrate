@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasKey;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -64,6 +65,9 @@ public class ImportTest extends EndpointTest {
   private static final String DATASET_PID = "dataset-pid";
 
   private static final String OWNER_GROUP = "group-2";
+
+  private static final String REMOTE_DATASET_ID =
+      "nfs://ra.psi.ch/das/work/p18/p18844/remote-ingest-rocrate";
 
   private static Consumer<ImportTest> checkTokenValidity(boolean isValid) {
     return test -> {
@@ -253,6 +257,27 @@ public class ImportTest extends EndpointTest {
                   201,
                   MOCK_NEW_DATASET,
                   res -> res.body("$", hasKey("data/ds1/"))));
+
+          add(
+              createTestCase(
+                  "One remote dataset attached to the root",
+                  ExtraMediaType.APPLICATION_JSONLD,
+                  true,
+                  getResource("remote-dataset.json"),
+                  201,
+                  MOCK_NEW_DATASET,
+                  res -> {
+                    Map<String, String> importMap = res.extract().jsonPath().getMap("$");
+                    assertTrue(importMap.containsKey(REMOTE_DATASET_ID));
+                    if (scicatService == null) {
+                      importMap
+                          .values()
+                          .forEach(
+                              pid ->
+                                  assertEquals(
+                                      BigInteger.valueOf(0), getDatasetByPid(pid).getSize()));
+                    }
+                  }));
 
           add(
               createTestCase(
