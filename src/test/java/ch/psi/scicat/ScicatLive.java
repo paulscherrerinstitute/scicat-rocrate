@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ScicatLive
     implements QuarkusTestResourceLifecycleManager, DevServicesContext.ContextAware {
   // renovate: datasource=github-releases depName=scicatproject/scicatlive
-  static final String scicatliveVersion = "4.1.7";
+  static final String scicatliveVersion = "4.7.0";
   static final String[] cmd = {
     "docker",
     "compose",
