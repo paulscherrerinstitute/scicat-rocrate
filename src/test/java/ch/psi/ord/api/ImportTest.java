@@ -1,7 +1,9 @@
 package ch.psi.ord.api;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,10 +14,10 @@ import ch.psi.ord.core.RoCrateImporter;
 import ch.psi.scicat.TestData;
 import ch.psi.scicat.model.v3.CountResponse;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
-import ch.psi.scicat.model.v3.CreatePublishedDataDto;
 import ch.psi.scicat.model.v3.Dataset;
 import ch.psi.scicat.model.v3.OutputJobDto;
-import ch.psi.scicat.model.v3.PublishedData;
+import ch.psi.scicat.model.v4.CreatePublishedDataDto;
+import ch.psi.scicat.model.v4.PublishedData;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.ValidatableResponse;
 import jakarta.ws.rs.core.Response.Status;
@@ -114,9 +116,7 @@ public class ImportTest extends EndpointTest {
                   when(test.scicatService.myidentity(any()))
                       .thenReturn(RestResponse.ok(TestData.rocrateUser));
                   when(test.scicatService.countPublishedData(
-                          String.format(
-                              RoCrateImporter.publicationExistsFilter,
-                              DoiUtils.buildStandardUrl(PUBLICATION_DOI)),
+                          String.format(RoCrateImporter.publicationExistsFilter, PUBLICATION_DOI),
                           null))
                       .thenReturn(RestResponse.ok(new CountResponse().setCount(1)));
                 }
@@ -205,7 +205,11 @@ public class ImportTest extends EndpointTest {
                   getResource("one-publication.json"),
                   201,
                   MOCK_NEW_PUBLICATION,
-                  res -> res.body("$", hasKey(PUBLICATION_URL))));
+                  res -> {
+                    Map<String, String> importMap = res.extract().jsonPath().getMap("$");
+                    assertThat(importMap, hasKey(PUBLICATION_URL));
+                    assertPublishable(importMap.get(PUBLICATION_URL));
+                  }));
 
           add(
               createTestCase(
@@ -275,6 +279,15 @@ public class ImportTest extends EndpointTest {
                   NO_ASSERTIONS));
         }
       };
+
+  private void assertPublishable(String doi) {
+    if (scicatService != null) {
+      return;
+    }
+    publishPublishedData(doi)
+        .statusCode(Status.CREATED.getStatusCode())
+        .body("status", equalTo("public"));
+  }
 
   @ParameterizedTest
   @FieldSource("testMatrix")
