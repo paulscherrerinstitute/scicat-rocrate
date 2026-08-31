@@ -9,7 +9,7 @@ import ch.psi.s3_broker.client.S3BrokerService;
 import ch.psi.s3_broker.model.DatasetUrls;
 import ch.psi.s3_broker.model.PublishedDataUrls;
 import ch.psi.scicat.client.ScicatService;
-import ch.psi.scicat.model.v3.PublishedData;
+import ch.psi.scicat.model.v4.PublishedData;
 import com.apicatalog.jsonld.JsonLd;
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.document.Document;
