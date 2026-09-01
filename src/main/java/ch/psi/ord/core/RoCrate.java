@@ -15,11 +15,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.zip.ZipException;
 import lombok.Getter;
@@ -52,8 +52,8 @@ public class RoCrate implements AutoCloseable {
           config.getOptionalValue("jsonld.processing-timeout", Integer.class).orElse(10));
   private static final DocumentLoader documentLoader = new LoggingDocumentLoader(jsonLdTimeout);
 
-  private Map<String, List<Path>> files =
-      Map.of(FILE_KEY, new ArrayList<>(), DIR_KEY, new ArrayList<>());
+  private Map<String, Set<Path>> files =
+      Map.of(FILE_KEY, new HashSet<>(), DIR_KEY, new HashSet<>());
   @Getter private Path base;
   @Getter private Model model;
 
@@ -132,11 +132,10 @@ public class RoCrate implements AutoCloseable {
         }
 
         if (entry.isDirectory()) {
-          Files.createDirectories(resolvedPath);
-          files.get(DIR_KEY).add(resolvedPath);
+          createDirectories(resolvedPath);
           log.debug("Created directory {}", resolvedPath);
         } else {
-          Files.createDirectories(resolvedPath.getParent());
+          createDirectories(resolvedPath.getParent());
           Files.copy(zip, resolvedPath, StandardCopyOption.REPLACE_EXISTING);
           files.get(FILE_KEY).add(resolvedPath);
           log.debug("Wrote file {}", resolvedPath);
@@ -148,6 +147,13 @@ public class RoCrate implements AutoCloseable {
       // With the ZipInputStream API there is no way of telling the difference between invalid
       // and empty zip archive
       throw new ZipException("Invalid or empty zip archive");
+    }
+  }
+
+  private void createDirectories(Path directory) throws IOException {
+    Files.createDirectories(directory);
+    for (Path p = directory; !p.equals(base); p = p.getParent()) {
+      files.get(DIR_KEY).add(p);
     }
   }
 
