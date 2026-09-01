@@ -105,6 +105,21 @@ public class RoCrateTest {
       assertIllegalPath(String.join("/", Collections.nCopies(segmentCount, segment)));
     }
 
+    @Test
+    @DisplayName(
+        "A directory with no dedicated zip entry should be in the list of files of the crate")
+    public void test08() throws Exception {
+      byte[] archive =
+          EndpointTest.zipResource(
+              "one-publication.json", Map.of("data/nested/a.txt", BigInteger.valueOf(7)), false);
+      try (RoCrate crate = RoCrate.fromZip(new ByteArrayInputStream(archive))) {
+        Path base = crate.getBase();
+        for (String expected : new String[] {"data", "data/nested", "data/nested/a.txt"}) {
+          assertTrue(crate.contains(base.resolve(expected)));
+        }
+      }
+    }
+
     private static byte[] archiveWith(String entryName) {
       return EndpointTest.zipResource(
           "one-publication.json", Map.of(entryName, BigInteger.valueOf(7)));
