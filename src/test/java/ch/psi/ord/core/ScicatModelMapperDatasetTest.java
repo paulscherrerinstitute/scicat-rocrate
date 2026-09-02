@@ -90,6 +90,47 @@ public class ScicatModelMapperDatasetTest {
           "data/with space/",
           map(dataset().setResourceIdentifier("data/with space/")).getSourceFolder());
     }
+
+    @Test
+    @DisplayName("The path of a remote identifier is used")
+    public void test03() {
+      assertEquals(
+          "/das/work/p18/p18844/ds1",
+          map(dataset().setResourceIdentifier("nfs://ra.psi.ch/das/work/p18/p18844/ds1"))
+              .getSourceFolder());
+    }
+  }
+
+  @Nested
+  @DisplayName("sourceFolderHost")
+  class SourceFolderHost {
+    @Test
+    @DisplayName("The host of a remote identifier is used")
+    public void test00() {
+      assertEquals(
+          "ra.psi.ch",
+          map(dataset().setResourceIdentifier("nfs://ra.psi.ch/das/work/p18/p18844/ds1"))
+              .getSourceFolderHost());
+    }
+
+    @Test
+    @DisplayName("An identifier without a host has no source folder host")
+    public void test01() {
+      assertNull(map(dataset().setResourceIdentifier("data/ds1/")).getSourceFolderHost());
+    }
+
+    @Test
+    @DisplayName("An identifier that is not a valid URI has no source folder host")
+    public void test02() {
+      assertEquals(
+          "", map(dataset().setResourceIdentifier("data/with space/")).getSourceFolderHost());
+    }
+
+    @Test
+    @DisplayName("A dataset without an identifier has no source folder host")
+    public void test03() {
+      assertNull(map(dataset()).getSourceFolderHost());
+    }
   }
 
   @Nested

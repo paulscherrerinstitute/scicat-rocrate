@@ -27,6 +27,8 @@ public class CreateDatasetDto {
   @JsonProperty(required = true)
   String sourceFolder;
 
+  @JsonProperty String sourceFolderHost;
+
   @JsonProperty(required = true)
   @JsonFormat(shape = JsonFormat.Shape.STRING)
   private Instant creationTime;
