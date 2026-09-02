@@ -25,7 +25,10 @@
         "Collection": "https://schema.org/Collection",
         "publisher": "https://schema.org/publisher",
         "conformsTo": "http://purl.org/dc/terms/conformsTo",
-        "Person": "https://schema.org/Person"
+        "Person": "https://schema.org/Person",
+        "givenName": "https://schema.org/givenName",
+        "familyName": "https://schema.org/familyName",
+        "email": "https://schema.org/email"
     },
     "@graph": [
         {
@@ -38,7 +41,9 @@
             },
             "datePublished": "2023-01-01",
             "hasPart": [
-                { "@id": "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5" }
+                {
+                    "@id": "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"
+                }
             ]
         },
         {
@@ -117,16 +122,25 @@
         },
         {
             "name": "Maik Kahnt",
+            "givenName": "Maik",
+            "familyName": "Kahnt",
+            "email": "maik.kahnt@example.com",
             "@id": "284f40e5-72fe-4414-91f8-141abcd0ed9d",
             "@type": "Person"
         },
         {
             "name": "Doru Constantin",
+            "givenName": "Doru",
+            "familyName": "Constantin",
+            "email": "doru.constantin@example.com",
             "@id": "eaf4cc90-2ea0-44c2-8c9f-a9f8ce448a2a",
             "@type": "Person"
         },
         {
             "name": "Gabriel Bernardo",
+            "givenName": "Gabriel",
+            "familyName": "Bernardo",
+            "email": "gabriel.bernardo@example.com",
             "@id": "bdfa1049-0bf2-46aa-86db-74555124d266",
             "@type": "Person"
         },
