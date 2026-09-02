@@ -66,7 +66,7 @@ public class RoCrateImporter {
   private MyIdentity userIdentity;
   private String ownerGroup;
 
-  public static String publicationExistsFilter =
+  public static final String publicationExistsFilter =
       """
           {
             "where": {
@@ -80,7 +80,8 @@ public class RoCrateImporter {
               }
             }
           }
-      """;
+      """
+          .replace(" ", "");
 
   public void loadCrate(RoCrate crate) {
     this.crate = crate;
