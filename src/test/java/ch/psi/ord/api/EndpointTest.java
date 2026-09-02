@@ -90,6 +90,11 @@ public abstract class EndpointTest {
   }
 
   public static byte[] zipResource(String resourceName, Map<String, BigInteger> fileList) {
+    return zipResource(resourceName, fileList, true);
+  }
+
+  public static byte[] zipResource(
+      String resourceName, Map<String, BigInteger> fileList, boolean withDirectoryEntries) {
     try {
       ByteArrayOutputStream output = new ByteArrayOutputStream();
       Random random = new Random();
@@ -102,7 +107,9 @@ public abstract class EndpointTest {
         zipStream.closeEntry();
 
         for (Map.Entry<String, BigInteger> file : fileList.entrySet()) {
-          createParentDirectories(file.getKey(), zipStream, createdDirectories);
+          if (withDirectoryEntries) {
+            createParentDirectories(file.getKey(), zipStream, createdDirectories);
+          }
           zipStream.putNextEntry(new ZipEntry(file.getKey()));
           byte[] randomBytes = new byte[file.getValue().intValue()];
           random.nextBytes(randomBytes);
