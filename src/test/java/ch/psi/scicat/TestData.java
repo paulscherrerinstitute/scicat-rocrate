@@ -79,6 +79,14 @@ public class TestData {
                                       "https://example.com/PID.SAMPLE.PREFIX/hzdr_ds1.tar?X-Amz-Date=20200301T000000Z&X-Amz-Expires=3600")
                                   .setExpires(Instant.parse("2020-03-01T01:00:00Z"))))));
 
+  public static PublishedDataUrls s3ResponseWithoutUrls =
+      new PublishedDataUrls()
+          .setExpires(Instant.parse("0001-01-01T00:00:00Z"))
+          .setUrls(
+              Map.of(
+                  "20.500.11935/1d424a0e-b6b2-42bb-89d3-2a83c69f6197",
+                  new DatasetUrls().setExpires(Instant.parse("0001-01-01T00:00:00Z"))));
+
   static {
     rocrateUser =
         new MyIdentity()

@@ -8,7 +8,6 @@ import ch.psi.rdf.ser.RdfSerializationException;
 import ch.psi.s3_broker.client.S3BrokerService;
 import ch.psi.s3_broker.model.DatasetUrls;
 import ch.psi.s3_broker.model.PublishedDataUrls;
-import ch.psi.s3_broker.model.S3Url;
 import ch.psi.scicat.client.ScicatService;
 import ch.psi.scicat.model.v4.PublishedData;
 import com.apicatalog.jsonld.JsonLd;
@@ -20,7 +19,9 @@ import jakarta.inject.Inject;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.riot.RDFFormat;
@@ -71,13 +72,17 @@ public class ZenodoExporter {
                 .setExpirationDate(datasetUrls.getExpires()));
       }
 
-      for (S3Url s3Url : datasetUrls.getUrls()) {
-        distribution.add(
-            new DataDownload()
-                .setContentUrl(s3Url.getUrl())
-                .setEncodingFormat(ExtraMediaType.APPLICATION_TAR)
-                .setExpirationDate(s3Url.getExpires()));
-      }
+      Optional.ofNullable(datasetUrls)
+          .map(DatasetUrls::getUrls)
+          .orElseGet(Collections::emptyList)
+          .stream()
+          .forEach(
+              s3Url ->
+                  distribution.add(
+                      new DataDownload()
+                          .setContentUrl(s3Url.getUrl())
+                          .setEncodingFormat(ExtraMediaType.APPLICATION_TAR)
+                          .setExpirationDate(s3Url.getExpires())));
     }
 
     RestResponse<PublishedData> res = scicatService.getPublishedDataById(doi);
