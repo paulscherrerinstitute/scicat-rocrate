@@ -6,7 +6,9 @@ import ch.psi.s3_broker.model.DatasetUrls;
 import ch.psi.s3_broker.model.PublishedDataUrls;
 import ch.psi.scicat.client.ScicatService;
 import ch.psi.scicat.model.v3.Dataset;
-import ch.psi.scicat.model.v3.PublishedData;
+import ch.psi.scicat.model.v4.DataciteMetadata;
+import ch.psi.scicat.model.v4.DataciteMetadata.DescriptionType;
+import ch.psi.scicat.model.v4.PublishedData;
 import edu.kit.datamanager.ro_crate.RoCrate;
 import edu.kit.datamanager.ro_crate.context.RoCrateMetadataContext;
 import edu.kit.datamanager.ro_crate.entities.contextual.ContextualEntity;
@@ -69,7 +71,8 @@ public class RoCrateExporter {
       root.addProperty(SchemaDO.description.getLocalName(), publication.getAbstract());
       root.addIdProperty(SchemaDO.license.getLocalName(), StaticEntities.LICENSE.getId());
       root.addProperty(
-          SchemaDO.datePublished.getLocalName(), yearToISO3601(publication.getPublicationYear()));
+          SchemaDO.datePublished.getLocalName(),
+          yearToISO3601(publication.getMetadata().getPublicationYear()));
     }
 
     String publicationId = DoiUtils.buildStandardUrl(publication.getDoi());
@@ -79,38 +82,47 @@ public class RoCrateExporter {
         .setId(publicationId)
         .addProperty(SchemaDO.identifier.getLocalName(), publication.getDoi());
     publication
-        .getCreator()
+        .getMetadata()
+        .getCreators()
         .forEach(
             creator -> {
-              ContextualEntity creatorEntity = addPerson(creator);
+              ContextualEntity creatorEntity = addPerson(creator.getName());
               crate.addContextualEntity(creatorEntity);
               publicationBuilder.addIdProperty(
                   SchemaDO.creator.getLocalName(), creatorEntity.getId());
             });
-    // Assuming that PSI publications all have the same Publisher/License
-    if ("PSI".equals(publication.getPublisher().toUpperCase())) {
-      crate.addContextualEntity(StaticEntities.PSI);
-      publicationBuilder.addIdProperty(
-          SchemaDO.publisher.getLocalName(), StaticEntities.PSI.getId());
-      crate.addContextualEntity(StaticEntities.LICENSE);
-      publicationBuilder.addIdProperty(
-          SchemaDO.license.getLocalName(), StaticEntities.LICENSE.getId());
-    }
+
+    ContextualEntity publisher = addOrganization(publication.getMetadata().getPublisher());
+    crate.addContextualEntity(publisher);
+    publicationBuilder.addIdProperty(SchemaDO.publisher.getLocalName(), publisher.getId());
+
+    ContextualEntity license =
+        addCreativeWork(publication.getMetadata().getRightsList().getFirst());
+    crate.addContextualEntity(license);
+    publicationBuilder.addIdProperty(SchemaDO.license.getLocalName(), license.getId());
+
     publicationBuilder
         .addProperty(
-            SchemaDO.datePublished.getLocalName(), Long.toString(publication.getPublicationYear()))
+            SchemaDO.datePublished.getLocalName(),
+            Long.toString(publication.getMetadata().getPublicationYear()))
         .addProperty(SchemaDO.name.getLocalName(), publication.getTitle())
         .addProperty(SchemaDO._abstract.getLocalName(), publication.getAbstract())
-        .addProperty(SchemaDO.additionalType.getLocalName(), publication.getResourceType())
         .addProperty(
             SchemaDO.sdDatePublished.getLocalName(), publication.getRegisteredTime().toString())
         .addProperty(SchemaDO.creativeWorkStatus.getLocalName(), publication.getStatus().toString())
-        .addProperty(SchemaDO.dateCreated.getLocalName(), publication.getCreatedAt())
-        .addProperty(SchemaDO.dateModified.getLocalName(), publication.getUpdatedAt())
-        .addProperty(SchemaDO.description.getLocalName(), publication.getDataDescription())
+        .addProperty(SchemaDO.dateCreated.getLocalName(), publication.getCreatedAt().toString())
+        .addProperty(SchemaDO.dateModified.getLocalName(), publication.getUpdatedAt().toString())
         .addProperty(SchemaDO.expires.getLocalName(), brokerResponse.getExpires().toString());
+
+    publication.getMetadata().getDescriptions().stream()
+        .filter(d -> !d.getDescriptionType().equals(DescriptionType.ABSTRACT))
+        .forEach(
+            d -> {
+              publicationBuilder.addProperty(
+                  SchemaDO.description.getLocalName(), d.getDescription());
+            });
     publication
-        .getPidArray()
+        .getDatasetPids()
         .forEach(
             pid -> {
               Dataset dataset = scicatService.getDatasetByPid(pid).getEntity();
@@ -165,6 +177,26 @@ public class RoCrateExporter {
             .addProperty(SchemaDO.name.getLocalName(), name);
 
     return creatorBuilder.build();
+  }
+
+  public ContextualEntity addOrganization(DataciteMetadata.Publisher publisher) {
+    ContextualEntityBuilder organizationBuilder =
+        new ContextualEntityBuilder()
+            .setId(publisher.getPublisherIdentifier())
+            .addType(SchemaDO.Organization.getLocalName())
+            .addProperty(SchemaDO.name.getLocalName(), publisher.getName());
+
+    return organizationBuilder.build();
+  }
+
+  public ContextualEntity addCreativeWork(DataciteMetadata.Right right) {
+    ContextualEntityBuilder organizationBuilder =
+        new ContextualEntityBuilder()
+            .addType(SchemaDO.CreativeWork.getLocalName())
+            .setId(right.getRightsIdentifier())
+            .addProperty(SchemaDO.name.getLocalName(), right.getRights());
+
+    return organizationBuilder.build();
   }
 
   public String getCrateMetadata() {

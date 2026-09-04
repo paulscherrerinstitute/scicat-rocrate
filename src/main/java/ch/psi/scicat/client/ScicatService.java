@@ -3,12 +3,12 @@ package ch.psi.scicat.client;
 import ch.psi.scicat.model.v3.CountResponse;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
 import ch.psi.scicat.model.v3.CreateJobDto;
-import ch.psi.scicat.model.v3.CreatePublishedDataDto;
 import ch.psi.scicat.model.v3.Dataset;
 import ch.psi.scicat.model.v3.MyIdentity;
 import ch.psi.scicat.model.v3.OutputJobDto;
-import ch.psi.scicat.model.v3.PublishedData;
 import ch.psi.scicat.model.v3.UpdateDatasetDto;
+import ch.psi.scicat.model.v4.CreatePublishedDataDto;
+import ch.psi.scicat.model.v4.PublishedData;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.PATCH;
@@ -48,21 +48,21 @@ public interface ScicatService {
       UpdateDatasetDto updateDatasetDto);
 
   @GET
-  @Path("/api/v3/publisheddata/{doi}")
+  @Path("/api/v4/publisheddata/{doi}")
   RestResponse<PublishedData> getPublishedDataById(@PathParam("doi") String doi);
 
   @POST
-  @Path("/api/v3/publisheddata/{doi}/register")
+  @Path("/api/v4/publisheddata/{doi}/register")
   RestResponse<Void> registerPublishedData(
       @PathParam("doi") String doi, @HeaderParam("Authorization") String accessToken);
 
   @GET
-  @Path("/api/v3/publisheddata/count")
+  @Path("/api/v4/publisheddata/count")
   RestResponse<CountResponse> countPublishedData(
       @QueryParam("filter") String where, @HeaderParam("Authorization") String accessToken);
 
   @POST
-  @Path("/api/v3/publisheddata")
+  @Path("/api/v4/publisheddata")
   RestResponse<PublishedData> createPublishedData(
       @HeaderParam("Authorization") String accessToken, CreatePublishedDataDto publishedData);
 

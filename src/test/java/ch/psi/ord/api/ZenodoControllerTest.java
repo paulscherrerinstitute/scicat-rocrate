@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import ch.psi.ord.core.DoiUtils;
 import ch.psi.scicat.TestData;
+import ch.psi.scicat.model.v4.DataciteMetadata.Creator;
 import io.quarkus.test.junit.DisabledOnIntegrationTest;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.ws.rs.WebApplicationException;
@@ -48,7 +49,9 @@ public class ZenodoControllerTest extends EndpointTest {
         .body(SchemaDO.identifier.getLocalName(), equalTo(doiUrl))
         .body(SchemaDO.name.getLocalName(), equalTo(TestData.psiPub1.getTitle()))
         .body(SchemaDO.description.getLocalName(), equalTo(TestData.psiPub1.getAbstract()))
-        .body(SchemaDO.dateCreated.getLocalName(), equalTo(TestData.psiPub1.getCreatedAt()))
+        .body(
+            SchemaDO.dateCreated.getLocalName(),
+            equalTo(TestData.psiPub1.getCreatedAt().toString()))
         .body(
             SchemaDO.datePublished.getLocalName(),
             equalTo(TestData.psiPub1.getRegisteredTime().toString()))
@@ -57,17 +60,22 @@ public class ZenodoControllerTest extends EndpointTest {
             equalTo(SchemaDO.Organization.getLocalName()))
         .body(
             SchemaDO.publisher.getLocalName() + "." + SchemaDO.name.getLocalName(),
-            equalTo(TestData.psiPub1.getPublisher()))
-        .body(SchemaDO.creator.getLocalName(), hasSize(TestData.psiPub1.getCreator().size()))
+            equalTo(TestData.psiPub1.getMetadata().getPublisher().getName()))
+        .body(
+            SchemaDO.creator.getLocalName(),
+            hasSize(TestData.psiPub1.getMetadata().getCreators().size()))
         .body(
             SchemaDO.creator.getLocalName() + ".@type",
             everyItem(equalTo(SchemaDO.Person.getLocalName())))
         .body(
             SchemaDO.creator.getLocalName() + "." + SchemaDO.name.getLocalName(),
-            containsInAnyOrder(TestData.psiPub1.getCreator().toArray()))
+            containsInAnyOrder(
+                TestData.psiPub1.getMetadata().getCreators().stream()
+                    .map(Creator::getName)
+                    .toArray()))
         .body(
             SchemaDO.distribution.getLocalName(),
-            hasSize(TestData.psiPub1.getPidArray().size() + 1))
+            hasSize(TestData.psiPub1.getDatasetPids().size() + 1))
         .body(
             SchemaDO.distribution.getLocalName() + ".@type",
             everyItem(equalTo(SchemaDO.DataDownload.getLocalName())))
@@ -103,7 +111,9 @@ public class ZenodoControllerTest extends EndpointTest {
         .body(SchemaDO.identifier.getLocalName(), equalTo(doiUrl))
         .body(SchemaDO.name.getLocalName(), equalTo(TestData.hzdrPub1.getTitle()))
         .body(SchemaDO.description.getLocalName(), equalTo(TestData.hzdrPub1.getAbstract()))
-        .body(SchemaDO.dateCreated.getLocalName(), equalTo(TestData.hzdrPub1.getCreatedAt()))
+        .body(
+            SchemaDO.dateCreated.getLocalName(),
+            equalTo(TestData.hzdrPub1.getCreatedAt().toString()))
         .body(
             SchemaDO.datePublished.getLocalName(),
             equalTo(TestData.hzdrPub1.getRegisteredTime().toString()))
@@ -112,14 +122,11 @@ public class ZenodoControllerTest extends EndpointTest {
             equalTo(SchemaDO.Organization.getLocalName()))
         .body(
             SchemaDO.publisher.getLocalName() + "." + SchemaDO.name.getLocalName(),
-            equalTo(TestData.hzdrPub1.getPublisher()))
-        .body(SchemaDO.creator.getLocalName(), hasSize(TestData.hzdrPub1.getCreator().size()))
-        .body(
-            SchemaDO.creator.getLocalName() + ".@type",
-            everyItem(equalTo(SchemaDO.Person.getLocalName())))
+            equalTo(TestData.hzdrPub1.getMetadata().getPublisher().getName()))
+        .body(SchemaDO.creator.getLocalName() + ".@type", equalTo(SchemaDO.Person.getLocalName()))
         .body(
             SchemaDO.creator.getLocalName() + "." + SchemaDO.name.getLocalName(),
-            containsInAnyOrder(TestData.hzdrPub1.getCreator().toArray()))
+            equalTo(TestData.hzdrPub1.getMetadata().getCreators().getFirst().getName()))
         .body(
             SchemaDO.distribution.getLocalName() + ".@type",
             equalTo(SchemaDO.DataDownload.getLocalName()))
