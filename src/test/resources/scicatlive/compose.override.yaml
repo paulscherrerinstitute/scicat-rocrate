@@ -56,7 +56,7 @@ services:
       backend-configs:
         condition: service_completed_successfully
   s3-broker:
-    image: ghcr.io/paulscherrerinstitute/scicat-s3-broker:0.5.1
+    image: ghcr.io/paulscherrerinstitute/scicat-s3-broker:0.5.2
     labels:
       - traefik.http.services.s3-broker.loadbalancer.server.port=8080
     configs:
