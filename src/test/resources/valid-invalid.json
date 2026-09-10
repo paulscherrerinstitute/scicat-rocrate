@@ -25,7 +25,11 @@
     "Collection": "https://schema.org/Collection",
     "publisher": "https://schema.org/publisher",
     "conformsTo": "http://purl.org/dc/terms/conformsTo",
-    "Person": "https://schema.org/Person"
+    "Person": "https://schema.org/Person",
+    "givenName": "https://schema.org/givenName",
+    "familyName": "https://schema.org/familyName",
+    "email": "https://schema.org/email",
+    "affiliation": "https://schema.org/affiliation"
   },
   "@graph": [
     {
@@ -167,22 +171,46 @@
     {
       "name": "Oleksandr Yefanov",
       "@id": "03528919-10f3-4727-9307-5db64bb4a14d",
-      "@type": "Person"
+      "@type": "Person",
+      "givenName": "Oleksandr",
+      "familyName": "Yefanov",
+      "email": "oleksandr.yefanov@example.com",
+      "affiliation": {
+        "@id": "https://ror.org/03eh3y714"
+      }
     },
     {
       "name": "Gabriel Bernardo",
       "@id": "8d7b0d43-ff13-43cf-a3bc-1f8243c96027",
-      "@type": "Person"
+      "@type": "Person",
+      "givenName": "Gabriel",
+      "familyName": "Bernardo",
+      "email": "gabriel.bernardo@example.com",
+      "affiliation": {
+        "@id": "https://ror.org/03eh3y714"
+      }
     },
     {
       "name": "Doru Constantin",
       "@id": "98c78fd7-8f0b-491d-8b71-ac9b45525ad7",
-      "@type": "Person"
+      "@type": "Person",
+      "givenName": "Doru",
+      "familyName": "Constantin",
+      "email": "doru.constantin@example.com",
+      "affiliation": {
+        "@id": "https://ror.org/03eh3y714"
+      }
     },
     {
       "name": "Maik Kahnt",
       "@id": "83738cc6-de96-440c-abee-884210d34d02",
-      "@type": "Person"
+      "@type": "Person",
+      "givenName": "Maik",
+      "familyName": "Kahnt",
+      "email": "maik.kahnt@example.com",
+      "affiliation": {
+        "@id": "https://ror.org/03eh3y714"
+      }
     },
     {
       "identifier": "https://creativecommons.org/licenses/by-sa/4.0/",
