@@ -32,7 +32,11 @@ public class PublicationTest {
           "creator": {
             "@id": "https://example.org/person/1",
             "@type": "Person",
-            "name": "Jane Doe"
+            "name": "Doe, Jane",
+            "givenName": "Jane",
+            "familyName": "Doe",
+            "email": "jane.doe@example.com",
+            "affiliation": { "@id": "https://example.org/org/1" }
           },
           "name": "Test publication",
           "publisher": {
