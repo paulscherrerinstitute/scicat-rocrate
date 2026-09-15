@@ -17,6 +17,7 @@ jobs:
       rebuildDevContainer: ${{ steps.check_changes.outputs.devcontainer_any_changed }}
       lintWorkflows: ${{ steps.check_changes.outputs.workflow_any_changed }}
       runTests: ${{ steps.check_changes.outputs.src_any_changed }}
+      runReleaseDryRun: ${{ steps.check_changes.outputs.release_any_changed }}
     steps:
       - uses: actions/checkout@v7
       - name: Check for changes
@@ -34,6 +35,12 @@ jobs:
               - .github/workflows/ci.yaml
               - .mvn/**
               - mvnw{,.cmd}
+              - .devcontainer/**
+            release:
+              - .releaserc.json
+              - .github/semantic-release/**
+              - .github/workflows/release.yaml
+              - .github/workflows/ci.yaml
               - .devcontainer/**
 
   build:
@@ -72,6 +79,43 @@ jobs:
           imageName: ${{ env.devImage }}
           cacheFrom: ${{ env.devImage }}
           runCmd: ./mvnw verify -DskipITs=false
+
+  release_dry_run:
+    name: semantic-release (dry run)
+    runs-on: ubuntu-latest
+    needs: check_changes
+    if: needs.check_changes.outputs.runReleaseDryRun == 'true'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Name the checked out merge commit after the base branch
+        run: git checkout -B "$GITHUB_BASE_REF"
+
+      - name: Dry run
+        uses: devcontainers/ci@v0.3
+        with:
+          push: never
+          imageName: ${{ env.devImage }}
+          cacheFrom: ${{ env.devImage }}
+          runCmd: |
+            set -e
+            npm install --prefix .github/semantic-release
+            npx --prefix .github/semantic-release semantic-release --dry-run
+          env: |
+            CI=true
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+            GITHUB_ACTION=${{ github.action }}
+            GITHUB_ACTOR=${{ github.actor }}
+            GITHUB_REPOSITORY=${{ github.repository }}
+            GITHUB_REF=${{ github.ref }}
+            GITHUB_SHA=${{ github.sha }}
+            GITHUB_WORKFLOW=${{ github.workflow }}
+            GITHUB_RUN_ID=${{ github.run_id }}
+            GITHUB_RUN_NUMBER=${{ github.run_number }}
 
   actionlint:
     runs-on: ubuntu-latest
