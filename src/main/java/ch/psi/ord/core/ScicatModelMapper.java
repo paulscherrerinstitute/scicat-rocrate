@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -143,24 +144,25 @@ public class ScicatModelMapper {
         }
       };
 
-  Converter<String, String> uriPathExtractor =
+  private final Converter<String, String> uriPathExtractor =
       context -> {
         String sourceId = context.getSource();
         try {
           URI uri = new URI(sourceId);
           return uri.getPath();
-        } catch (Exception e) {
+        } catch (URISyntaxException e) {
           return sourceId;
         }
       };
-  Converter<String, String> uriHostExtractor =
+
+  private final Converter<String, String> uriHostExtractor =
       context -> {
         String sourceId = context.getSource();
         try {
           URI uri = new URI(sourceId);
           return uri.getHost();
-        } catch (Exception e) {
-          return sourceId;
+        } catch (URISyntaxException e) {
+          return "";
         }
       };
 
@@ -319,6 +321,9 @@ public class ScicatModelMapper {
               m.when(isNotNull())
                   .using(uriPathExtractor)
                   .map(Dataset::getResourceIdentifier, CreateDatasetDto::setSourceFolder);
+              m.when(isNotNull())
+                  .using(uriHostExtractor)
+                  .map(Dataset::getResourceIdentifier, CreateDatasetDto::setSourceFolderHost);
               m.using(personListToOwnerEmails)
                   .map(Dataset::getCreator, CreateDatasetDto::setContactEmail);
               m.map(src -> Instant.now(), CreateDatasetDto::setCreationTime);
