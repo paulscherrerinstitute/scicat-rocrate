@@ -106,6 +106,22 @@ public class ImportTest extends EndpointTest {
             }
           });
 
+  private static final Consumer<ImportTest> MOCK_NEW_DATASET =
+      checkTokenValidity(true)
+          .andThen(
+              test -> {
+                if (test.scicatService != null) {
+                  when(test.scicatService.myidentity(any()))
+                      .thenReturn(RestResponse.ok(TestData.rocrateUser));
+                  when(test.scicatService.createJob(any(), any()))
+                      .thenReturn(RestResponse.ok(new OutputJobDto().setId("job-1")));
+                }
+                if (test.scicatCli != null) {
+                  when(test.scicatCli.ingestDataset(any(), any(CreateDatasetDto.class)))
+                      .thenReturn(DATASET_PID);
+                }
+              });
+
   private static final Consumer<ImportTest> MOCK_EXISTING_PUBLICATION =
       checkTokenValidity(true)
           .andThen(
@@ -226,6 +242,17 @@ public class ImportTest extends EndpointTest {
                               hasKey("data/file1.txt"),
                               hasKey("data/file2.txt"),
                               hasKey(PUBLICATION_URL)))));
+
+          add(
+              createTestCase(
+                  "One dataset attached to the root",
+                  ExtraMediaType.APPLICATION_ZIP,
+                  true,
+                  zipResource(
+                      "one-dataset.json", Map.of("data/ds1/file1.txt", BigInteger.valueOf(16))),
+                  201,
+                  MOCK_NEW_DATASET,
+                  res -> res.body("$", hasKey("data/ds1/"))));
 
           add(
               createTestCase(
