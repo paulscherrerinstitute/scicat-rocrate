@@ -11,6 +11,7 @@ import ch.psi.scicat.model.v3.CredentialsDto;
 import ch.psi.scicat.model.v3.Dataset;
 import io.quarkus.test.InjectMock;
 import io.restassured.http.ContentType;
+import io.restassured.response.ValidatableResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -65,6 +66,18 @@ public abstract class EndpointTest {
         .statusCode(200)
         .extract()
         .as(Dataset.class);
+  }
+
+  public ValidatableResponse publishPublishedData(String doi) {
+    return given()
+        .baseUri("http://backend.localhost")
+        .port(80)
+        .accept(ContentType.JSON)
+        .header("Authorization", String.format("Bearer %s", accessToken))
+        .pathParam("doi", doi)
+        .when()
+        .post("/api/v4/publisheddata/{doi}/publish")
+        .then();
   }
 
   public static byte[] getResource(String resourceName) {

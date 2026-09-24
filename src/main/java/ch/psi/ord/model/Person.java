@@ -2,6 +2,7 @@ package ch.psi.ord.model;
 
 import ch.psi.rdf.annotations.RdfClass;
 import ch.psi.rdf.annotations.RdfProperty;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.jena.vocabulary.SchemaDO;
@@ -21,4 +22,7 @@ public class Person {
 
   @RdfProperty(uri = SchemaDO.NS + "email", minCardinality = 1)
   public String email;
+
+  @RdfProperty(uri = SchemaDO.NS + "affiliation")
+  public List<Organization> affiliation;
 }

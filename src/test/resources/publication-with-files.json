@@ -27,7 +27,8 @@
         "familyName": "https://schema.org/familyName",
         "email": "https://schema.org/email",
         "conformsTo": "http://purl.org/dc/terms/conformsTo",
-        "Person": "https://schema.org/Person"
+        "Person": "https://schema.org/Person",
+        "affiliation": "https://schema.org/affiliation"
     },
     "@graph": [
         {
@@ -113,7 +114,10 @@
             "familyName": "Kahnt",
             "email": "maik.kahnt@example.com",
             "@id": "284f40e5-72fe-4414-91f8-141abcd0ed9d",
-            "@type": "Person"
+            "@type": "Person",
+            "affiliation": {
+                "@id": "https://ror.org/03eh3y714"
+            }
         },
         {
             "name": "Constantin, Doru",
@@ -121,7 +125,10 @@
             "familyName": "Constantin",
             "email": "doru.constantin@example.com",
             "@id": "eaf4cc90-2ea0-44c2-8c9f-a9f8ce448a2a",
-            "@type": "Person"
+            "@type": "Person",
+            "affiliation": {
+                "@id": "https://ror.org/03eh3y714"
+            }
         },
         {
             "identifier": "https://creativecommons.org/licenses/by-sa/4.0/",

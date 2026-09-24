@@ -15,7 +15,9 @@ import ch.psi.ord.core.RoCrate;
 import ch.psi.ord.model.ExportFormat;
 import ch.psi.s3_broker.model.DatasetUrls;
 import ch.psi.scicat.TestData;
-import ch.psi.scicat.model.v3.PublishedData;
+import ch.psi.scicat.model.v4.DataciteMetadata.Description;
+import ch.psi.scicat.model.v4.DataciteMetadata.DescriptionType;
+import ch.psi.scicat.model.v4.PublishedData;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.builder.ResponseBuilder;
 import io.restassured.http.ContentType;
@@ -123,20 +125,30 @@ public class ExportTest extends EndpointTest {
                         .body(rootPath + ".identifier", is(pub.getDoi()))
                         .body(rootPath + ".name", is(pub.getTitle()))
                         .body(rootPath + ".abstract", is(pub.getAbstract()))
-                        .body(rootPath + ".description", is(pub.getDataDescription()))
-                        .body(rootPath + ".additionalType", is(pub.getResourceType()))
+                        .body(
+                            rootPath + ".description",
+                            is(
+                                pub.getMetadata().getDescriptions().stream()
+                                    .filter(
+                                        d ->
+                                            !d.getDescriptionType()
+                                                .equals(DescriptionType.ABSTRACT))
+                                    .map(Description::getDescription)
+                                    .findFirst()
+                                    .get()))
                         .body(rootPath + ".creativeWorkStatus", is(pub.getStatus().toString()))
-                        .body(rootPath + ".dateCreated", is(pub.getCreatedAt()))
-                        .body(rootPath + ".dateModified", is(pub.getUpdatedAt()))
+                        .body(rootPath + ".dateCreated", is(pub.getCreatedAt().toString()))
+                        .body(rootPath + ".dateModified", is(pub.getUpdatedAt().toString()))
                         .body(
                             rootPath + ".datePublished",
-                            is(String.valueOf(pub.getPublicationYear())))
+                            is(String.valueOf(pub.getMetadata().getPublicationYear())))
                         .body(rootPath + ".sdDatePublished", is(pub.getRegisteredTime().toString()))
                         .body(
                             rootPath + ".expires",
                             is(TestData.psiPub1S3Response.getExpires().toString()))
-                        .body(rootPath + ".creator", hasSize(pub.getCreator().size()))
-                        .body(rootPath + ".hasPart", hasSize(pub.getPidArray().size()))
+                        .body(
+                            rootPath + ".creator", hasSize(pub.getMetadata().getCreators().size()))
+                        .body(rootPath + ".hasPart", hasSize(pub.getDatasetPids().size()))
                         .body(rootPath + ".publisher", notNullValue())
                         .body(rootPath + ".license", notNullValue());
                   }));
