@@ -3,6 +3,7 @@ package ch.psi.scicat.model.v3;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum DatasetType {
+  BASE("base"),
   RAW("raw"),
   DERIVED("derived");
 

@@ -25,7 +25,10 @@
     "Collection": "https://schema.org/Collection",
     "publisher": "https://schema.org/publisher",
     "conformsTo": "http://purl.org/dc/terms/conformsTo",
-    "Person": "https://schema.org/Person"
+    "Person": "https://schema.org/Person",
+    "givenName": "https://schema.org/givenName",
+    "familyName": "https://schema.org/familyName",
+    "email": "https://schema.org/email"
   },
   "@graph": [
     {
@@ -154,21 +157,33 @@
     },
     {
       "name": "Oleksandr Yefanov",
+      "givenName": "Oleksandr",
+      "familyName": "Yefanov",
+      "email": "oleksandr.yefanov@example.com",
       "@id": "03528919-10f3-4727-9307-5db64bb4a14d",
       "@type": "Person"
     },
     {
       "name": "Gabriel Bernardo",
+      "givenName": "Gabriel",
+      "familyName": "Bernardo",
+      "email": "gabriel.bernardo@example.com",
       "@id": "8d7b0d43-ff13-43cf-a3bc-1f8243c96027",
       "@type": "Person"
     },
     {
       "name": "Doru Constantin",
+      "givenName": "Doru",
+      "familyName": "Constantin",
+      "email": "doru.constantin@example.com",
       "@id": "98c78fd7-8f0b-491d-8b71-ac9b45525ad7",
       "@type": "Person"
     },
     {
       "name": "Maik Kahnt",
+      "givenName": "Maik",
+      "familyName": "Kahnt",
+      "email": "maik.kahnt@example.com",
       "@id": "83738cc6-de96-440c-abee-884210d34d02",
       "@type": "Person"
     },
