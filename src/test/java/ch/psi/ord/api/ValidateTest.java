@@ -3,6 +3,7 @@ package ch.psi.ord.api;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
@@ -111,7 +112,7 @@ public class ValidateTest extends EndpointTest {
                       res.body("isValid", is(false))
                           .body(
                               "entities",
-                              Matchers.contains(
+                              hasItem(
                                   "https://doi.org/10.16907/4b55cbae-ac98-445a-a15e-1534b2a8b01f"))
                           .body("errors", hasSize(1))
                           .body(
