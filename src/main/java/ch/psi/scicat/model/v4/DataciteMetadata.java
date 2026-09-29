@@ -469,7 +469,7 @@ public class DataciteMetadata {
     @JsonProperty("ROR")
     ROR,
     @JsonProperty("Other")
-    Other
+    OTHER
   }
 
   @Data
