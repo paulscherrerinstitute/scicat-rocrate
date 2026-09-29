@@ -1,11 +1,9 @@
 package ch.psi.scicat.model.v4;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
@@ -151,10 +149,7 @@ public class DataciteMetadata {
   @Data
   @JsonInclude(Include.NON_NULL)
   public static class Date {
-    @JsonProperty
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Instant date;
-
+    @JsonProperty private String date;
     @JsonProperty private DateType dateType;
     @JsonProperty private String dateInformation;
   }
