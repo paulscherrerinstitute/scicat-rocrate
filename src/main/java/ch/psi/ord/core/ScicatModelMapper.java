@@ -2,6 +2,7 @@ package ch.psi.ord.core;
 
 import static org.modelmapper.Conditions.isNotNull;
 
+import ch.psi.ord.model.Organization;
 import ch.psi.ord.model.Person;
 import ch.psi.ord.model.Publication;
 import ch.psi.ord.model.ZenodoDataset;
@@ -136,7 +137,9 @@ public class ScicatModelMapper {
                           .setGivenName(creator.getGivenName())
                           .setFamilyName(creator.getFamilyName())
                           .setAffiliation(
-                              creator.getAffiliation().stream()
+                              Objects.requireNonNullElse(
+                                      creator.getAffiliation(), List.<Organization>of())
+                                  .stream()
                                   .map(
                                       organization ->
                                           new Affiliation().setName(organization.getName()))

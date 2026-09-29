@@ -2,6 +2,7 @@ package ch.psi.ord.model;
 
 import ch.psi.rdf.annotations.RdfClass;
 import ch.psi.rdf.annotations.RdfProperty;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,5 +25,5 @@ public class Person {
   public String email;
 
   @RdfProperty(uri = SchemaDO.NS + "affiliation")
-  public List<Organization> affiliation;
+  public List<Organization> affiliation = new ArrayList<>();
 }
