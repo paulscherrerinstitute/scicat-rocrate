@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
@@ -140,11 +142,36 @@ public class ScicatModelMapper {
                               Objects.requireNonNullElse(
                                       creator.getAffiliation(), List.<Organization>of())
                                   .stream()
+                                  .filter(Objects::nonNull)
                                   .map(
                                       organization ->
-                                          new Affiliation().setName(organization.getName()))
+                                          context
+                                              .getMappingEngine()
+                                              .map(context.create(organization, Affiliation.class)))
                                   .collect(Collectors.toList())))
               .toList();
+
+  // https://ror.readme.io/docs/identifier
+  private static final Pattern ROR_URL =
+      Pattern.compile("^https?://(?:www\\.)?ror\\.org/(0[a-hj-km-np-tv-z0-9]{6}[0-9]{2})/?$");
+
+  private final Converter<Organization, Affiliation> organizationToDataciteAffiliation =
+      context -> {
+        Organization organization = context.getSource();
+        Affiliation affiliation = new Affiliation().setName(organization.getName());
+        String id = organization.getResourceIdentifier();
+        if (id != null) {
+          Matcher matcher = ROR_URL.matcher(id);
+          if (matcher.matches()) {
+            affiliation
+                .setAffiliationIdentifier("https://ror.org/" + matcher.group(1))
+                .setAffiliationIdentifierScheme("ROR")
+                .setSchemeUri("https://ror.org");
+          }
+        }
+
+        return affiliation;
+      };
 
   private final Converter<Publication, CreatePublishedDataDto> publicationPostConverter =
       context -> {
@@ -181,6 +208,8 @@ public class ScicatModelMapper {
   public ModelMapper createPublicationModelMapper() {
     ModelMapper mapper = new ModelMapper();
     mapper.getConfiguration().setImplicitMappingEnabled(false);
+
+    mapper.addConverter(organizationToDataciteAffiliation, Organization.class, Affiliation.class);
 
     mapper
         .typeMap(Publication.class, CreatePublishedDataDto.class)
