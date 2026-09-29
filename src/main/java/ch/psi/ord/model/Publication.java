@@ -41,7 +41,7 @@ public class Publication {
   @RdfProperty(uri = SchemaDO.NS + "name", minCardinality = 1)
   private String title;
 
-  @RdfProperty(uri = SchemaDO.NS + "publisher", minCardinality = 1)
+  @RdfProperty(uri = SchemaDO.NS + "publisher")
   private Organization publisher;
 
   @RdfProperty(uri = SchemaDO.NS + "dateCreated", minCardinality = 0)
