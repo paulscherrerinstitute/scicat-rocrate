@@ -183,7 +183,7 @@ public class ImportTest extends EndpointTest {
                   ExtraMediaType.APPLICATION_JSONLD,
                   true,
                   "{}".getBytes(),
-                  400,
+                  422,
                   checkTokenValidity(true),
                   NO_ASSERTIONS));
 
