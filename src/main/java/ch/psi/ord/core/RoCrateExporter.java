@@ -6,9 +6,13 @@ import ch.psi.s3_broker.model.DatasetUrls;
 import ch.psi.s3_broker.model.PublishedDataUrls;
 import ch.psi.scicat.client.ScicatService;
 import ch.psi.scicat.model.v3.Dataset;
-import ch.psi.scicat.model.v3.PublishedData;
+import ch.psi.scicat.model.v4.DataciteMetadata;
+import ch.psi.scicat.model.v4.DataciteMetadata.DescriptionType;
+import ch.psi.scicat.model.v4.PublishedData;
 import edu.kit.datamanager.ro_crate.RoCrate;
 import edu.kit.datamanager.ro_crate.context.RoCrateMetadataContext;
+import edu.kit.datamanager.ro_crate.entities.AbstractEntity;
+import edu.kit.datamanager.ro_crate.entities.AbstractEntity.AbstractEntityBuilder;
 import edu.kit.datamanager.ro_crate.entities.contextual.ContextualEntity;
 import edu.kit.datamanager.ro_crate.entities.contextual.ContextualEntity.ContextualEntityBuilder;
 import edu.kit.datamanager.ro_crate.entities.data.DataEntity;
@@ -61,15 +65,18 @@ public class RoCrateExporter {
     // File Data Entities with an @id URI outside the RO-Crate Root SHOULD at the time of RO-Crate
     // creation be directly downloadable by a simple non-interactive retrieval (e.g. HTTP GET) of a
     // single data stream, permitting redirections and HTTP/HTTPS authentication
-    boolean includeS3Urls = brokerResponse.getExpires().isAfter(Instant.now());
+    boolean includeS3Urls =
+        brokerResponse.getExpires() != null && brokerResponse.getExpires().isAfter(Instant.now());
 
     if (asRootEntity) {
       RootDataEntity root = crate.getRootDataEntity();
-      root.addProperty(SchemaDO.name.getLocalName(), publication.getTitle());
-      root.addProperty(SchemaDO.description.getLocalName(), publication.getAbstract());
+      addIfPresent(root, SchemaDO.name.getLocalName(), publication.getTitle());
+      addIfPresent(root, SchemaDO.description.getLocalName(), publication.getAbstract());
       root.addIdProperty(SchemaDO.license.getLocalName(), StaticEntities.LICENSE.getId());
-      root.addProperty(
-          SchemaDO.datePublished.getLocalName(), yearToISO3601(publication.getPublicationYear()));
+      addIfPresent(
+          root,
+          SchemaDO.datePublished.getLocalName(),
+          yearToISO3601(publication.getMetadata().getPublicationYear()));
     }
 
     String publicationId = DoiUtils.buildStandardUrl(publication.getDoi());
@@ -79,66 +86,85 @@ public class RoCrateExporter {
         .setId(publicationId)
         .addProperty(SchemaDO.identifier.getLocalName(), publication.getDoi());
     publication
-        .getCreator()
+        .getMetadata()
+        .getCreators()
         .forEach(
             creator -> {
-              ContextualEntity creatorEntity = addPerson(creator);
+              ContextualEntity creatorEntity = addPerson(creator.getName());
               crate.addContextualEntity(creatorEntity);
               publicationBuilder.addIdProperty(
                   SchemaDO.creator.getLocalName(), creatorEntity.getId());
             });
-    // Assuming that PSI publications all have the same Publisher/License
-    if ("PSI".equals(publication.getPublisher().toUpperCase())) {
-      crate.addContextualEntity(StaticEntities.PSI);
-      publicationBuilder.addIdProperty(
-          SchemaDO.publisher.getLocalName(), StaticEntities.PSI.getId());
-      crate.addContextualEntity(StaticEntities.LICENSE);
-      publicationBuilder.addIdProperty(
-          SchemaDO.license.getLocalName(), StaticEntities.LICENSE.getId());
+
+    if (publication.getMetadata().getPublisher() != null) {
+      ContextualEntity publisher = addOrganization(publication.getMetadata().getPublisher());
+      crate.addContextualEntity(publisher);
+      publicationBuilder.addIdProperty(SchemaDO.publisher.getLocalName(), publisher.getId());
     }
-    publicationBuilder
-        .addProperty(
-            SchemaDO.datePublished.getLocalName(), Long.toString(publication.getPublicationYear()))
-        .addProperty(SchemaDO.name.getLocalName(), publication.getTitle())
-        .addProperty(SchemaDO._abstract.getLocalName(), publication.getAbstract())
-        .addProperty(SchemaDO.additionalType.getLocalName(), publication.getResourceType())
-        .addProperty(
-            SchemaDO.sdDatePublished.getLocalName(), publication.getRegisteredTime().toString())
-        .addProperty(SchemaDO.creativeWorkStatus.getLocalName(), publication.getStatus().toString())
-        .addProperty(SchemaDO.dateCreated.getLocalName(), publication.getCreatedAt())
-        .addProperty(SchemaDO.dateModified.getLocalName(), publication.getUpdatedAt())
-        .addProperty(SchemaDO.description.getLocalName(), publication.getDataDescription())
-        .addProperty(SchemaDO.expires.getLocalName(), brokerResponse.getExpires().toString());
+
+    publication.getMetadata().getRightsList().stream()
+        .findFirst()
+        .ifPresent(
+            right -> {
+              ContextualEntity license = addCreativeWork(right);
+              crate.addContextualEntity(license);
+              publicationBuilder.addIdProperty(SchemaDO.license.getLocalName(), license.getId());
+            });
+
+    addIfPresent(
+        publicationBuilder,
+        SchemaDO.datePublished.getLocalName(),
+        publication.getMetadata().getPublicationYear());
+    addIfPresent(publicationBuilder, SchemaDO.name.getLocalName(), publication.getTitle());
+    addIfPresent(publicationBuilder, SchemaDO._abstract.getLocalName(), publication.getAbstract());
+    addIfPresent(
+        publicationBuilder,
+        SchemaDO.sdDatePublished.getLocalName(),
+        publication.getRegisteredTime());
+    addIfPresent(
+        publicationBuilder, SchemaDO.creativeWorkStatus.getLocalName(), publication.getStatus());
+    addIfPresent(
+        publicationBuilder, SchemaDO.dateCreated.getLocalName(), publication.getCreatedAt());
+    addIfPresent(
+        publicationBuilder, SchemaDO.dateModified.getLocalName(), publication.getUpdatedAt());
+    addIfPresent(publicationBuilder, SchemaDO.expires.getLocalName(), brokerResponse.getExpires());
+
+    publication.getMetadata().getDescriptions().stream()
+        .filter(d -> d.getDescriptionType() != DescriptionType.ABSTRACT)
+        .forEach(
+            d ->
+                addIfPresent(
+                    publicationBuilder, SchemaDO.description.getLocalName(), d.getDescription()));
     publication
-        .getPidArray()
+        .getDatasetPids()
         .forEach(
             pid -> {
               Dataset dataset = scicatService.getDatasetByPid(pid).getEntity();
               DataEntityBuilder datasetBuilder =
-                  new DataEntityBuilder()
-                      .addType(SchemaDO.Dataset.getLocalName())
-                      .addProperty(SchemaDO.name.getLocalName(), dataset.getDatasetName())
-                      .addProperty(SchemaDO.description.getLocalName(), dataset.getDescription());
+                  new DataEntityBuilder().addType(SchemaDO.Dataset.getLocalName());
+              addIfPresent(datasetBuilder, SchemaDO.name.getLocalName(), dataset.getDatasetName());
+              addIfPresent(
+                  datasetBuilder, SchemaDO.description.getLocalName(), dataset.getDescription());
 
               if (urls.containsKey(pid)) {
                 DatasetUrls datasetUrls = urls.get(pid);
-                datasetBuilder.addProperty(
-                    SchemaDO.expires.getLocalName(), datasetUrls.getExpires().toString());
-                if (includeS3Urls) {
+                addIfPresent(
+                    datasetBuilder, SchemaDO.expires.getLocalName(), datasetUrls.getExpires());
+                if (includeS3Urls && datasetUrls.getUrls() != null) {
                   datasetUrls
                       .getUrls()
                       .forEach(
                           s3Info -> {
                             crate.addDataEntity(
-                                new DataEntityBuilder()
-                                    .addType(SchemaDO.MediaObject.getLocalName())
-                                    .setId(s3Info.getUrl())
-                                    .addProperty(
-                                        SchemaDO.encodingFormat.getLocalName(),
-                                        ExtraMediaType.APPLICATION_TAR)
-                                    .addProperty(
+                                addIfPresent(
+                                        new DataEntityBuilder()
+                                            .addType(SchemaDO.MediaObject.getLocalName())
+                                            .setId(s3Info.getUrl())
+                                            .addProperty(
+                                                SchemaDO.encodingFormat.getLocalName(),
+                                                ExtraMediaType.APPLICATION_TAR),
                                         SchemaDO.expires.getLocalName(),
-                                        s3Info.getExpires().toString())
+                                        s3Info.getExpires())
                                     .build());
 
                             datasetBuilder.addIdProperty(
@@ -160,11 +186,30 @@ public class RoCrateExporter {
 
   public ContextualEntity addPerson(String name) {
     ContextualEntityBuilder creatorBuilder =
-        new ContextualEntityBuilder()
-            .addType(SchemaDO.Person.getLocalName())
-            .addProperty(SchemaDO.name.getLocalName(), name);
+        new ContextualEntityBuilder().addType(SchemaDO.Person.getLocalName());
+    addIfPresent(creatorBuilder, SchemaDO.name.getLocalName(), name);
 
     return creatorBuilder.build();
+  }
+
+  public ContextualEntity addOrganization(DataciteMetadata.Publisher publisher) {
+    ContextualEntityBuilder organizationBuilder =
+        new ContextualEntityBuilder()
+            .setId(publisher.getPublisherIdentifier())
+            .addType(SchemaDO.Organization.getLocalName());
+    addIfPresent(organizationBuilder, SchemaDO.name.getLocalName(), publisher.getName());
+
+    return organizationBuilder.build();
+  }
+
+  public ContextualEntity addCreativeWork(DataciteMetadata.Right right) {
+    ContextualEntityBuilder organizationBuilder =
+        new ContextualEntityBuilder()
+            .addType(SchemaDO.CreativeWork.getLocalName())
+            .setId(right.getRightsIdentifier());
+    addIfPresent(organizationBuilder, SchemaDO.name.getLocalName(), right.getRights());
+
+    return organizationBuilder.build();
   }
 
   public String getCrateMetadata() {
@@ -187,7 +232,18 @@ public class RoCrateExporter {
     return Optional.of(outputStream.toByteArray());
   }
 
-  private String yearToISO3601(int year) {
-    return Year.of(year).atDay(1).toString();
+  private String yearToISO3601(Integer year) {
+    return year == null ? null : Year.of(year).atDay(1).toString();
+  }
+
+  private static <B extends AbstractEntityBuilder<B>> B addIfPresent(
+      B builder, String key, Object value) {
+    return value == null ? builder : builder.addProperty(key, value.toString());
+  }
+
+  private static void addIfPresent(AbstractEntity entity, String key, Object value) {
+    if (value != null) {
+      entity.addProperty(key, value.toString());
+    }
   }
 }

@@ -11,17 +11,13 @@ import org.apache.jena.vocabulary.SchemaDO;
 @Setter
 @RdfClass(typesUri = SchemaDO.NS + "Organization")
 public class Organization {
+  @RdfResourceIdentifier String resourceIdentifier;
+
   @RdfProperty(uri = SchemaDO.NS + "name", minCardinality = 1)
   public String name;
 
   @RdfResourceIdentifier()
   public String generateId() {
-    if (this == PSI) {
-      return "https://ror.org/03eh3y714";
-    }
-
-    return null;
+    return resourceIdentifier;
   }
-
-  public static Organization PSI = new Organization().setName("Paul Scherrer Institute");
 }

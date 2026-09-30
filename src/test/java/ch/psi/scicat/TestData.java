@@ -6,7 +6,7 @@ import ch.psi.s3_broker.model.S3Url;
 import ch.psi.scicat.model.v3.Dataset;
 import ch.psi.scicat.model.v3.MyIdentity;
 import ch.psi.scicat.model.v3.MyIdentity.Profile;
-import ch.psi.scicat.model.v3.PublishedData;
+import ch.psi.scicat.model.v4.PublishedData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.Instant;

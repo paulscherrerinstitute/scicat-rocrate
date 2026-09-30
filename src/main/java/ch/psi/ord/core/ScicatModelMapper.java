@@ -2,13 +2,21 @@ package ch.psi.ord.core;
 
 import static org.modelmapper.Conditions.isNotNull;
 
+import ch.psi.ord.model.Organization;
 import ch.psi.ord.model.Person;
 import ch.psi.ord.model.Publication;
 import ch.psi.ord.model.ZenodoDataset;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
-import ch.psi.scicat.model.v3.CreatePublishedDataDto;
 import ch.psi.scicat.model.v3.DatasetType;
-import ch.psi.scicat.model.v3.PublishedData;
+import ch.psi.scicat.model.v4.CreatePublishedDataDto;
+import ch.psi.scicat.model.v4.DataciteMetadata.Affiliation;
+import ch.psi.scicat.model.v4.DataciteMetadata.Creator;
+import ch.psi.scicat.model.v4.DataciteMetadata.Description;
+import ch.psi.scicat.model.v4.DataciteMetadata.DescriptionType;
+import ch.psi.scicat.model.v4.DataciteMetadata.RelatedIdentifier;
+import ch.psi.scicat.model.v4.DataciteMetadata.RelatedIdentifierType;
+import ch.psi.scicat.model.v4.DataciteMetadata.RelationType;
+import ch.psi.scicat.model.v4.PublishedData;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
 import java.net.URI;
@@ -20,116 +28,75 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.spi.MappingContext;
 
 @Singleton
 public class ScicatModelMapper {
-  Converter<String, List<String>> identifierToRelatedPublications =
-      new Converter<>() {
-        @Override
-        public List<String> convert(MappingContext<String, List<String>> context) {
-          List<String> relatedPublications = new ArrayList<>();
-          relatedPublications.add(
-              String.format("%s (IsIdenticalTo)", DoiUtils.buildStandardUrl(context.getSource())));
-          return relatedPublications;
-        }
-      };
-
-  Converter<List<Person>, String> personListToOwnerString =
-      new Converter<>() {
-        @Override
-        public String convert(MappingContext<List<Person>, String> context) {
-          return context.getSource().stream()
+  private final Converter<List<Person>, String> personListToOwnerString =
+      context ->
+          context.getSource().stream()
               .map(p -> String.format("%s %s", p.getGivenName(), p.getFamilyName()))
               .collect(Collectors.joining("; "));
-        }
-      };
 
-  Converter<List<Person>, String> personListToOwnerEmails =
-      new Converter<>() {
-        @Override
-        public String convert(MappingContext<List<Person>, String> context) {
-          return context.getSource().stream()
-              .map(Person::getEmail)
-              .collect(Collectors.joining("; "));
-        }
-      };
+  private final Converter<List<Person>, String> personListToOwnerEmails =
+      context ->
+          context.getSource().stream().map(Person::getEmail).collect(Collectors.joining("; "));
 
-  Converter<List<Person>, List<String>> personToStringList =
-      new Converter<>() {
-        @Override
-        public List<String> convert(MappingContext<List<Person>, List<String>> context) {
-          return context.getSource().stream().map(Person::getName).collect(Collectors.toList());
-        }
-      };
+  private final Converter<List<Person>, List<String>> personToStringList =
+      context -> context.getSource().stream().map(Person::getName).collect(Collectors.toList());
 
-  Converter<List<String>, List<Person>> stringListToPerson =
-      new Converter<>() {
-        @Override
-        public List<Person> convert(MappingContext<List<String>, List<Person>> context) {
-          return context.getSource().stream()
+  private final Converter<List<String>, List<Person>> stringListToPerson =
+      context ->
+          context.getSource().stream()
               .map(str -> new Person().setName(str))
               .collect(Collectors.toList());
+
+  private final Converter<String, Integer> dateToYear =
+      context -> {
+        DateTimeFormatter openBisFormatter =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z"); // Pattern used by openBIS
+        List<DateTimeFormatter> supportedFormats =
+            List.of(openBisFormatter, DateTimeFormatter.ISO_ZONED_DATE_TIME);
+
+        String input = context.getSource();
+        if (context.getSource().matches("\\d{4}")) {
+          input += "-01-01T00:00:00Z";
         }
-      };
-
-  Converter<String, Integer> dateToYear =
-      new Converter<>() {
-        @Override
-        public Integer convert(MappingContext<String, Integer> context) {
-          DateTimeFormatter openBisFormatter =
-              DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z"); // Pattern used by openBIS
-          List<DateTimeFormatter> supportedFormats =
-              List.of(openBisFormatter, DateTimeFormatter.ISO_ZONED_DATE_TIME);
-
-          String input = context.getSource();
-          if (context.getSource().matches("\\d{4}")) {
-            input += "-01-01T00:00:00Z";
+        for (DateTimeFormatter format : supportedFormats) {
+          try {
+            OffsetDateTime date = OffsetDateTime.parse(input, format);
+            return date.getYear();
+          } catch (DateTimeParseException e) {
           }
-          for (DateTimeFormatter format : supportedFormats) {
-            try {
-              OffsetDateTime date = OffsetDateTime.parse(input, format);
-              return date.getYear();
-            } catch (DateTimeParseException e) {
-            }
-          }
-          throw new IllegalArgumentException("Invalid date format: " + input);
         }
+        throw new IllegalArgumentException("Invalid date format: " + input);
       };
 
-  Converter<String, String> doiToDoiUrl =
-      new Converter<String, String>() {
-        @Override
-        public String convert(MappingContext<String, String> context) {
-          return DoiUtils.buildStandardUrl(context.getSource());
+  private final Converter<String, String> doiToDoiUrl =
+      context -> DoiUtils.buildStandardUrl(context.getSource());
+
+  private final Converter<List<String>, List<String>> keywordsConverter =
+      context -> {
+        List<String> source = context.getSource();
+
+        if (source == null || source.isEmpty()) {
+          return new ArrayList<>();
         }
+
+        return source.stream()
+            .filter(Objects::nonNull)
+            .map(entry -> entry.split(","))
+            .flatMap(Arrays::stream)
+            .map(String::trim)
+            .filter(str -> !str.isEmpty())
+            .collect(Collectors.toList());
       };
 
-  Converter<List<String>, List<String>> keywordsConverter =
-      new Converter<List<String>, List<String>>() {
-
-        @Override
-        public List<String> convert(MappingContext<List<String>, List<String>> context) {
-          List<String> source = context.getSource();
-
-          if (source == null || source.isEmpty()) {
-            return new ArrayList<>();
-          }
-
-          return source.stream()
-              .filter(Objects::nonNull)
-              .map(entry -> entry.split(","))
-              .flatMap(Arrays::stream)
-              .map(String::trim)
-              .filter(str -> !str.isEmpty())
-              .collect(Collectors.toList());
-        }
-      };
-
-  Converter<String, String> uriPathExtractor =
+  private final Converter<String, String> uriPathExtractor =
       context -> {
         String sourceId = context.getSource();
         try {
@@ -139,7 +106,8 @@ public class ScicatModelMapper {
           return sourceId;
         }
       };
-  Converter<String, String> uriHostExtractor =
+
+  private final Converter<String, String> uriHostExtractor =
       context -> {
         String sourceId = context.getSource();
         try {
@@ -150,36 +118,114 @@ public class ScicatModelMapper {
         }
       };
 
+  private final Converter<List<Creator>, List<Person>> dataciteCreatorToPerson =
+      context ->
+          context.getSource().stream()
+              .map(
+                  creator ->
+                      new Person()
+                          .setName(creator.getName())
+                          .setGivenName(creator.getGivenName())
+                          .setFamilyName(creator.getFamilyName()))
+              .toList();
+
+  private final Converter<List<Person>, List<Creator>> personToDataciteCreator =
+      context ->
+          context.getSource().stream()
+              .map(
+                  creator ->
+                      new Creator()
+                          .setName(creator.getName())
+                          .setGivenName(creator.getGivenName())
+                          .setFamilyName(creator.getFamilyName())
+                          .setAffiliation(
+                              Objects.requireNonNullElse(
+                                      creator.getAffiliation(), List.<Organization>of())
+                                  .stream()
+                                  .filter(Objects::nonNull)
+                                  .map(
+                                      organization ->
+                                          context
+                                              .getMappingEngine()
+                                              .map(context.create(organization, Affiliation.class)))
+                                  .collect(Collectors.toList())))
+              .toList();
+
+  // https://ror.readme.io/docs/identifier
+  private static final Pattern ROR_URL =
+      Pattern.compile("^https?://(?:www\\.)?ror\\.org/(0[a-hj-km-np-tv-z0-9]{6}[0-9]{2})/?$");
+
+  private final Converter<Organization, Affiliation> organizationToDataciteAffiliation =
+      context -> {
+        Organization organization = context.getSource();
+        Affiliation affiliation = new Affiliation().setName(organization.getName());
+        String id = organization.getResourceIdentifier();
+        if (id != null) {
+          Matcher matcher = ROR_URL.matcher(id);
+          if (matcher.matches()) {
+            affiliation
+                .setAffiliationIdentifier("https://ror.org/" + matcher.group(1))
+                .setAffiliationIdentifierScheme("ROR")
+                .setSchemeUri("https://ror.org");
+          }
+        }
+
+        return affiliation;
+      };
+
+  private final Converter<Publication, CreatePublishedDataDto> publicationPostConverter =
+      context -> {
+        Publication source = context.getSource();
+        CreatePublishedDataDto destination = context.getDestination();
+
+        if (source.getDescription() != null) {
+          destination
+              .getMetadata()
+              .getDescriptions()
+              .add(
+                  new Description()
+                      .setDescription(source.getDescription())
+                      .setLang("en")
+                      .setDescriptionType(DescriptionType.OTHER));
+        }
+
+        DoiUtils.extractDoi(source.getIdentifier())
+            .ifPresent(
+                doi ->
+                    destination
+                        .getMetadata()
+                        .getRelatedIdentifiers()
+                        .add(
+                            new RelatedIdentifier()
+                                .setRelatedIdentifierType(RelatedIdentifierType.DOI)
+                                .setRelationType(RelationType.IS_IDENTICAL_TO)
+                                .setRelatedIdentifier(doi)));
+
+        return destination;
+      };
+
   @Produces
   public ModelMapper createPublicationModelMapper() {
     ModelMapper mapper = new ModelMapper();
     mapper.getConfiguration().setImplicitMappingEnabled(false);
+
+    mapper.addConverter(organizationToDataciteAffiliation, Organization.class, Affiliation.class);
 
     mapper
         .typeMap(Publication.class, CreatePublishedDataDto.class)
         .addMappings(
             m -> {
               m.when(isNotNull())
-                  .using(identifierToRelatedPublications)
-                  .map(Publication::getIdentifier, CreatePublishedDataDto::setRelatedPublications);
-              m.when(isNotNull())
-                  .using(personToStringList)
-                  .map(Publication::getCreator, CreatePublishedDataDto::setCreator);
+                  .using(personToDataciteCreator)
+                  .map(
+                      Publication::getCreator,
+                      (CreatePublishedDataDto dst, List<Creator> v) ->
+                          dst.getMetadata().setCreators(v));
               m.when(isNotNull()).map(Publication::getTitle, CreatePublishedDataDto::setTitle);
               m.when(isNotNull())
-                  .map(src -> src.getPublisher().getName(), CreatePublishedDataDto::setPublisher);
-              m.when(isNotNull())
                   .map(Publication::getAbstract, CreatePublishedDataDto::setAbstract);
-              m.when(isNotNull())
-                  .map(Publication::getDescription, CreatePublishedDataDto::setDataDescription);
-              m.when(isNotNull())
-                  .using(dateToYear)
-                  .map(Publication::getDatePublished, CreatePublishedDataDto::setPublicationYear);
-
-              // Default values
-              m.map(src -> "derived", CreatePublishedDataDto::setResourceType);
-              m.map(src -> "pending_registration", CreatePublishedDataDto::setStatus);
-            });
+            })
+        .setPostConverter(publicationPostConverter);
 
     mapper
         .typeMap(PublishedData.class, ZenodoDataset.class)
@@ -195,11 +241,11 @@ public class ScicatModelMapper {
                   .map(PublishedData::getRegisteredTime, ZenodoDataset::setDatePublished);
               m.when(isNotNull())
                   .map(
-                      src -> src.getPublisher(),
+                      src -> src.getMetadata().getPublisher().getName(),
                       (dst, v) -> dst.getPublisher().setName((String) v));
               m.when(isNotNull())
-                  .using(stringListToPerson)
-                  .map(PublishedData::getCreator, ZenodoDataset::setCreators);
+                  .using(dataciteCreatorToPerson)
+                  .map(src -> src.getMetadata().getCreators(), ZenodoDataset::setCreators);
             });
 
     mapper
