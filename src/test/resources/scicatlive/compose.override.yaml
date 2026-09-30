@@ -1,6 +1,6 @@
 services:
   backend-configs:
-    image: curlimages/curl:8.19.0
+    image: curlimages/curl:8.22.0
     user: root
     volumes:
       - backend-configs:/configs
