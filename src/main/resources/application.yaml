@@ -11,6 +11,9 @@ quarkus:
   log:
     level: INFO
   http:
+    access-log:
+      enabled: true
+      masked-headers: api-key
     limits:
       max-body-size: 10G
     test-port: 9999
