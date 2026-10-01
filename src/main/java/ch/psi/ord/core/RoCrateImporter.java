@@ -15,11 +15,12 @@ import ch.psi.scicat.client.ScicatService;
 import ch.psi.scicat.model.v3.CountResponse;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
 import ch.psi.scicat.model.v3.CreateJobDto;
-import ch.psi.scicat.model.v3.CreatePublishedDataDto;
 import ch.psi.scicat.model.v3.DatasetType;
 import ch.psi.scicat.model.v3.MyIdentity;
 import ch.psi.scicat.model.v3.OutputJobDto;
-import ch.psi.scicat.model.v3.PublishedData;
+import ch.psi.scicat.model.v4.CreatePublishedDataDto;
+import ch.psi.scicat.model.v4.DataciteMetadata.Creator;
+import ch.psi.scicat.model.v4.PublishedData;
 import io.vertx.ext.web.handler.HttpException;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -65,10 +66,22 @@ public class RoCrateImporter {
   private MyIdentity userIdentity;
   private String ownerGroup;
 
-  public static String publicationExistsFilter =
+  public static final String publicationExistsFilter =
       """
-          { "where": { "relatedPublications": "%s (IsIdenticalTo)" } }
-      """;
+          {
+            "where": {
+              "metadata.relatedIdentifiers":
+                {
+                  "$elemMatch": {
+                    "relatedIdentifier": "%s",
+                    "relationType": "IsIdenticalTo",
+                    "relatedIdentifierType": "DOI"
+                }
+              }
+            }
+          }
+      """
+          .replace(" ", "");
 
   public void loadCrate(RoCrate crate) {
     this.crate = crate;
@@ -138,25 +151,23 @@ public class RoCrateImporter {
 
   public void importPublication(
       Map<String, String> importMap, Publication publication, String scicatToken) {
-    if (publication.getIdentifier() != null) {
-      CountResponse count =
-          scicatService
-              .countPublishedData(
-                  String.format(
-                      publicationExistsFilter,
-                      DoiUtils.buildStandardUrl(publication.getIdentifier())),
-                  scicatToken)
-              .getEntity();
+    DoiUtils.extractDoi(publication.getIdentifier())
+        .ifPresent(
+            doi -> {
+              CountResponse count =
+                  scicatService
+                      .countPublishedData(String.format(publicationExistsFilter, doi), scicatToken)
+                      .getEntity();
 
-      if (count.getCount() > 0) {
-        throw new WebApplicationException(
-            "This Publication has already been imported", Status.CONFLICT);
-      }
-    }
+              if (count.getCount() > 0) {
+                throw new WebApplicationException(
+                    "This Publication has already been imported", Status.CONFLICT);
+              }
+            });
 
     CreatePublishedDataDto dto = modelMapper.map(publication, CreatePublishedDataDto.class);
 
-    if (dto.getPidArray().isEmpty()) {
+    if (dto.getDatasetPids().isEmpty()) {
       CreateDatasetDto datasetDto = createPlaceholderDataset(dto, scicatToken);
       String pid =
           scicatCli.ingestDataset(
@@ -179,7 +190,7 @@ public class RoCrateImporter {
           scicatCli.ingestDataset(
               scicatToken, datasetDto, publication.getHasPart().getFiles().values());
       scheduleForArchival(datasetPid);
-      dto.getPidArray().add(datasetPid);
+      dto.getDatasetPids().add(datasetPid);
       publication
           .getHasPart()
           .getFiles()
@@ -194,21 +205,22 @@ public class RoCrateImporter {
 
   private CreateDatasetDto createPlaceholderDataset(
       CreatePublishedDataDto publishedDatasetDto, String scicatToken) {
-    CreateDatasetDto datasetDto = new CreateDatasetDto();
-
-    publishedDatasetDto.setScicatUser(userIdentity.getProfile().getUsername());
-
-    datasetDto
-        .setDatasetName("Original RO-Crate")
-        .setOwner(String.join("; ", publishedDatasetDto.getCreator()))
-        .setPrincipalInvestigator(String.join("; ", publishedDatasetDto.getCreator()))
-        .setContactEmail(userIdentity.getProfile().getEmail())
-        .setSourceFolder(crate.getBase().toString())
-        .setCreationLocation("")
-        .setCreationTime(Instant.now())
-        .setType(DatasetType.RAW)
-        .setPublished(false)
-        .setOwnerGroup(ownerGroup);
+    String creators =
+        publishedDatasetDto.getMetadata().getCreators().stream()
+            .map(Creator::getName)
+            .collect(Collectors.joining("; "));
+    CreateDatasetDto datasetDto =
+        new CreateDatasetDto()
+            .setDatasetName("Original RO-Crate")
+            .setOwner(creators)
+            .setPrincipalInvestigator(creators)
+            .setContactEmail(userIdentity.getProfile().getEmail())
+            .setSourceFolder(crate.getBase().toString())
+            .setCreationLocation("")
+            .setCreationTime(Instant.now())
+            .setType(DatasetType.RAW)
+            .setPublished(false)
+            .setOwnerGroup(ownerGroup);
 
     return datasetDto;
   }
