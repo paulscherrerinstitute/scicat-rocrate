@@ -15,4 +15,6 @@ public @interface RdfProperty {
   int maxCardinality() default Integer.MAX_VALUE;
 
   String[] equivalentProperties() default {};
+
+  RdfCardinality[] nested() default {};
 }

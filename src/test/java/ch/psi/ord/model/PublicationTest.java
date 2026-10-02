@@ -8,6 +8,7 @@ import ch.psi.rdf.RdfMapper;
 import ch.psi.rdf.deser.DeserializationReport;
 import ch.psi.rdf.deser.RdfDeserializationException;
 import io.quarkus.test.junit.QuarkusTest;
+import java.util.Set;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.Lang;
@@ -155,5 +156,30 @@ public class PublicationTest {
                                   "sub-tree should contain at least one '%s' or '%s'",
                                   SchemaDO.Dataset, SchemaDO.MediaObject))));
     }
+  }
+
+  @Test
+  @DisplayName("Creator without affiliation")
+  public void test00() throws RdfDeserializationException {
+    Resource publication =
+        publication(
+            """
+            {
+              "@id": "file:///data/file.bin",
+              "@type": "MediaObject"
+            }
+            """);
+    Resource creator = publication.getModel().createResource("https://example.org/person/1");
+    publication.getModel().removeAll(creator, SchemaDO.affiliation, null);
+
+    DeserializationReport<Publication> report =
+        rdfMapper.deserialize(publication, Publication.class);
+
+    assertFalse(report.isValid());
+    assertEquals(
+        Set.of(
+            new PropertyError(
+                creator.getURI(), SchemaDO.affiliation.getURI(), "Missing required property")),
+        report.getErrors());
   }
 }

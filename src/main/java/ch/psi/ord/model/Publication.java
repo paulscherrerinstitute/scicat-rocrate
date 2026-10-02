@@ -4,6 +4,7 @@ import static ch.psi.rdf.RdfUtils.isOfType;
 import static ch.psi.rdf.RdfUtils.listProperties;
 
 import ch.psi.ord.model.Publication.Parts.PartsDeserializer;
+import ch.psi.rdf.annotations.RdfCardinality;
 import ch.psi.rdf.annotations.RdfClass;
 import ch.psi.rdf.annotations.RdfDeserialize;
 import ch.psi.rdf.annotations.RdfProperty;
@@ -35,7 +36,10 @@ public class Publication {
   @RdfProperty(uri = SchemaDO.NS + "identifier", maxCardinality = 1)
   private String identifier;
 
-  @RdfProperty(uri = SchemaDO.NS + "creator", minCardinality = 1)
+  @RdfProperty(
+      uri = SchemaDO.NS + "creator",
+      minCardinality = 1,
+      nested = @RdfCardinality(uri = SchemaDO.NS + "affiliation", min = 1))
   private List<Person> creator = new ArrayList<>();
 
   @RdfProperty(uri = SchemaDO.NS + "name", minCardinality = 1)

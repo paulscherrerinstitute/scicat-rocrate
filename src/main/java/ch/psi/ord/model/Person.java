@@ -22,6 +22,6 @@ public class Person {
   @RdfProperty(uri = SchemaDO.NS + "email", minCardinality = 1)
   public String email;
 
-  @RdfProperty(uri = SchemaDO.NS + "affiliation", minCardinality = 1)
+  @RdfProperty(uri = SchemaDO.NS + "affiliation")
   public List<Organization> affiliation = new ArrayList<>();
 }

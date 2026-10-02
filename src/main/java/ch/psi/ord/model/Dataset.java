@@ -22,7 +22,7 @@ public class Dataset {
   String description;
 
   @RdfProperty(uri = SchemaDO.NS + "creator")
-  List<Person2> creator;
+  List<Person> creator;
 
   @RdfProperty(uri = SchemaDO.NS + "size")
   int size;
