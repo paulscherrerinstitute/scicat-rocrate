@@ -5,6 +5,7 @@ import static ch.psi.rdf.RdfUtils.isOfType;
 import static ch.psi.rdf.RdfUtils.listProperties;
 
 import ch.psi.ord.model.PropertyError;
+import ch.psi.rdf.annotations.RdfCardinality;
 import ch.psi.rdf.annotations.RdfClass;
 import ch.psi.rdf.annotations.RdfDeserialize;
 import ch.psi.rdf.annotations.RdfProperty;
@@ -67,6 +68,7 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
           String.format("Failed to create an instance of %s", clazz.getName()), e);
     }
     Resource subject = node.asResource();
+    Map<String, RdfCardinality> overrides = context.getCardinalityOverrides();
     context.pushCurrentSubject(subject);
     try {
       setUriFields(subject, obj);
@@ -78,38 +80,44 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
 
         Set<RDFNode> values =
             listProperties(subject, ResourceFactory.createProperty(propertyAnnotation.uri()));
-        checkCardinalities(subject, propertyAnnotation, values.size())
+        checkCardinalities(subject, propertyAnnotation, overrides, values.size())
             .ifPresent(e -> context.addError(e));
 
-        if (field.getType().isAssignableFrom(List.class)) {
-          Class<?> listType =
-              (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-          RdfDeserializer<?> elementDeserializer = context.getDeserializer(listType);
-          List<Object> collection = new ArrayList<>();
-          for (RDFNode value : values) {
-            collection.add(elementDeserializer.deserialize(value, context));
-          }
-          setField(field, obj, collection);
-        } else if (!values.isEmpty()) {
-          if (values.size() > 1) {
-            log.warn(
-                "Field '{}' of class '{}' is not a collection, only the first value will be"
-                    + " assigned",
-                field.getName(),
-                clazz.getName());
-          }
-
-          RdfDeserializer<?> fieldDeserializer = context.getDeserializer(field.getType());
-          if (field.isAnnotationPresent(RdfDeserialize.class)) {
-            try {
-              fieldDeserializer = createInstance(field.getAnnotation(RdfDeserialize.class).using());
-            } catch (ReflectiveOperationException e) {
-              throw new RdfDeserializationException(
-                  String.format("Unable to instantiate custom field deserializer"), e);
+        context.pushCardinalityOverrides(propertyAnnotation.nested());
+        try {
+          if (field.getType().isAssignableFrom(List.class)) {
+            Class<?> listType =
+                (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+            RdfDeserializer<?> elementDeserializer = context.getDeserializer(listType);
+            List<Object> collection = new ArrayList<>();
+            for (RDFNode value : values) {
+              collection.add(elementDeserializer.deserialize(value, context));
             }
+            setField(field, obj, collection);
+          } else if (!values.isEmpty()) {
+            if (values.size() > 1) {
+              log.warn(
+                  "Field '{}' of class '{}' is not a collection, only the first value will be"
+                      + " assigned",
+                  field.getName(),
+                  clazz.getName());
+            }
+
+            RdfDeserializer<?> fieldDeserializer = context.getDeserializer(field.getType());
+            if (field.isAnnotationPresent(RdfDeserialize.class)) {
+              try {
+                fieldDeserializer =
+                    createInstance(field.getAnnotation(RdfDeserialize.class).using());
+              } catch (ReflectiveOperationException e) {
+                throw new RdfDeserializationException(
+                    String.format("Unable to instantiate custom field deserializer"), e);
+              }
+            }
+            Object value = fieldDeserializer.deserialize(values.iterator().next(), context);
+            setField(field, obj, value);
           }
-          Object value = fieldDeserializer.deserialize(values.iterator().next(), context);
-          setField(field, obj, value);
+        } finally {
+          context.popCardinalityOverrides();
         }
       }
     } finally {
@@ -135,20 +143,24 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
   }
 
   private Optional<PropertyError> checkCardinalities(
-      Resource subject, RdfProperty propertyAnnotation, int actualCardinality) {
+      Resource subject,
+      RdfProperty propertyAnnotation,
+      Map<String, RdfCardinality> overrides,
+      int actualCardinality) {
+    RdfCardinality override = overrides.get(propertyAnnotation.uri());
+    int min = override != null ? override.min() : propertyAnnotation.minCardinality();
+    int max = override != null ? override.max() : propertyAnnotation.maxCardinality();
+
     String message = null;
-    if (actualCardinality < propertyAnnotation.minCardinality()) {
+    if (actualCardinality < min) {
       message =
           (actualCardinality == 0)
               ? "Missing required property"
               : String.format(
-                  "Too few values: expected at least %d but got %d",
-                  propertyAnnotation.minCardinality(), actualCardinality);
-    } else if (actualCardinality > propertyAnnotation.maxCardinality()) {
+                  "Too few values: expected at least %d but got %d", min, actualCardinality);
+    } else if (actualCardinality > max) {
       message =
-          String.format(
-              "Too many values: expected at most %d but got %d",
-              propertyAnnotation.maxCardinality(), actualCardinality);
+          String.format("Too many values: expected at most %d but got %d", max, actualCardinality);
     }
     return Optional.ofNullable(message)
         .map(msg -> new PropertyError(subject.getURI(), propertyAnnotation.uri(), msg));
