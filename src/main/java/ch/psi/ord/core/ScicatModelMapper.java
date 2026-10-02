@@ -2,8 +2,10 @@ package ch.psi.ord.core;
 
 import static org.modelmapper.Conditions.isNotNull;
 
+import ch.psi.ord.model.Dataset;
 import ch.psi.ord.model.Organization;
 import ch.psi.ord.model.Person;
+import ch.psi.ord.model.Person2;
 import ch.psi.ord.model.Publication;
 import ch.psi.ord.model.ZenodoDataset;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
@@ -45,6 +47,10 @@ public class ScicatModelMapper {
   private final Converter<List<Person>, String> personListToOwnerEmails =
       context ->
           context.getSource().stream().map(Person::getEmail).collect(Collectors.joining("; "));
+
+  private final Converter<List<Person2>, String> person2ListToOwnerEmails =
+      context ->
+          context.getSource().stream().map(Person2::getEmail).collect(Collectors.joining("; "));
 
   private final Converter<List<Person>, List<String>> personToStringList =
       context -> context.getSource().stream().map(Person::getName).collect(Collectors.toList());
@@ -263,6 +269,20 @@ public class ScicatModelMapper {
                   .map(Publication::getCreator, CreateDatasetDto::setContactEmail);
               m.map(src -> Instant.now(), CreateDatasetDto::setCreationTime);
               m.map(Publication::getDescription, CreateDatasetDto::setDescription);
+            });
+
+    mapper
+        .typeMap(Dataset.class, CreateDatasetDto.class)
+        .addMappings(
+            m -> {
+              m.when(isNotNull()).map(Dataset::getName, CreateDatasetDto::setDatasetName);
+              m.when(isNotNull()).map(src -> DatasetType.BASE, CreateDatasetDto::setType);
+              m.when(isNotNull())
+                  .using(uriPathExtractor)
+                  .map(Dataset::getResourceIdentifier, CreateDatasetDto::setSourceFolder);
+              m.using(person2ListToOwnerEmails)
+                  .map(Dataset::getCreator, CreateDatasetDto::setContactEmail);
+              m.map(src -> Instant.now(), CreateDatasetDto::setCreationTime);
             });
 
     return mapper;

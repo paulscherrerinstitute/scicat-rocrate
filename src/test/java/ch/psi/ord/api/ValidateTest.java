@@ -10,8 +10,11 @@ import static org.hamcrest.Matchers.is;
 import ch.psi.ord.model.ExportFormat;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.ValidatableResponse;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import lombok.Data;
 import org.hamcrest.Matchers;
@@ -40,6 +43,15 @@ public class ValidateTest extends EndpointTest {
       String resourceName,
       int statusCode,
       Consumer<ValidatableResponse> assertions) {
+    return createTestCase(testName, resourceName, Collections.emptyMap(), statusCode, assertions);
+  }
+
+  private static List<ValidateTestCase> createTestCase(
+      String testName,
+      String resourceName,
+      Map<String, BigInteger> fileList,
+      int statusCode,
+      Consumer<ValidatableResponse> assertions) {
     return List.of(
         new ValidateTestCase()
             .setTestName(testName)
@@ -50,7 +62,7 @@ public class ValidateTest extends EndpointTest {
         new ValidateTestCase()
             .setTestName(testName)
             .setExportFormat(ExportFormat.ZIP)
-            .setBody(zipResource(resourceName))
+            .setBody(zipResource(resourceName, fileList))
             .setExpectedStatusCode(statusCode)
             .setAssertions(assertions));
   }
@@ -69,6 +81,17 @@ public class ValidateTest extends EndpointTest {
                               "entities",
                               Matchers.contains(
                                   "https://doi.org/10.16907/d910159a-d48a-45fb-acf2-74b27cd5a8e5"))
+                          .body("errors", emptyIterable())));
+
+          addAll(
+              createTestCase(
+                  "One dataset attached to the root",
+                  "one-dataset.json",
+                  Map.of("data/ds1/file1.txt", BigInteger.valueOf(16)),
+                  200,
+                  res ->
+                      res.body("isValid", is(true))
+                          .body("entities", Matchers.contains("data/ds1/"))
                           .body("errors", emptyIterable())));
 
           addAll(
