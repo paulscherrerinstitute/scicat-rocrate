@@ -13,6 +13,7 @@ import ch.psi.scicat.model.v4.DataciteMetadata.Affiliation;
 import ch.psi.scicat.model.v4.DataciteMetadata.Creator;
 import ch.psi.scicat.model.v4.DataciteMetadata.Description;
 import ch.psi.scicat.model.v4.DataciteMetadata.DescriptionType;
+import ch.psi.scicat.model.v4.DataciteMetadata.NameIdentifier;
 import ch.psi.scicat.model.v4.DataciteMetadata.RelatedIdentifier;
 import ch.psi.scicat.model.v4.DataciteMetadata.RelatedIdentifierType;
 import ch.psi.scicat.model.v4.DataciteMetadata.RelationType;
@@ -31,6 +32,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 
@@ -138,6 +140,13 @@ public class ScicatModelMapper {
                           .setName(creator.getName())
                           .setGivenName(creator.getGivenName())
                           .setFamilyName(creator.getFamilyName())
+                          .setNameIdentifiers(
+                              context
+                                  .getMappingEngine()
+                                  .map(
+                                      context.create(
+                                          creator,
+                                          (Class<List<NameIdentifier>>) (Class<?>) List.class)))
                           .setAffiliation(
                               Objects.requireNonNullElse(
                                       creator.getAffiliation(), List.<Organization>of())
@@ -150,6 +159,31 @@ public class ScicatModelMapper {
                                               .map(context.create(organization, Affiliation.class)))
                                   .collect(Collectors.toList())))
               .toList();
+
+  // https://support.orcid.org/hc/en-us/articles/360006897674-Structure-of-the-ORCID-Identifier
+  private static final Pattern ORCID =
+      Pattern.compile(
+          "^(?:https?://(?:www\\.)?orcid\\.org/)?(\\d{4}-\\d{4}-\\d{4}-\\d{3}[\\dX])/?$");
+
+  private final Converter<Person, List<NameIdentifier>> personToDataciteNameIdentifiers =
+      context -> {
+        Person person = context.getSource();
+        return Stream.concat(
+                Stream.of(person.getResourceIdentifier()),
+                Objects.requireNonNullElse(person.getIdentifier(), List.<String>of()).stream())
+            .filter(Objects::nonNull)
+            .map(id -> ORCID.matcher(id.trim()))
+            .filter(Matcher::matches)
+            .map(matcher -> "https://orcid.org/" + matcher.group(1))
+            .limit(1)
+            .map(
+                orcid ->
+                    new NameIdentifier()
+                        .setNameIdentifier(orcid)
+                        .setNameIdentifierScheme("ORCID")
+                        .setSchemeUri("https://orcid.org"))
+            .collect(Collectors.toList());
+      };
 
   // https://ror.readme.io/docs/identifier
   private static final Pattern ROR_URL =
@@ -210,6 +244,10 @@ public class ScicatModelMapper {
     mapper.getConfiguration().setImplicitMappingEnabled(false);
 
     mapper.addConverter(organizationToDataciteAffiliation, Organization.class, Affiliation.class);
+    mapper.addConverter(
+        personToDataciteNameIdentifiers,
+        Person.class,
+        (Class<List<NameIdentifier>>) (Class<?>) List.class);
 
     mapper
         .typeMap(Publication.class, CreatePublishedDataDto.class)

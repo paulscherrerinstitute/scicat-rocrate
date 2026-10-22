@@ -2,6 +2,7 @@ package ch.psi.ord.model;
 
 import ch.psi.rdf.annotations.RdfClass;
 import ch.psi.rdf.annotations.RdfProperty;
+import ch.psi.rdf.annotations.RdfResourceIdentifier;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -12,6 +13,11 @@ import org.apache.jena.vocabulary.SchemaDO;
 @Setter
 @RdfClass(typesUri = SchemaDO.NS + "Person")
 public class Person {
+  @RdfResourceIdentifier String resourceIdentifier;
+
+  @RdfProperty(uri = SchemaDO.NS + "identifier")
+  public List<String> identifier = new ArrayList<>();
+
   @RdfProperty(uri = SchemaDO.NS + "name", minCardinality = 1)
   public String name;
 
