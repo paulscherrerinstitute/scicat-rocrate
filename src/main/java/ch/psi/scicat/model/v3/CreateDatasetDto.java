@@ -48,4 +48,6 @@ public class CreateDatasetDto {
   @JsonProperty() ObjectNode scientificMetadata;
 
   @JsonProperty() List<String> keywords;
+
+  @JsonProperty() List<CreateRelationshipDto> relationships;
 }

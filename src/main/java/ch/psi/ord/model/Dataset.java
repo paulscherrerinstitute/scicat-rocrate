@@ -26,4 +26,7 @@ public class Dataset {
 
   @RdfProperty(uri = SchemaDO.NS + "size")
   int size;
+
+  @RdfProperty(uri = "https://scicatproject.org/relationships")
+  List<ScicatRelationship> relationships;
 }
