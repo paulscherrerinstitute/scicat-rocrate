@@ -16,6 +16,7 @@ import ch.psi.scicat.model.v3.CountResponse;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
 import ch.psi.scicat.model.v3.Dataset;
 import ch.psi.scicat.model.v3.OutputJobDto;
+import ch.psi.scicat.model.v3.Relationship;
 import ch.psi.scicat.model.v4.CreatePublishedDataDto;
 import ch.psi.scicat.model.v4.PublishedData;
 import io.quarkus.test.junit.QuarkusTest;
@@ -66,6 +67,13 @@ public class ImportTest extends EndpointTest {
   private static final String DATASET_PID = "dataset-pid";
 
   private static final String OWNER_GROUP = "group-2";
+
+  private static final Relationship DATASET_RELATIONSHIP =
+      new Relationship()
+          .setIdentifier("PID.SAMPLE.PREFIX/psi_ds3")
+          .setIdentifierType("Handle")
+          .setRelationship("IsDerivedFrom")
+          .setEntityType("Dataset");
 
   private static Consumer<ImportTest> checkTokenValidity(boolean isValid) {
     return test -> {
@@ -257,6 +265,26 @@ public class ImportTest extends EndpointTest {
                   201,
                   MOCK_NEW_DATASET,
                   res -> res.body("$", hasKey("data/ds1/"))));
+
+          add(
+              createTestCase(
+                  "Dataset with relationships",
+                  ExtraMediaType.APPLICATION_ZIP,
+                  true,
+                  zipResource(
+                      "dataset-with-relationships.json",
+                      Map.of("data/ds1/file1.txt", BigInteger.valueOf(16))),
+                  201,
+                  MOCK_NEW_DATASET,
+                  res -> {
+                    res.body("$", hasKey("data/ds1/"));
+                    if (scicatService != null) {
+                      return;
+                    }
+                    String pid = res.extract().jsonPath().getString("'data/ds1/'");
+                    assertEquals(
+                        List.of(DATASET_RELATIONSHIP), getDatasetByPid(pid).getRelationships());
+                  }));
 
           add(
               createTestCase(

@@ -6,8 +6,10 @@ import ch.psi.ord.model.Dataset;
 import ch.psi.ord.model.Organization;
 import ch.psi.ord.model.Person;
 import ch.psi.ord.model.Publication;
+import ch.psi.ord.model.ScicatRelationship;
 import ch.psi.ord.model.ZenodoDataset;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
+import ch.psi.scicat.model.v3.CreateRelationshipDto;
 import ch.psi.scicat.model.v3.DatasetType;
 import ch.psi.scicat.model.v4.CreatePublishedDataDto;
 import ch.psi.scicat.model.v4.DataciteMetadata.Affiliation;
@@ -120,6 +122,20 @@ public class ScicatModelMapper {
           return sourceId;
         }
       };
+
+  private final Converter<List<ScicatRelationship>, List<CreateRelationshipDto>>
+      relationshipsToDto =
+          context ->
+              context.getSource().stream()
+                  .map(
+                      relationship ->
+                          new CreateRelationshipDto()
+                              .setIdentifier(relationship.getIdentifier())
+                              .setIdentifierType(relationship.getIdentifierType())
+                              .setRelationship(relationship.getRelationship())
+                              .setEntityType(relationship.getEntityType())
+                              .setExternalId(relationship.getExternalId()))
+                  .toList();
 
   private final Converter<List<Creator>, List<Person>> dataciteCreatorToPerson =
       context ->
@@ -316,6 +332,9 @@ public class ScicatModelMapper {
               m.using(personListToOwnerEmails)
                   .map(Dataset::getCreator, CreateDatasetDto::setContactEmail);
               m.map(src -> Instant.now(), CreateDatasetDto::setCreationTime);
+              m.when(isNotNull())
+                  .using(relationshipsToDto)
+                  .map(Dataset::getRelationships, CreateDatasetDto::setRelationships);
             });
 
     return mapper;
