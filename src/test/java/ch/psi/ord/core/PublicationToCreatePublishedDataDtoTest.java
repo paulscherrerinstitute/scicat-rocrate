@@ -8,6 +8,7 @@ import ch.psi.scicat.model.v4.DataciteMetadata.Affiliation;
 import ch.psi.scicat.model.v4.DataciteMetadata.Creator;
 import ch.psi.scicat.model.v4.DataciteMetadata.Description;
 import ch.psi.scicat.model.v4.DataciteMetadata.DescriptionType;
+import ch.psi.scicat.model.v4.DataciteMetadata.NameIdentifier;
 import ch.psi.scicat.model.v4.DataciteMetadata.RelatedIdentifier;
 import ch.psi.scicat.model.v4.DataciteMetadata.RelatedIdentifierType;
 import ch.psi.scicat.model.v4.DataciteMetadata.RelationType;
@@ -24,6 +25,7 @@ import org.modelmapper.ModelMapper;
 public class PublicationToCreatePublishedDataDtoTest {
   private static final String DOI = "10.16907/abc-123";
   private static final String HZDR_ROR = "https://ror.org/01zy2cs03";
+  private static final String ORCID = "https://orcid.org/0000-0002-1825-0097";
 
   private final ModelMapper mapper = new ScicatModelMapper().createPublicationModelMapper();
 
@@ -186,6 +188,67 @@ public class PublicationToCreatePublishedDataDtoTest {
         map(new Publication().setIdentifier(identifier))
             .getMetadata()
             .getRelatedIdentifiers()
+            .isEmpty());
+  }
+
+  private List<NameIdentifier> nameIdentifiers(Person person) {
+    return map(new Publication().setCreator(List.of(person)))
+        .getMetadata()
+        .getCreators()
+        .getFirst()
+        .getNameIdentifiers();
+  }
+
+  private static void assertOrcid(NameIdentifier nameIdentifier) {
+    Assertions.assertEquals(ORCID, nameIdentifier.getNameIdentifier());
+    Assertions.assertEquals("ORCID", nameIdentifier.getNameIdentifierScheme());
+    Assertions.assertEquals("https://orcid.org", nameIdentifier.getSchemeUri());
+  }
+
+  @Test
+  @DisplayName("ORCID from @id")
+  public void test11() {
+    List<NameIdentifier> ids = nameIdentifiers(new Person().setResourceIdentifier(ORCID));
+
+    Assertions.assertEquals(1, ids.size());
+    assertOrcid(ids.getFirst());
+  }
+
+  @ParameterizedTest(name = "{0}")
+  @DisplayName("ORCID from schema:identifier")
+  @ValueSource(strings = {ORCID, "http://orcid.org/0000-0002-1825-0097", "0000-0002-1825-0097"})
+  public void test12(String identifier) {
+    List<NameIdentifier> ids =
+        nameIdentifiers(
+            new Person()
+                .setResourceIdentifier("https://example.org/person/1")
+                .setIdentifier(List.of(identifier)));
+
+    Assertions.assertEquals(1, ids.size());
+    assertOrcid(ids.getFirst());
+  }
+
+  @Test
+  @DisplayName("ORCID from @id has precedence over schema:identifier")
+  public void test13() {
+    List<NameIdentifier> ids =
+        nameIdentifiers(
+            new Person()
+                .setResourceIdentifier(ORCID)
+                .setIdentifier(List.of("https://orcid.org/0000-0001-5109-3700")));
+
+    Assertions.assertEquals(1, ids.size());
+    assertOrcid(ids.getFirst());
+  }
+
+  @Test
+  @DisplayName("No ORCID")
+  public void test14() {
+    Assertions.assertTrue(
+        nameIdentifiers(
+                new Person()
+                    .setResourceIdentifier("https://example.org/person/1")
+                    .setIdentifier(List.of("https://example.org/id/1")))
             .isEmpty());
   }
 }
