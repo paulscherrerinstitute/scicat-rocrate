@@ -2,6 +2,8 @@
 
 Implementation of the [RO-Crate API](https://github.com/paulscherrerinstitute/rocrate-api) for [SciCat](https://github.com/SciCatProject/scicat-backend-next).
 
+To prepare a crate for import, see the [SciCat Publication RO-Crate profile](profile/README.md).
+
 
 ## How to work on this project?
 
