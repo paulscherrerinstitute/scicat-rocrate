@@ -75,7 +75,7 @@ public class RoCrateController {
   public @interface ScicatAuth {}
 
   @ScicatAuth
-  @ServerRequestFilter()
+  @ServerRequestFilter
   public Optional<Response> scicatAuthFilter(ContainerRequestContext requestContext) {
     String scicatToken = requestContext.getHeaderString("api-key");
     if (!isTokenValid(scicatToken)) {

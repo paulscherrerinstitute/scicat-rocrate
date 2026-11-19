@@ -129,10 +129,8 @@ public class ExportTest extends EndpointTest {
                             rootPath + ".description",
                             is(
                                 pub.getMetadata().getDescriptions().stream()
-                                    .filter(
-                                        d ->
-                                            !d.getDescriptionType()
-                                                .equals(DescriptionType.ABSTRACT))
+                                    .filter(d ->
+                                        !d.getDescriptionType().equals(DescriptionType.ABSTRACT))
                                     .map(Description::getDescription)
                                     .findFirst()
                                     .get()))
@@ -160,20 +158,19 @@ public class ExportTest extends EndpointTest {
                   res -> {
                     var expectedItems =
                         Stream.of(TestData.psiDs1, TestData.psiDs2, TestData.psiDs3)
-                            .map(
-                                ds -> {
-                                  DatasetUrls dsUrls =
-                                      TestData.psiPub1S3Response.getUrls().get(ds.getPid());
-                                  return Map.of(
-                                      "@id",
-                                      dsUrls.getUrls().getFirst().getUrl(),
-                                      "@type",
-                                      SchemaDO.MediaObject.getLocalName(),
-                                      "expires",
-                                      dsUrls.getUrls().getFirst().getExpires().toString(),
-                                      "encodingFormat",
-                                      ExtraMediaType.APPLICATION_TAR);
-                                })
+                            .map(ds -> {
+                              DatasetUrls dsUrls =
+                                  TestData.psiPub1S3Response.getUrls().get(ds.getPid());
+                              return Map.of(
+                                  "@id",
+                                  dsUrls.getUrls().getFirst().getUrl(),
+                                  "@type",
+                                  SchemaDO.MediaObject.getLocalName(),
+                                  "expires",
+                                  dsUrls.getUrls().getFirst().getExpires().toString(),
+                                  "encodingFormat",
+                                  ExtraMediaType.APPLICATION_TAR);
+                            })
                             .toArray();
 
                     res.body(
@@ -228,14 +225,13 @@ public class ExportTest extends EndpointTest {
     }
 
     return extractJsonFromZip(response)
-        .map(
-            json ->
-                new ResponseBuilder()
-                    .clone(response)
-                    .setContentType(ContentType.JSON)
-                    .setBody(json)
-                    .build()
-                    .then())
+        .map(json ->
+            new ResponseBuilder()
+                .clone(response)
+                .setContentType(ContentType.JSON)
+                .setBody(json)
+                .build()
+                .then())
         .orElseGet(() -> fail("Target file 'ro-crate-metadata.json' not found in ZIP archive."));
   }
 

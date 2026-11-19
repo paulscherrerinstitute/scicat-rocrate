@@ -147,13 +147,12 @@ public class PublicationTest {
       assertFalse(report.isValid());
       assertTrue(
           report.getErrors().stream()
-              .anyMatch(
-                  e ->
-                      e.getMessage()
-                          .equals(
-                              String.format(
-                                  "sub-tree should contain at least one '%s' or '%s'",
-                                  SchemaDO.Dataset, SchemaDO.MediaObject))));
+              .anyMatch(e ->
+                  e.getMessage()
+                      .equals(
+                          String.format(
+                              "sub-tree should contain at least one '%s' or '%s'",
+                              SchemaDO.Dataset, SchemaDO.MediaObject))));
     }
   }
 }

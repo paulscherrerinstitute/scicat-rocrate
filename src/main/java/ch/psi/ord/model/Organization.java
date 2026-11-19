@@ -16,7 +16,7 @@ public class Organization {
   @RdfProperty(uri = SchemaDO.NS + "name", minCardinality = 1)
   public String name;
 
-  @RdfResourceIdentifier()
+  @RdfResourceIdentifier
   public String generateId() {
     return resourceIdentifier;
   }
