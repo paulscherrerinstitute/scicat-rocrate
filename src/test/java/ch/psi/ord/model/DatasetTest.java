@@ -170,12 +170,11 @@ public class DatasetTest {
       assertFalse(report.isValid());
       assertTrue(
           report.getErrors().stream()
-              .anyMatch(
-                  e ->
-                      e.getMessage()
-                          .equals(
-                              "Expected '@type' to be one of [ https://scicatproject.org/Relationship"
-                                  + " ] but is [ https://schema.org/CreativeWork ]")),
+              .anyMatch(e ->
+                  e.getMessage()
+                      .equals(
+                          "Expected '@type' to be one of [ https://scicatproject.org/Relationship"
+                              + " ] but is [ https://schema.org/CreativeWork ]")),
           report.toString());
     }
   }

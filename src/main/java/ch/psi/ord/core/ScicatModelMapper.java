@@ -127,54 +127,50 @@ public class ScicatModelMapper {
       relationshipsToDto =
           context ->
               context.getSource().stream()
-                  .map(
-                      relationship ->
-                          new CreateRelationshipDto()
-                              .setIdentifier(relationship.getIdentifier())
-                              .setIdentifierType(relationship.getIdentifierType())
-                              .setRelationship(relationship.getRelationship())
-                              .setEntityType(relationship.getEntityType())
-                              .setExternalId(relationship.getExternalId()))
+                  .map(relationship ->
+                      new CreateRelationshipDto()
+                          .setIdentifier(relationship.getIdentifier())
+                          .setIdentifierType(relationship.getIdentifierType())
+                          .setRelationship(relationship.getRelationship())
+                          .setEntityType(relationship.getEntityType())
+                          .setExternalId(relationship.getExternalId()))
                   .toList();
 
   private final Converter<List<Creator>, List<Person>> dataciteCreatorToPerson =
       context ->
           context.getSource().stream()
-              .map(
-                  creator ->
-                      new Person()
-                          .setName(creator.getName())
-                          .setGivenName(creator.getGivenName())
-                          .setFamilyName(creator.getFamilyName()))
+              .map(creator ->
+                  new Person()
+                      .setName(creator.getName())
+                      .setGivenName(creator.getGivenName())
+                      .setFamilyName(creator.getFamilyName()))
               .toList();
 
   private final Converter<List<Person>, List<Creator>> personToDataciteCreator =
       context ->
           context.getSource().stream()
-              .map(
-                  creator ->
-                      new Creator()
-                          .setName(creator.getName())
-                          .setGivenName(creator.getGivenName())
-                          .setFamilyName(creator.getFamilyName())
-                          .setNameIdentifiers(
-                              context
-                                  .getMappingEngine()
-                                  .map(
-                                      context.create(
-                                          creator,
-                                          (Class<List<NameIdentifier>>) (Class<?>) List.class)))
-                          .setAffiliation(
-                              Objects.requireNonNullElse(
-                                      creator.getAffiliation(), List.<Organization>of())
-                                  .stream()
-                                  .filter(Objects::nonNull)
-                                  .map(
-                                      organization ->
-                                          context
-                                              .getMappingEngine()
-                                              .map(context.create(organization, Affiliation.class)))
-                                  .collect(Collectors.toList())))
+              .map(creator ->
+                  new Creator()
+                      .setName(creator.getName())
+                      .setGivenName(creator.getGivenName())
+                      .setFamilyName(creator.getFamilyName())
+                      .setNameIdentifiers(
+                          context
+                              .getMappingEngine()
+                              .map(
+                                  context.create(
+                                      creator,
+                                      (Class<List<NameIdentifier>>) (Class<?>) List.class)))
+                      .setAffiliation(
+                          Objects.requireNonNullElse(
+                                  creator.getAffiliation(), List.<Organization>of())
+                              .stream()
+                              .filter(Objects::nonNull)
+                              .map(organization ->
+                                  context
+                                      .getMappingEngine()
+                                      .map(context.create(organization, Affiliation.class)))
+                              .collect(Collectors.toList())))
               .toList();
 
   // https://support.orcid.org/hc/en-us/articles/360006897674-Structure-of-the-ORCID-Identifier
@@ -193,12 +189,11 @@ public class ScicatModelMapper {
             .filter(Matcher::matches)
             .map(matcher -> "https://orcid.org/" + matcher.group(1))
             .limit(1)
-            .map(
-                orcid ->
-                    new NameIdentifier()
-                        .setNameIdentifier(orcid)
-                        .setNameIdentifierScheme("ORCID")
-                        .setSchemeUri("https://orcid.org"))
+            .map(orcid ->
+                new NameIdentifier()
+                    .setNameIdentifier(orcid)
+                    .setNameIdentifierScheme("ORCID")
+                    .setSchemeUri("https://orcid.org"))
             .collect(Collectors.toList());
       };
 
@@ -241,16 +236,15 @@ public class ScicatModelMapper {
         }
 
         DoiUtils.extractDoi(source.getIdentifier())
-            .ifPresent(
-                doi ->
-                    destination
-                        .getMetadata()
-                        .getRelatedIdentifiers()
-                        .add(
-                            new RelatedIdentifier()
-                                .setRelatedIdentifierType(RelatedIdentifierType.DOI)
-                                .setRelationType(RelationType.IS_IDENTICAL_TO)
-                                .setRelatedIdentifier(doi)));
+            .ifPresent(doi ->
+                destination
+                    .getMetadata()
+                    .getRelatedIdentifiers()
+                    .add(
+                        new RelatedIdentifier()
+                            .setRelatedIdentifierType(RelatedIdentifierType.DOI)
+                            .setRelationType(RelationType.IS_IDENTICAL_TO)
+                            .setRelatedIdentifier(doi)));
 
         return destination;
       };
@@ -268,74 +262,68 @@ public class ScicatModelMapper {
 
     mapper
         .typeMap(Publication.class, CreatePublishedDataDto.class)
-        .addMappings(
-            m -> {
-              m.when(isNotNull())
-                  .using(personToDataciteCreator)
-                  .map(
-                      Publication::getCreator,
-                      (CreatePublishedDataDto dst, List<Creator> v) ->
-                          dst.getMetadata().setCreators(v));
-              m.when(isNotNull()).map(Publication::getTitle, CreatePublishedDataDto::setTitle);
-              m.when(isNotNull())
-                  .map(Publication::getAbstract, CreatePublishedDataDto::setAbstract);
-            })
+        .addMappings(m -> {
+          m.when(isNotNull())
+              .using(personToDataciteCreator)
+              .map(
+                  Publication::getCreator,
+                  (CreatePublishedDataDto dst, List<Creator> v) ->
+                      dst.getMetadata().setCreators(v));
+          m.when(isNotNull()).map(Publication::getTitle, CreatePublishedDataDto::setTitle);
+          m.when(isNotNull()).map(Publication::getAbstract, CreatePublishedDataDto::setAbstract);
+        })
         .setPostConverter(publicationPostConverter);
 
     mapper
         .typeMap(PublishedData.class, ZenodoDataset.class)
-        .addMappings(
-            m -> {
-              m.when(isNotNull())
-                  .using(doiToDoiUrl)
-                  .map(PublishedData::getDoi, ZenodoDataset::setIdentifier);
-              m.when(isNotNull()).map(PublishedData::getTitle, ZenodoDataset::setName);
-              m.when(isNotNull()).map(PublishedData::getAbstract, ZenodoDataset::setDescription);
-              m.when(isNotNull()).map(PublishedData::getCreatedAt, ZenodoDataset::setDateCreated);
-              m.when(isNotNull())
-                  .map(PublishedData::getRegisteredTime, ZenodoDataset::setDatePublished);
-              m.when(isNotNull())
-                  .map(
-                      src -> src.getMetadata().getPublisher().getName(),
-                      (dst, v) -> dst.getPublisher().setName((String) v));
-              m.when(isNotNull())
-                  .using(dataciteCreatorToPerson)
-                  .map(src -> src.getMetadata().getCreators(), ZenodoDataset::setCreators);
-            });
+        .addMappings(m -> {
+          m.when(isNotNull())
+              .using(doiToDoiUrl)
+              .map(PublishedData::getDoi, ZenodoDataset::setIdentifier);
+          m.when(isNotNull()).map(PublishedData::getTitle, ZenodoDataset::setName);
+          m.when(isNotNull()).map(PublishedData::getAbstract, ZenodoDataset::setDescription);
+          m.when(isNotNull()).map(PublishedData::getCreatedAt, ZenodoDataset::setDateCreated);
+          m.when(isNotNull())
+              .map(PublishedData::getRegisteredTime, ZenodoDataset::setDatePublished);
+          m.when(isNotNull())
+              .map(
+                  src -> src.getMetadata().getPublisher().getName(),
+                  (dst, v) -> dst.getPublisher().setName((String) v));
+          m.when(isNotNull())
+              .using(dataciteCreatorToPerson)
+              .map(src -> src.getMetadata().getCreators(), ZenodoDataset::setCreators);
+        });
 
     mapper
         .typeMap(Publication.class, CreateDatasetDto.class)
-        .addMappings(
-            m -> {
-              m.using(personListToOwnerString)
-                  .map(Publication::getCreator, CreateDatasetDto::setPrincipalInvestigator);
-              m.using(personListToOwnerString)
-                  .map(Publication::getCreator, CreateDatasetDto::setOwner);
-              m.map(Publication::getTitle, CreateDatasetDto::setDatasetName);
-              m.map(src -> "rocrate", CreateDatasetDto::setCreationLocation);
-              m.map(src -> DatasetType.RAW, CreateDatasetDto::setType);
-              m.using(personListToOwnerEmails)
-                  .map(Publication::getCreator, CreateDatasetDto::setContactEmail);
-              m.map(src -> Instant.now(), CreateDatasetDto::setCreationTime);
-              m.map(Publication::getDescription, CreateDatasetDto::setDescription);
-            });
+        .addMappings(m -> {
+          m.using(personListToOwnerString)
+              .map(Publication::getCreator, CreateDatasetDto::setPrincipalInvestigator);
+          m.using(personListToOwnerString).map(Publication::getCreator, CreateDatasetDto::setOwner);
+          m.map(Publication::getTitle, CreateDatasetDto::setDatasetName);
+          m.map(src -> "rocrate", CreateDatasetDto::setCreationLocation);
+          m.map(src -> DatasetType.RAW, CreateDatasetDto::setType);
+          m.using(personListToOwnerEmails)
+              .map(Publication::getCreator, CreateDatasetDto::setContactEmail);
+          m.map(src -> Instant.now(), CreateDatasetDto::setCreationTime);
+          m.map(Publication::getDescription, CreateDatasetDto::setDescription);
+        });
 
     mapper
         .typeMap(Dataset.class, CreateDatasetDto.class)
-        .addMappings(
-            m -> {
-              m.when(isNotNull()).map(Dataset::getName, CreateDatasetDto::setDatasetName);
-              m.when(isNotNull()).map(src -> DatasetType.BASE, CreateDatasetDto::setType);
-              m.when(isNotNull())
-                  .using(uriPathExtractor)
-                  .map(Dataset::getResourceIdentifier, CreateDatasetDto::setSourceFolder);
-              m.using(personListToOwnerEmails)
-                  .map(Dataset::getCreator, CreateDatasetDto::setContactEmail);
-              m.map(src -> Instant.now(), CreateDatasetDto::setCreationTime);
-              m.when(isNotNull())
-                  .using(relationshipsToDto)
-                  .map(Dataset::getRelationships, CreateDatasetDto::setRelationships);
-            });
+        .addMappings(m -> {
+          m.when(isNotNull()).map(Dataset::getName, CreateDatasetDto::setDatasetName);
+          m.when(isNotNull()).map(src -> DatasetType.BASE, CreateDatasetDto::setType);
+          m.when(isNotNull())
+              .using(uriPathExtractor)
+              .map(Dataset::getResourceIdentifier, CreateDatasetDto::setSourceFolder);
+          m.using(personListToOwnerEmails)
+              .map(Dataset::getCreator, CreateDatasetDto::setContactEmail);
+          m.map(src -> Instant.now(), CreateDatasetDto::setCreationTime);
+          m.when(isNotNull())
+              .using(relationshipsToDto)
+              .map(Dataset::getRelationships, CreateDatasetDto::setRelationships);
+        });
 
     return mapper;
   }

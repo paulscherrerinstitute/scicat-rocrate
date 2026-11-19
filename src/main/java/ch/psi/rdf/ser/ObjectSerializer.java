@@ -90,11 +90,10 @@ public class ObjectSerializer implements RdfSerializer<Object> {
   private Resource createResourceWithUri(Object obj, Model model) throws RdfSerializationException {
     List<Method> annotatedMethods =
         Arrays.stream(obj.getClass().getDeclaredMethods())
-            .filter(
-                m ->
-                    m.isAnnotationPresent(RdfResourceIdentifier.class)
-                        && m.getParameterCount() == 0
-                        && m.getReturnType() == String.class)
+            .filter(m ->
+                m.isAnnotationPresent(RdfResourceIdentifier.class)
+                    && m.getParameterCount() == 0
+                    && m.getReturnType() == String.class)
             .toList();
 
     if (annotatedMethods.isEmpty()) {

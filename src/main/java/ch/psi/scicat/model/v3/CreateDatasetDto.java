@@ -43,11 +43,11 @@ public class CreateDatasetDto {
   @JsonProperty(required = true)
   String creationLocation;
 
-  @JsonProperty() String description;
+  @JsonProperty String description;
 
-  @JsonProperty() ObjectNode scientificMetadata;
+  @JsonProperty ObjectNode scientificMetadata;
 
-  @JsonProperty() List<String> keywords;
+  @JsonProperty List<String> keywords;
 
-  @JsonProperty() List<CreateRelationshipDto> relationships;
+  @JsonProperty List<CreateRelationshipDto> relationships;
 }

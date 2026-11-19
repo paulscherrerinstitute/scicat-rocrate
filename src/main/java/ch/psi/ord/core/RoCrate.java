@@ -182,15 +182,14 @@ public class RoCrate implements AutoCloseable {
       Map<String, Integer> deleted = new HashMap<>(Map.of(FILE_KEY, 0, DIR_KEY, 0));
       paths
           .sorted(Comparator.reverseOrder())
-          .forEachOrdered(
-              path -> {
-                File f = path.toFile();
-                String key = f.isFile() ? FILE_KEY : DIR_KEY;
-                f.delete();
-                files.get(key).remove(path);
-                deleted.merge(key, 1, Integer::sum);
-                log.debug("Deleted {} {}", key, path);
-              });
+          .forEachOrdered(path -> {
+            File f = path.toFile();
+            String key = f.isFile() ? FILE_KEY : DIR_KEY;
+            f.delete();
+            files.get(key).remove(path);
+            deleted.merge(key, 1, Integer::sum);
+            log.debug("Deleted {} {}", key, path);
+          });
       log.info(
           "Deleted crate at {} ({} files, {} directories)",
           base,

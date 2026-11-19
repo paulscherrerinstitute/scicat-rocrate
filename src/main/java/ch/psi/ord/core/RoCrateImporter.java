@@ -163,18 +163,17 @@ public class RoCrateImporter {
   public void importPublication(
       Map<String, String> importMap, Publication publication, String scicatToken) {
     DoiUtils.extractDoi(publication.getIdentifier())
-        .ifPresent(
-            doi -> {
-              CountResponse count =
-                  scicatService
-                      .countPublishedData(String.format(publicationExistsFilter, doi), scicatToken)
-                      .getEntity();
+        .ifPresent(doi -> {
+          CountResponse count =
+              scicatService
+                  .countPublishedData(String.format(publicationExistsFilter, doi), scicatToken)
+                  .getEntity();
 
-              if (count.getCount() > 0) {
-                throw new WebApplicationException(
-                    "This Publication has already been imported", Status.CONFLICT);
-              }
-            });
+          if (count.getCount() > 0) {
+            throw new WebApplicationException(
+                "This Publication has already been imported", Status.CONFLICT);
+          }
+        });
 
     CreatePublishedDataDto dto = modelMapper.map(publication, CreatePublishedDataDto.class);
 
@@ -296,12 +295,11 @@ public class RoCrateImporter {
             .collect(Collectors.toSet());
 
     List<MissingDataError> errors = new ArrayList<>();
-    pathsToCheck.forEach(
-        dataEntityPath -> {
-          if (!crate.contains(dataEntityPath)) {
-            errors.add(new MissingDataError(crate.getBase().relativize(dataEntityPath).toString()));
-          }
-        });
+    pathsToCheck.forEach(dataEntityPath -> {
+      if (!crate.contains(dataEntityPath)) {
+        errors.add(new MissingDataError(crate.getBase().relativize(dataEntityPath).toString()));
+      }
+    });
 
     return errors;
   }

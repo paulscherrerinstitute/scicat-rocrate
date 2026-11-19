@@ -13,8 +13,8 @@ public class CreateRelationshipDto {
   @JsonProperty(required = true)
   private String identifier;
 
-  @JsonProperty() private String identifierType;
-  @JsonProperty() private String relationship;
-  @JsonProperty() private String entityType;
-  @JsonProperty() private String externalId;
+  @JsonProperty private String identifierType;
+  @JsonProperty private String relationship;
+  @JsonProperty private String entityType;
+  @JsonProperty private String externalId;
 }

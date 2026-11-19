@@ -30,11 +30,10 @@ public class BearerRequestFilter implements ClientRequestFilter {
 
       List<Object> updatedAuth =
           originalAuth.stream()
-              .map(
-                  h ->
-                      !h.toString().startsWith(BEARER_PREFIX)
-                          ? String.format("%s %s", BEARER_PREFIX, h.toString())
-                          : h)
+              .map(h ->
+                  !h.toString().startsWith(BEARER_PREFIX)
+                      ? String.format("%s %s", BEARER_PREFIX, h.toString())
+                      : h)
               .collect(Collectors.toList());
 
       requestContext.getHeaders().put(AUTH_HEADER, updatedAuth);

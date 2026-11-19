@@ -41,5 +41,5 @@ public class ValidationReport {
     entities.add(e);
   }
 
-  public record Entity<T>(@JsonProperty("id") String id, @JsonIgnore() T object) {}
+  public record Entity<T>(@JsonProperty("id") String id, @JsonIgnore T object) {}
 }

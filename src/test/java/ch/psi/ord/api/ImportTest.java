@@ -89,72 +89,65 @@ public class ImportTest extends EndpointTest {
 
   private static final Consumer<ImportTest> MOCK_NEW_PUBLICATION =
       checkTokenValidity(true)
-          .andThen(
-              test -> {
-                if (test.scicatService != null) {
-                  when(test.scicatService.countPublishedData(any(), any()))
-                      .thenReturn(RestResponse.ok(new CountResponse().setCount(0)));
-                  when(test.scicatService.myidentity(any()))
-                      .thenReturn(RestResponse.ok(TestData.rocrateUser));
-                  when(test.scicatService.createDataset(any(), any(CreateDatasetDto.class)))
-                      .thenReturn(RestResponse.ok(new Dataset().setPid("some-pid")));
-                  when(test.scicatService.createPublishedData(
-                          any(), any(CreatePublishedDataDto.class)))
-                      .thenReturn(RestResponse.ok(new PublishedData().setDoi("some-pid")));
-                  when(test.scicatService.registerPublishedData(any(), any()))
-                      .thenReturn(RestResponse.ok());
-                  when(test.scicatService.createJob(any(), any()))
-                      .thenReturn(RestResponse.ok(new OutputJobDto().setId("job-1")));
-                }
-              });
-
-  private static final Consumer<ImportTest> MOCK_NEW_PUBLICATION_WITH_FILES =
-      MOCK_NEW_PUBLICATION.andThen(
-          test -> {
-            if (test.scicatCli != null) {
-              when(test.scicatCli.ingestDataset(any(), any(), any())).thenReturn(DATASET_PID);
+          .andThen(test -> {
+            if (test.scicatService != null) {
+              when(test.scicatService.countPublishedData(any(), any()))
+                  .thenReturn(RestResponse.ok(new CountResponse().setCount(0)));
+              when(test.scicatService.myidentity(any()))
+                  .thenReturn(RestResponse.ok(TestData.rocrateUser));
+              when(test.scicatService.createDataset(any(), any(CreateDatasetDto.class)))
+                  .thenReturn(RestResponse.ok(new Dataset().setPid("some-pid")));
+              when(test.scicatService.createPublishedData(any(), any(CreatePublishedDataDto.class)))
+                  .thenReturn(RestResponse.ok(new PublishedData().setDoi("some-pid")));
+              when(test.scicatService.registerPublishedData(any(), any()))
+                  .thenReturn(RestResponse.ok());
+              when(test.scicatService.createJob(any(), any()))
+                  .thenReturn(RestResponse.ok(new OutputJobDto().setId("job-1")));
             }
           });
 
   private static final Consumer<ImportTest> MOCK_NEW_DATASET =
       checkTokenValidity(true)
-          .andThen(
-              test -> {
-                if (test.scicatService != null) {
-                  when(test.scicatService.myidentity(any()))
-                      .thenReturn(RestResponse.ok(TestData.rocrateUser));
-                  when(test.scicatService.createJob(any(), any()))
-                      .thenReturn(RestResponse.ok(new OutputJobDto().setId("job-1")));
-                }
-                if (test.scicatCli != null) {
-                  when(test.scicatCli.ingestDataset(any(), any(CreateDatasetDto.class)))
-                      .thenReturn(DATASET_PID);
-                }
-              });
+          .andThen(test -> {
+            if (test.scicatService != null) {
+              when(test.scicatService.myidentity(any()))
+                  .thenReturn(RestResponse.ok(TestData.rocrateUser));
+              when(test.scicatService.createJob(any(), any()))
+                  .thenReturn(RestResponse.ok(new OutputJobDto().setId("job-1")));
+            }
+            if (test.scicatCli != null) {
+              when(test.scicatCli.ingestDataset(any(), any(CreateDatasetDto.class)))
+                  .thenReturn(DATASET_PID);
+            }
+          });
+  private static final Consumer<ImportTest> MOCK_NEW_PUBLICATION_WITH_FILES =
+      MOCK_NEW_PUBLICATION.andThen(test -> {
+        if (test.scicatCli != null) {
+          when(test.scicatCli.ingestDataset(any(), any(), any())).thenReturn(DATASET_PID);
+        }
+      });
 
   private static final Consumer<ImportTest> MOCK_EXISTING_PUBLICATION =
       checkTokenValidity(true)
-          .andThen(
-              test -> {
-                if (test.scicatService != null) {
-                  when(test.scicatService.myidentity(any()))
-                      .thenReturn(RestResponse.ok(TestData.rocrateUser));
-                  when(test.scicatService.countPublishedData(
-                          String.format(RoCrateImporter.publicationExistsFilter, PUBLICATION_DOI),
-                          null))
-                      .thenReturn(RestResponse.ok(new CountResponse().setCount(1)));
-                }
-              });
+          .andThen(test -> {
+            if (test.scicatService != null) {
+              when(test.scicatService.myidentity(any()))
+                  .thenReturn(RestResponse.ok(TestData.rocrateUser));
+              when(test.scicatService.countPublishedData(
+                      String.format(RoCrateImporter.publicationExistsFilter, PUBLICATION_DOI),
+                      null))
+                  .thenReturn(RestResponse.ok(new CountResponse().setCount(1)));
+            }
+          });
 
   private static final Consumer<ImportTest> MOCK_NO_GROUP_USER =
       checkTokenValidity(true)
-          .andThen(
-              test -> {
-                if (test.scicatService != null) {
-                  when(test.scicatService.myidentity(any()))
-                      .thenReturn(RestResponse.ok(TestData.noGroupUser));
-                }
-              });
+          .andThen(test -> {
+            if (test.scicatService != null) {
+              when(test.scicatService.myidentity(any()))
+                  .thenReturn(RestResponse.ok(TestData.noGroupUser));
+            }
+          });
 
   private static ImportTestCase createTestCase(
       String testName,
@@ -316,10 +309,8 @@ public class ImportTest extends EndpointTest {
                         Map<String, String> importMap = res.extract().jsonPath().getMap("$");
                         importMap.values().stream()
                             .filter(identifier -> !DoiUtils.isDoi(identifier))
-                            .forEach(
-                                pid ->
-                                    assertEquals(
-                                        OWNER_GROUP, getDatasetByPid(pid).getOwnerGroup()));
+                            .forEach(pid ->
+                                assertEquals(OWNER_GROUP, getDatasetByPid(pid).getOwnerGroup()));
                       })
                   .setOwnerGroup(OWNER_GROUP));
 

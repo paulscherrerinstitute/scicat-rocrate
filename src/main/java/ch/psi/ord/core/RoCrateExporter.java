@@ -88,13 +88,11 @@ public class RoCrateExporter {
     publication
         .getMetadata()
         .getCreators()
-        .forEach(
-            creator -> {
-              ContextualEntity creatorEntity = addPerson(creator.getName());
-              crate.addContextualEntity(creatorEntity);
-              publicationBuilder.addIdProperty(
-                  SchemaDO.creator.getLocalName(), creatorEntity.getId());
-            });
+        .forEach(creator -> {
+          ContextualEntity creatorEntity = addPerson(creator.getName());
+          crate.addContextualEntity(creatorEntity);
+          publicationBuilder.addIdProperty(SchemaDO.creator.getLocalName(), creatorEntity.getId());
+        });
 
     if (publication.getMetadata().getPublisher() != null) {
       ContextualEntity publisher = addOrganization(publication.getMetadata().getPublisher());
@@ -104,12 +102,11 @@ public class RoCrateExporter {
 
     publication.getMetadata().getRightsList().stream()
         .findFirst()
-        .ifPresent(
-            right -> {
-              ContextualEntity license = addCreativeWork(right);
-              crate.addContextualEntity(license);
-              publicationBuilder.addIdProperty(SchemaDO.license.getLocalName(), license.getId());
-            });
+        .ifPresent(right -> {
+          ContextualEntity license = addCreativeWork(right);
+          crate.addContextualEntity(license);
+          publicationBuilder.addIdProperty(SchemaDO.license.getLocalName(), license.getId());
+        });
 
     addIfPresent(
         publicationBuilder,
@@ -131,52 +128,47 @@ public class RoCrateExporter {
 
     publication.getMetadata().getDescriptions().stream()
         .filter(d -> d.getDescriptionType() != DescriptionType.ABSTRACT)
-        .forEach(
-            d ->
-                addIfPresent(
-                    publicationBuilder, SchemaDO.description.getLocalName(), d.getDescription()));
+        .forEach(d ->
+            addIfPresent(
+                publicationBuilder, SchemaDO.description.getLocalName(), d.getDescription()));
     publication
         .getDatasetPids()
-        .forEach(
-            pid -> {
-              Dataset dataset = scicatService.getDatasetByPid(pid).getEntity();
-              DataEntityBuilder datasetBuilder =
-                  new DataEntityBuilder().addType(SchemaDO.Dataset.getLocalName());
-              addIfPresent(datasetBuilder, SchemaDO.name.getLocalName(), dataset.getDatasetName());
-              addIfPresent(
-                  datasetBuilder, SchemaDO.description.getLocalName(), dataset.getDescription());
+        .forEach(pid -> {
+          Dataset dataset = scicatService.getDatasetByPid(pid).getEntity();
+          DataEntityBuilder datasetBuilder =
+              new DataEntityBuilder().addType(SchemaDO.Dataset.getLocalName());
+          addIfPresent(datasetBuilder, SchemaDO.name.getLocalName(), dataset.getDatasetName());
+          addIfPresent(
+              datasetBuilder, SchemaDO.description.getLocalName(), dataset.getDescription());
 
-              if (urls.containsKey(pid)) {
-                DatasetUrls datasetUrls = urls.get(pid);
-                addIfPresent(
-                    datasetBuilder, SchemaDO.expires.getLocalName(), datasetUrls.getExpires());
-                if (includeS3Urls && datasetUrls.getUrls() != null) {
-                  datasetUrls
-                      .getUrls()
-                      .forEach(
-                          s3Info -> {
-                            crate.addDataEntity(
-                                addIfPresent(
-                                        new DataEntityBuilder()
-                                            .addType(SchemaDO.MediaObject.getLocalName())
-                                            .setId(s3Info.getUrl())
-                                            .addProperty(
-                                                SchemaDO.encodingFormat.getLocalName(),
-                                                ExtraMediaType.APPLICATION_TAR),
-                                        SchemaDO.expires.getLocalName(),
-                                        s3Info.getExpires())
-                                    .build());
+          if (urls.containsKey(pid)) {
+            DatasetUrls datasetUrls = urls.get(pid);
+            addIfPresent(datasetBuilder, SchemaDO.expires.getLocalName(), datasetUrls.getExpires());
+            if (includeS3Urls && datasetUrls.getUrls() != null) {
+              datasetUrls
+                  .getUrls()
+                  .forEach(s3Info -> {
+                    crate.addDataEntity(
+                        addIfPresent(
+                                new DataEntityBuilder()
+                                    .addType(SchemaDO.MediaObject.getLocalName())
+                                    .setId(s3Info.getUrl())
+                                    .addProperty(
+                                        SchemaDO.encodingFormat.getLocalName(),
+                                        ExtraMediaType.APPLICATION_TAR),
+                                SchemaDO.expires.getLocalName(),
+                                s3Info.getExpires())
+                            .build());
 
-                            datasetBuilder.addIdProperty(
-                                SchemaDO.hasPart.getLocalName(), s3Info.getUrl());
-                          });
-                }
-              }
+                    datasetBuilder.addIdProperty(SchemaDO.hasPart.getLocalName(), s3Info.getUrl());
+                  });
+            }
+          }
 
-              DataEntity dsEntity = datasetBuilder.build();
-              crate.addDataEntity(dsEntity);
-              publicationBuilder.addIdProperty(SchemaDO.hasPart.getLocalName(), dsEntity.getId());
-            });
+          DataEntity dsEntity = datasetBuilder.build();
+          crate.addDataEntity(dsEntity);
+          publicationBuilder.addIdProperty(SchemaDO.hasPart.getLocalName(), dsEntity.getId());
+        });
 
     DataEntity publicationEntity = publicationBuilder.build();
     crate.addDataEntity(publicationEntity);

@@ -8,6 +8,6 @@ import lombok.Data;
 @Data
 @JsonInclude(Include.NON_NULL)
 public class UpdateDatasetDto {
-  @JsonProperty() String sourceFolder;
-  @JsonProperty() DatasetLifeCycle datasetlifecycle;
+  @JsonProperty String sourceFolder;
+  @JsonProperty DatasetLifeCycle datasetlifecycle;
 }

@@ -25,7 +25,7 @@ public class CreatePublishedDataDto {
   @JsonFormat(shape = JsonFormat.Shape.STRING)
   private Instant registeredTime;
 
-  @JsonProperty() private PublishedDataStatus status;
+  @JsonProperty private PublishedDataStatus status;
 
   @JsonProperty(required = true)
   private DataciteMetadata metadata = new DataciteMetadata();
