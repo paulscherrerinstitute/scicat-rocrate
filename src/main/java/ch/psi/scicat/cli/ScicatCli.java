@@ -100,9 +100,8 @@ public class ScicatCli {
         fileListPath = Files.createTempFile("scicat-cli-filelist", ".tmp");
         List<String> relativePaths =
             fileList.stream()
-                .map(
-                    absolutePath ->
-                        Path.of(dto.getSourceFolder()).relativize(Path.of(absolutePath)).toString())
+                .map(absolutePath ->
+                    Path.of(dto.getSourceFolder()).relativize(Path.of(absolutePath)).toString())
                 .toList();
         Files.write(fileListPath, relativePaths);
       }
@@ -146,11 +145,10 @@ public class ScicatCli {
               .map(String::trim)
               .filter(line -> pidPattern.matcher(line).matches())
               .reduce((first, second) -> second)
-              .orElseThrow(
-                  () ->
-                      new ScicatCliException(
-                          "CLI reported success, but no valid PID matching pattern was found in"
-                              + " output."));
+              .orElseThrow(() ->
+                  new ScicatCliException(
+                      "CLI reported success, but no valid PID matching pattern was found in"
+                          + " output."));
 
       moveData(pid, dto.getSourceFolder(), fileList);
 

@@ -14,7 +14,7 @@ public class ZenodoDataset {
   @RdfProperty(uri = SchemaDO.NS + "identifier", minCardinality = 1)
   public String identifier;
 
-  @RdfResourceIdentifier()
+  @RdfResourceIdentifier
   public String getIdentifier() {
     return this.identifier;
   }

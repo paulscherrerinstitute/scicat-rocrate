@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 public class PropertyError implements ValidationError {
-  @JsonProperty() private String nodeId;
-  @JsonProperty() private String property;
+  @JsonProperty private String nodeId;
+  @JsonProperty private String property;
 
   private String message;
 

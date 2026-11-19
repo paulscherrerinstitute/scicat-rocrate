@@ -9,11 +9,11 @@ import lombok.Getter;
 @Data
 @JsonInclude(Include.NON_NULL)
 public class DatasetLifeCycle {
-  @JsonProperty() private boolean archivable;
-  @JsonProperty() private boolean retrievable;
-  @JsonProperty() private String archiveStatusMessage;
+  @JsonProperty private boolean archivable;
+  @JsonProperty private boolean retrievable;
+  @JsonProperty private String archiveStatusMessage;
 
-  @JsonProperty()
+  @JsonProperty
   @Getter(onMethod_ = {@JsonProperty("isOnCentralDisk")})
   private boolean isOnCentralDisk;
 }

@@ -76,13 +76,12 @@ public class ZenodoExporter {
           .map(DatasetUrls::getUrls)
           .orElseGet(Collections::emptyList)
           .stream()
-          .forEach(
-              s3Url ->
-                  distribution.add(
-                      new DataDownload()
-                          .setContentUrl(s3Url.getUrl())
-                          .setEncodingFormat(ExtraMediaType.APPLICATION_TAR)
-                          .setExpirationDate(s3Url.getExpires())));
+          .forEach(s3Url ->
+              distribution.add(
+                  new DataDownload()
+                      .setContentUrl(s3Url.getUrl())
+                      .setEncodingFormat(ExtraMediaType.APPLICATION_TAR)
+                      .setExpirationDate(s3Url.getExpires())));
     }
 
     RestResponse<PublishedData> res = scicatService.getPublishedDataById(doi);

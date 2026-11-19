@@ -136,7 +136,7 @@ public class ZenodoControllerTest extends EndpointTest {
   }
 
   @Test
-  @DisabledOnIntegrationTest()
+  @DisabledOnIntegrationTest
   @DisplayName("Export should succeed if the s3 broker reports no url for a dataset")
   public void test03() {
     when(scicatService.getPublishedDataById(TestData.psiPub1.getDoi()))
