@@ -286,6 +286,10 @@ public class ScicatModelMapper {
             return;
           }
 
+          if (parent.has(name)) {
+            log.warn("Duplicate property name '{}': overwriting '{}'", name, parent.get(name));
+          }
+
           String unit = property.getUnitText();
           if (unit == null || unit.isEmpty()) {
             parent.set(name, value);
