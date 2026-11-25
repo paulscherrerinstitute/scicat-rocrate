@@ -459,4 +459,38 @@ public class PropertyValueTest {
                 "Lexical form 'abc' is not a valid 'http://www.w3.org/2001/XMLSchema#integer'")),
         report.getErrors());
   }
+
+  @Test
+  @DisplayName("A value that is neither a literal nor a PropertyValue is reported as invalid")
+  public void test14() throws RdfDeserializationException {
+    DeserializationReport<PropertyValue> report =
+        report(
+            """
+            {
+              "@context": { "@vocab": "https://schema.org/" },
+              "@graph": [
+                {
+                  "@id": "https://example.org/crate/#property",
+                  "@type": "PropertyValue",
+                  "name": "sample",
+                  "value": { "@id": "https://example.org/crate/#thing" }
+                },
+                {
+                  "@id": "https://example.org/crate/#thing",
+                  "@type": "Thing"
+                }
+              ]
+            }
+            """);
+
+    assertFalse(report.isValid());
+    assertEquals(
+        Set.of(
+            new PropertyError(
+                PROPERTY_ID,
+                "https://schema.org/value",
+                "Expected a literal or a 'https://schema.org/PropertyValue' but"
+                    + " 'https://example.org/crate/#thing' is of type [ https://schema.org/Thing ]")),
+        report.getErrors());
+  }
 }

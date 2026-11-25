@@ -12,14 +12,13 @@ import ch.psi.rdf.deser.RdfDeserializer;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.SchemaDO;
 
 @Data
-@Slf4j
 @RdfClass(typesUri = SchemaDO.NS + "PropertyValue")
 public non-sealed class PropertyValue implements ValueContent {
   @RdfProperty(uri = SchemaDO.NS + "name", minCardinality = 1)
@@ -63,11 +62,15 @@ public non-sealed class PropertyValue implements ValueContent {
             values.add(nested);
           }
         } else {
-          log.warn(
-              "Dropping value '{}' of property '{}': not a literal nor a '{}'",
-              value,
-              subject,
-              SchemaDO.PropertyValue);
+          List<String> types =
+              listProperties(value.asResource(), RDF.type).stream().map(RDFNode::toString).toList();
+          context.addError(
+              new PropertyError(
+                  subject.getURI(),
+                  SchemaDO.value.getURI(),
+                  String.format(
+                      "Expected a literal or a '%s' but '%s' is of type [ %s ]",
+                      SchemaDO.PropertyValue, value, String.join(", ", types))));
         }
       }
 
