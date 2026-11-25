@@ -33,6 +33,10 @@ public class RdfDeserializationContext {
     subjects.pop();
   }
 
+  public boolean isBeingDeserialized(Resource subject) {
+    return subjects.contains(subject);
+  }
+
   public Map<String, RdfCardinality> getCardinalityOverrides() {
     return cardinalityOverrides.isEmpty() ? Map.of() : cardinalityOverrides.peek();
   }

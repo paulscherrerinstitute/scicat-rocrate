@@ -45,7 +45,11 @@ public non-sealed class PropertyValue implements ValueContent {
         if (value.isLiteral()) {
           values.add(new LiteralValue(value.asLiteral()));
         } else if (isOfType(value.asResource(), SchemaDO.PropertyValue)) {
-          values.add(context.getDeserializer(PropertyValue.class).deserialize(value, context));
+          PropertyValue nested =
+              context.getDeserializer(PropertyValue.class).deserialize(value, context);
+          if (nested != null) {
+            values.add(nested);
+          }
         } else {
           log.warn(
               "Dropping value '{}' of property '{}': not a literal nor a '{}'",

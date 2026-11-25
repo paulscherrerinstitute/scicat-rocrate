@@ -60,6 +60,13 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
           String.format("Expected node '%s' to be a resource", node.toString()));
     }
 
+    if (context.isBeingDeserialized(node.asResource())) {
+      context.addError(
+          new PropertyError(
+              node.asResource().getURI(), "@id", String.format("Cyclic reference to '%s'", node)));
+      return null;
+    }
+
     T obj;
     try {
       obj = createInstance(clazz);
@@ -104,7 +111,10 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
                 context.addError(error.get());
                 continue;
               }
-              collection.add(elementDeserializer.deserialize(value, context));
+              Object element = elementDeserializer.deserialize(value, context);
+              if (element != null) {
+                collection.add(element);
+              }
             }
             setField(field, obj, collection);
           } else if (!values.isEmpty()) {

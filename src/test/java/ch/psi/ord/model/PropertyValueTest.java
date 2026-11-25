@@ -304,4 +304,104 @@ public class PropertyValueTest {
                 Set.of(LiteralValue.class, PropertyValue.class),
                 values.values().stream().map(Object::getClass).collect(Collectors.toSet())));
   }
+
+  @Test
+  @DisplayName("A property referencing itself is reported as invalid")
+  public void test09() throws RdfDeserializationException {
+    DeserializationReport<PropertyValue> report =
+        report(
+            """
+            {
+              "@context": { "@vocab": "https://schema.org/" },
+              "@graph": [
+                {
+                  "@id": "https://example.org/crate/#property",
+                  "@type": "PropertyValue",
+                  "name": "loop",
+                  "value": { "@id": "https://example.org/crate/#property" }
+                }
+              ]
+            }
+            """);
+
+    assertFalse(report.isValid());
+    assertEquals(
+        Set.of(new PropertyError(PROPERTY_ID, "@id", "Cyclic reference to '" + PROPERTY_ID + "'")),
+        report.getErrors());
+  }
+
+  @Test
+  @DisplayName("A cycle between two properties is reported as invalid")
+  public void test10() throws RdfDeserializationException {
+    DeserializationReport<PropertyValue> report =
+        report(
+            """
+            {
+              "@context": { "@vocab": "https://schema.org/" },
+              "@graph": [
+                {
+                  "@id": "https://example.org/crate/#property",
+                  "@type": "PropertyValue",
+                  "name": "a",
+                  "value": { "@id": "https://example.org/crate/#other" }
+                },
+                {
+                  "@id": "https://example.org/crate/#other",
+                  "@type": "PropertyValue",
+                  "name": "b",
+                  "value": { "@id": "https://example.org/crate/#property" }
+                }
+              ]
+            }
+            """);
+
+    assertFalse(report.isValid());
+    assertEquals(
+        Set.of(new PropertyError(PROPERTY_ID, "@id", "Cyclic reference to '" + PROPERTY_ID + "'")),
+        report.getErrors());
+  }
+
+  @Test
+  @DisplayName("A property shared by two parents is not a cycle")
+  public void test11() throws RdfDeserializationException {
+    PropertyValue property =
+        deserialize(
+            """
+            {
+              "@context": { "@vocab": "https://schema.org/" },
+              "@graph": [
+                {
+                  "@id": "https://example.org/crate/#property",
+                  "@type": "PropertyValue",
+                  "name": "root",
+                  "value": [
+                    { "@id": "https://example.org/crate/#a" },
+                    { "@id": "https://example.org/crate/#b" }
+                  ]
+                },
+                {
+                  "@id": "https://example.org/crate/#a",
+                  "@type": "PropertyValue",
+                  "name": "a",
+                  "value": { "@id": "https://example.org/crate/#shared" }
+                },
+                {
+                  "@id": "https://example.org/crate/#b",
+                  "@type": "PropertyValue",
+                  "name": "b",
+                  "value": { "@id": "https://example.org/crate/#shared" }
+                },
+                {
+                  "@id": "https://example.org/crate/#shared",
+                  "@type": "PropertyValue",
+                  "name": "shared",
+                  "value": 1
+                }
+              ]
+            }
+            """);
+
+    ListValue values = assertInstanceOf(ListValue.class, property.getValue());
+    assertEquals(2, values.values().size());
+  }
 }
