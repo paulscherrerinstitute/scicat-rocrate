@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.SchemaDO;
@@ -43,7 +44,18 @@ public non-sealed class PropertyValue implements ValueContent {
       List<ValueContent> values = new ArrayList<>();
       for (RDFNode value : listProperties(subject, SchemaDO.value)) {
         if (value.isLiteral()) {
-          values.add(new LiteralValue(value.asLiteral()));
+          Literal literal = value.asLiteral();
+          if (literal.getDatatype().isValid(literal.getLexicalForm())) {
+            values.add(new LiteralValue(literal));
+          } else {
+            context.addError(
+                new PropertyError(
+                    subject.getURI(),
+                    SchemaDO.value.getURI(),
+                    String.format(
+                        "Lexical form '%s' is not a valid '%s'",
+                        literal.getLexicalForm(), literal.getDatatypeURI())));
+          }
         } else if (isOfType(value.asResource(), SchemaDO.PropertyValue)) {
           PropertyValue nested =
               context.getDeserializer(PropertyValue.class).deserialize(value, context);

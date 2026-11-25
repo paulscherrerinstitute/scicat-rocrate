@@ -404,4 +404,59 @@ public class PropertyValueTest {
     ListValue values = assertInstanceOf(ListValue.class, property.getValue());
     assertEquals(2, values.values().size());
   }
+
+  @Test
+  @DisplayName("A language-tagged literal value is valid")
+  public void test13() throws RdfDeserializationException {
+    PropertyValue property =
+        deserialize(
+            """
+            {
+              "@context": { "@vocab": "https://schema.org/" },
+              "@graph": [
+                {
+                  "@id": "https://example.org/crate/#property",
+                  "@type": "PropertyValue",
+                  "name": "comment",
+                  "value": { "@value": "bonjour", "@language": "fr" }
+                }
+              ]
+            }
+            """);
+
+    assertEquals(
+        new LiteralValue(ResourceFactory.createLangLiteral("bonjour", "fr")), property.getValue());
+  }
+
+  @Test
+  @DisplayName("An ill-typed literal value is reported as invalid")
+  public void test12() throws RdfDeserializationException {
+    DeserializationReport<PropertyValue> report =
+        report(
+            """
+            {
+              "@context": {
+                "@vocab": "https://schema.org/",
+                "xsd": "http://www.w3.org/2001/XMLSchema#"
+              },
+              "@graph": [
+                {
+                  "@id": "https://example.org/crate/#property",
+                  "@type": "PropertyValue",
+                  "name": "count",
+                  "value": { "@value": "abc", "@type": "xsd:integer" }
+                }
+              ]
+            }
+            """);
+
+    assertFalse(report.isValid());
+    assertEquals(
+        Set.of(
+            new PropertyError(
+                PROPERTY_ID,
+                "https://schema.org/value",
+                "Lexical form 'abc' is not a valid 'http://www.w3.org/2001/XMLSchema#integer'")),
+        report.getErrors());
+  }
 }
