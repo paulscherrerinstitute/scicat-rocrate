@@ -25,6 +25,10 @@ public class DatasetTest {
   private final RdfMapper rdfMapper = new RdfMapper();
 
   private Resource dataset(String relationships) {
+    return datasetWith("scicat:relationships", relationships);
+  }
+
+  private Resource datasetWith(String property, String value) {
     String jsonLd =
         """
         {
@@ -35,13 +39,53 @@ public class DatasetTest {
           "@id": "%s",
           "@type": "Dataset",
           "name": "A dataset",
-          "scicat:relationships": %s
+          "%s": %s
         }
         """
-            .formatted(DATASET_ID, relationships);
+            .formatted(DATASET_ID, property, value);
 
     Model model = RDFParser.fromString(jsonLd, Lang.JSONLD11).toModel();
     return model.createResource(DATASET_ID);
+  }
+
+  @Nested
+  @DisplayName("variableMeasured")
+  class VariableMeasured {
+    @Test
+    @DisplayName("Plain string is reported as a validation error")
+    public void test00() throws RdfDeserializationException {
+      DeserializationReport<Dataset> report =
+          rdfMapper.deserialize(datasetWith("variableMeasured", "\"temperature\""), Dataset.class);
+
+      assertFalse(report.isValid());
+      assertEquals(
+          Set.of(
+              new PropertyError(
+                  DATASET_ID,
+                  "https://schema.org/variableMeasured",
+                  "Expected an object of type [ https://schema.org/PropertyValue ] but got literal"
+                      + " 'temperature'")),
+          report.getErrors());
+    }
+
+    @Test
+    @DisplayName("Plain string mixed with a PropertyValue")
+    public void test01() throws RdfDeserializationException {
+      DeserializationReport<Dataset> report =
+          rdfMapper.deserialize(
+              datasetWith(
+                  "variableMeasured",
+                  """
+                  [
+                    "temperature",
+                    { "@type": "PropertyValue", "name": "pressure", "value": 1 }
+                  ]
+                  """),
+              Dataset.class);
+
+      assertFalse(report.isValid());
+      assertEquals(1, report.getErrors().size(), report.toString());
+    }
   }
 
   @Nested

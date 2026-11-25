@@ -98,6 +98,12 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
             RdfDeserializer<?> elementDeserializer = context.getDeserializer(listType);
             List<Object> collection = new ArrayList<>();
             for (RDFNode value : values) {
+              Optional<PropertyError> error =
+                  checkNodeKind(subject, propertyAnnotation, listType, value);
+              if (error.isPresent()) {
+                context.addError(error.get());
+                continue;
+              }
               collection.add(elementDeserializer.deserialize(value, context));
             }
             setField(field, obj, collection);
@@ -109,10 +115,15 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
                   field.getName(),
                   clazz.getName());
             }
-
-            RdfDeserializer<?> fieldDeserializer = context.getDeserializer(field.getType());
-            Object value = fieldDeserializer.deserialize(values.iterator().next(), context);
-            setField(field, obj, value);
+            RDFNode value = values.iterator().next();
+            Optional<PropertyError> error =
+                checkNodeKind(subject, propertyAnnotation, field.getType(), value);
+            if (error.isPresent()) {
+              context.addError(error.get());
+            } else {
+              RdfDeserializer<?> fieldDeserializer = context.getDeserializer(field.getType());
+              setField(field, obj, fieldDeserializer.deserialize(value, context));
+            }
           }
         } finally {
           context.popCardinalityOverrides();
@@ -150,6 +161,20 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
     }
 
     return Optional.empty();
+  }
+
+  private Optional<PropertyError> checkNodeKind(
+      Resource subject, RdfProperty propertyAnnotation, Class<?> targetType, RDFNode value) {
+    RdfClass targetClass = targetType.getAnnotation(RdfClass.class);
+    if (targetClass == null || value.isResource()) {
+      return Optional.empty();
+    }
+
+    String message =
+        String.format(
+            "Expected an object of type [ %s ] but got literal '%s'",
+            String.join(", ", targetClass.typesUri()), value.asLiteral().getLexicalForm());
+    return Optional.of(new PropertyError(subject.getURI(), propertyAnnotation.uri(), message));
   }
 
   private Optional<PropertyError> checkCardinalities(
