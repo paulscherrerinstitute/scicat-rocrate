@@ -26,7 +26,7 @@ public class Dataset {
   @RdfProperty(uri = SchemaDO.NS + "identifier")
   String identifier;
 
-  @RdfProperty(uri = SchemaDO.NS + "name")
+  @RdfProperty(uri = SchemaDO.NS + "name", minCardinality = 1)
   String name;
 
   @RdfProperty(uri = SchemaDO.NS + "description")
