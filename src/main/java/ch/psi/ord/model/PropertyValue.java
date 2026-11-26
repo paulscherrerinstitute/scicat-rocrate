@@ -10,9 +10,13 @@ import ch.psi.rdf.deser.RdfDeserializationContext;
 import ch.psi.rdf.deser.RdfDeserializationException;
 import ch.psi.rdf.deser.RdfDeserializer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import lombok.Data;
 import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
@@ -74,7 +78,33 @@ public non-sealed class PropertyValue implements ValueContent {
         }
       }
 
+      if (values.size() > 1 && values.stream().allMatch(v -> v instanceof PropertyValue)) {
+        checkDuplicateNames(
+            subject,
+            SchemaDO.value,
+            values.stream().map(PropertyValue.class::cast).toList(),
+            context);
+      }
+
       return values.size() == 1 ? values.getFirst() : new ListValue(values);
     }
+  }
+
+  static void checkDuplicateNames(
+      Resource subject,
+      Property property,
+      List<PropertyValue> properties,
+      RdfDeserializationContext context) {
+    Set<String> seen = new HashSet<>();
+    properties.stream()
+        .map(PropertyValue::getName)
+        .filter(Objects::nonNull)
+        .filter(name -> !seen.add(name))
+        .map(name ->
+            new PropertyError(
+                subject.getURI(),
+                property.getURI(),
+                String.format("Duplicate '%s' with name '%s'", SchemaDO.PropertyValue, name)))
+        .forEach(context::addError);
   }
 }

@@ -106,7 +106,7 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
             List<Object> collection = new ArrayList<>();
             for (RDFNode value : values) {
               Optional<PropertyError> error =
-                  checkNodeKind(subject, propertyAnnotation, listType, value);
+                  checkNodeKind(subject, propertyAnnotation.uri(), listType, value);
               if (error.isPresent()) {
                 context.addError(error.get());
                 continue;
@@ -127,7 +127,7 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
             }
             RDFNode value = values.iterator().next();
             Optional<PropertyError> error =
-                checkNodeKind(subject, propertyAnnotation, field.getType(), value);
+                checkNodeKind(subject, propertyAnnotation.uri(), field.getType(), value);
             if (error.isPresent()) {
               context.addError(error.get());
             } else {
@@ -173,8 +173,8 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
     return Optional.empty();
   }
 
-  private Optional<PropertyError> checkNodeKind(
-      Resource subject, RdfProperty propertyAnnotation, Class<?> targetType, RDFNode value) {
+  public static Optional<PropertyError> checkNodeKind(
+      Resource subject, String propertyUri, Class<?> targetType, RDFNode value) {
     RdfClass targetClass = targetType.getAnnotation(RdfClass.class);
     if (targetClass == null || value.isResource()) {
       return Optional.empty();
@@ -184,7 +184,7 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
         String.format(
             "Expected an object of type [ %s ] but got literal '%s'",
             String.join(", ", targetClass.typesUri()), value.asLiteral().getLexicalForm());
-    return Optional.of(new PropertyError(subject.getURI(), propertyAnnotation.uri(), message));
+    return Optional.of(new PropertyError(subject.getURI(), propertyUri, message));
   }
 
   private Optional<PropertyError> checkCardinalities(

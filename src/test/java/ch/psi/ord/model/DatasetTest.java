@@ -86,6 +86,51 @@ public class DatasetTest {
       assertFalse(report.isValid());
       assertEquals(1, report.getErrors().size(), report.toString());
     }
+
+    @Test
+    @DisplayName("Duplicate names are reported as a validation error")
+    public void test02() throws RdfDeserializationException {
+      DeserializationReport<Dataset> report =
+          rdfMapper.deserialize(
+              datasetWith(
+                  "variableMeasured",
+                  """
+                  [
+                    { "@type": "PropertyValue", "name": "temperature", "value": 1 },
+                    { "@type": "PropertyValue", "name": "temperature", "value": 2 },
+                    { "@type": "PropertyValue", "name": "pressure", "value": 3 }
+                  ]
+                  """),
+              Dataset.class);
+
+      assertFalse(report.isValid());
+      assertEquals(
+          Set.of(
+              new PropertyError(
+                  DATASET_ID,
+                  "https://schema.org/variableMeasured",
+                  "Duplicate 'https://schema.org/PropertyValue' with name 'temperature'")),
+          report.getErrors());
+    }
+
+    @Test
+    @DisplayName("Distinct names are valid")
+    public void test03() throws RdfDeserializationException {
+      DeserializationReport<Dataset> report =
+          rdfMapper.deserialize(
+              datasetWith(
+                  "variableMeasured",
+                  """
+                  [
+                    { "@type": "PropertyValue", "name": "temperature", "value": 1 },
+                    { "@type": "PropertyValue", "name": "pressure", "value": 3 }
+                  ]
+                  """),
+              Dataset.class);
+
+      assertTrue(report.isValid(), report.toString());
+      assertEquals(2, report.get().getVariableMeasured().size());
+    }
   }
 
   @Nested

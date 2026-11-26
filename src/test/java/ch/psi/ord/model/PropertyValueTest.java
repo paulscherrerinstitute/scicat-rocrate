@@ -493,4 +493,48 @@ public class PropertyValueTest {
                     + " 'https://example.org/crate/#thing' is of type [ https://schema.org/Thing ]")),
         report.getErrors());
   }
+
+  @Test
+  @DisplayName("Nested properties with the same name are reported as invalid")
+  public void test15() throws RdfDeserializationException {
+    DeserializationReport<PropertyValue> report =
+        report(
+            """
+            {
+              "@context": { "@vocab": "https://schema.org/" },
+              "@graph": [
+                {
+                  "@id": "https://example.org/crate/#property",
+                  "@type": "PropertyValue",
+                  "name": "sample",
+                  "value": [
+                    { "@id": "https://example.org/crate/#mass1" },
+                    { "@id": "https://example.org/crate/#mass2" }
+                  ]
+                },
+                {
+                  "@id": "https://example.org/crate/#mass1",
+                  "@type": "PropertyValue",
+                  "name": "mass",
+                  "value": "12"
+                },
+                {
+                  "@id": "https://example.org/crate/#mass2",
+                  "@type": "PropertyValue",
+                  "name": "mass",
+                  "value": "13"
+                }
+              ]
+            }
+            """);
+
+    assertFalse(report.isValid());
+    assertEquals(
+        Set.of(
+            new PropertyError(
+                PROPERTY_ID,
+                "https://schema.org/value",
+                "Duplicate 'https://schema.org/PropertyValue' with name 'mass'")),
+        report.getErrors());
+  }
 }
