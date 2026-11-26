@@ -60,6 +60,13 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
           String.format("Expected node '%s' to be a resource", node.toString()));
     }
 
+    if (context.isBeingDeserialized(node.asResource())) {
+      context.addError(
+          new PropertyError(
+              node.asResource().getURI(), "@id", String.format("Cyclic reference to '%s'", node)));
+      return null;
+    }
+
     T obj;
     try {
       obj = createInstance(clazz);
@@ -85,13 +92,29 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
 
         context.pushCardinalityOverrides(propertyAnnotation.nested());
         try {
-          if (field.getType().isAssignableFrom(List.class)) {
+          if (field.isAnnotationPresent(RdfDeserialize.class)) {
+            if (!values.isEmpty()) {
+              setField(
+                  field,
+                  obj,
+                  customDeserializer(field).deserialize(values.iterator().next(), context));
+            }
+          } else if (field.getType().isAssignableFrom(List.class)) {
             Class<?> listType =
                 (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
             RdfDeserializer<?> elementDeserializer = context.getDeserializer(listType);
             List<Object> collection = new ArrayList<>();
             for (RDFNode value : values) {
-              collection.add(elementDeserializer.deserialize(value, context));
+              Optional<PropertyError> error =
+                  checkNodeKind(subject, propertyAnnotation.uri(), listType, value);
+              if (error.isPresent()) {
+                context.addError(error.get());
+                continue;
+              }
+              Object element = elementDeserializer.deserialize(value, context);
+              if (element != null) {
+                collection.add(element);
+              }
             }
             setField(field, obj, collection);
           } else if (!values.isEmpty()) {
@@ -102,19 +125,15 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
                   field.getName(),
                   clazz.getName());
             }
-
-            RdfDeserializer<?> fieldDeserializer = context.getDeserializer(field.getType());
-            if (field.isAnnotationPresent(RdfDeserialize.class)) {
-              try {
-                fieldDeserializer =
-                    createInstance(field.getAnnotation(RdfDeserialize.class).using());
-              } catch (ReflectiveOperationException e) {
-                throw new RdfDeserializationException(
-                    String.format("Unable to instantiate custom field deserializer"), e);
-              }
+            RDFNode value = values.iterator().next();
+            Optional<PropertyError> error =
+                checkNodeKind(subject, propertyAnnotation.uri(), field.getType(), value);
+            if (error.isPresent()) {
+              context.addError(error.get());
+            } else {
+              RdfDeserializer<?> fieldDeserializer = context.getDeserializer(field.getType());
+              setField(field, obj, fieldDeserializer.deserialize(value, context));
             }
-            Object value = fieldDeserializer.deserialize(values.iterator().next(), context);
-            setField(field, obj, value);
           }
         } finally {
           context.popCardinalityOverrides();
@@ -125,6 +144,18 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
     }
 
     return obj;
+  }
+
+  private RdfDeserializer<?> customDeserializer(Field field) throws RdfDeserializationException {
+    try {
+      return createInstance(field.getAnnotation(RdfDeserialize.class).using());
+    } catch (ReflectiveOperationException e) {
+      throw new RdfDeserializationException(
+          String.format(
+              "Unable to instantiate the custom deserializer of field '%s' of class '%s'",
+              field.getName(), clazz.getName()),
+          e);
+    }
   }
 
   private Optional<PropertyError> checkType(Resource subject, String[] expectedTypes) {
@@ -140,6 +171,20 @@ public class ObjectDeserializer<T> implements RdfDeserializer<T> {
     }
 
     return Optional.empty();
+  }
+
+  public static Optional<PropertyError> checkNodeKind(
+      Resource subject, String propertyUri, Class<?> targetType, RDFNode value) {
+    RdfClass targetClass = targetType.getAnnotation(RdfClass.class);
+    if (targetClass == null || value.isResource()) {
+      return Optional.empty();
+    }
+
+    String message =
+        String.format(
+            "Expected an object of type [ %s ] but got literal '%s'",
+            String.join(", ", targetClass.typesUri()), value.asLiteral().getLexicalForm());
+    return Optional.of(new PropertyError(subject.getURI(), propertyUri, message));
   }
 
   private Optional<PropertyError> checkCardinalities(
