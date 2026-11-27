@@ -117,6 +117,7 @@ public class ScicatCli {
                   "--ingest",
                   "--noninteractive",
                   "--allowexistingsource",
+                  "--no-online-checks",
                   metadataPath.toAbsolutePath().toString())
               .redirectErrorStream(true);
       if (!fileList.isEmpty()) {
