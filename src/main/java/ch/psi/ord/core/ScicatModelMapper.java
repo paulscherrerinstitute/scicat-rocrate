@@ -2,11 +2,18 @@ package ch.psi.ord.core;
 
 import static org.modelmapper.Conditions.isNotNull;
 
+import ch.psi.ord.model.Dataset;
 import ch.psi.ord.model.Organization;
 import ch.psi.ord.model.Person;
+import ch.psi.ord.model.PropertyValue;
 import ch.psi.ord.model.Publication;
+import ch.psi.ord.model.ScicatRelationship;
+import ch.psi.ord.model.ValueContent;
+import ch.psi.ord.model.ValueContent.ListValue;
+import ch.psi.ord.model.ValueContent.LiteralValue;
 import ch.psi.ord.model.ZenodoDataset;
 import ch.psi.scicat.model.v3.CreateDatasetDto;
+import ch.psi.scicat.model.v3.CreateRelationshipDto;
 import ch.psi.scicat.model.v3.DatasetType;
 import ch.psi.scicat.model.v4.CreatePublishedDataDto;
 import ch.psi.scicat.model.v4.DataciteMetadata.Affiliation;
@@ -18,6 +25,12 @@ import ch.psi.scicat.model.v4.DataciteMetadata.RelatedIdentifier;
 import ch.psi.scicat.model.v4.DataciteMetadata.RelatedIdentifierType;
 import ch.psi.scicat.model.v4.DataciteMetadata.RelationType;
 import ch.psi.scicat.model.v4.PublishedData;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
 import java.net.URI;
@@ -33,9 +46,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.jena.rdf.model.Literal;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.spi.MappingContext;
 
+@Slf4j
 @Singleton
 public class ScicatModelMapper {
   private final Converter<List<Person>, String> personListToOwnerString =
@@ -119,6 +136,19 @@ public class ScicatModelMapper {
           return sourceId;
         }
       };
+
+  private final Converter<List<ScicatRelationship>, List<CreateRelationshipDto>>
+      relationshipsToDto =
+          context ->
+              context.getSource().stream()
+                  .map(relationship ->
+                      new CreateRelationshipDto()
+                          .setIdentifier(relationship.getIdentifier())
+                          .setIdentifierType(relationship.getIdentifierType())
+                          .setRelationship(relationship.getRelationship())
+                          .setEntityType(relationship.getEntityType())
+                          .setExternalId(relationship.getExternalId()))
+                  .toList();
 
   private final Converter<List<Creator>, List<Person>> dataciteCreatorToPerson =
       context ->
@@ -232,6 +262,81 @@ public class ScicatModelMapper {
 
         return destination;
       };
+  Converter<List<PropertyValue>, ObjectNode> scientficMetadaConverter =
+      new Converter<List<PropertyValue>, ObjectNode>() {
+        private static final ObjectMapper mapper = new ObjectMapper();
+
+        @Override
+        public ObjectNode convert(MappingContext<List<PropertyValue>, ObjectNode> context) {
+          List<PropertyValue> source = context.getSource();
+          if (source == null) return null;
+
+          ObjectNode root = mapper.createObjectNode();
+          for (PropertyValue property : source) {
+            processProperty(root, property);
+          }
+          return root;
+        }
+
+        private void processProperty(ObjectNode parent, PropertyValue property) {
+          String name = property.getName();
+          JsonNode value = toJson(property.getValue());
+          if (name == null || value == null) {
+            log.warn("Skipping property with name '{}' and value '{}'", name, property.getValue());
+            return;
+          }
+
+          String unit = property.getUnitText();
+          if (unit == null || unit.isEmpty()) {
+            parent.set(name, value);
+            return;
+          }
+
+          ObjectNode valueWithUnit = mapper.createObjectNode();
+          valueWithUnit.set("value", value);
+          valueWithUnit.put("unit", unit);
+          parent.set(name, valueWithUnit);
+        }
+
+        private JsonNode toJson(ValueContent value) {
+          return switch (value) {
+            case null -> null;
+            case LiteralValue(Literal literal) -> literalToJson(literal);
+            case PropertyValue nested -> toObject(List.of(nested));
+            case ListValue(List<ValueContent> values) -> toArrayOrObject(values);
+          };
+        }
+
+        private JsonNode literalToJson(Literal literal) {
+          if (literal == null) return null;
+
+          return switch (literal.getValue()) {
+            case null -> null;
+            case String string -> TextNode.valueOf(string);
+            case Boolean bool -> BooleanNode.valueOf(bool);
+            case Number number -> mapper.convertValue(number, JsonNode.class);
+            default -> TextNode.valueOf(literal.getLexicalForm());
+          };
+        }
+
+        private JsonNode toArrayOrObject(List<ValueContent> values) {
+          if (!values.isEmpty() && values.stream().allMatch(v -> v instanceof PropertyValue)) {
+            return toObject(values.stream().map(PropertyValue.class::cast).toList());
+          }
+
+          ArrayNode array = mapper.createArrayNode();
+          values.stream().map(this::toJson).filter(Objects::nonNull).forEach(array::add);
+          return array;
+        }
+
+        private ObjectNode toObject(List<PropertyValue> properties) {
+          ObjectNode object = mapper.createObjectNode();
+          for (PropertyValue property : properties) {
+            processProperty(object, property);
+          }
+          return object;
+        }
+      };
 
   @Produces
   public ModelMapper createPublicationModelMapper() {
@@ -291,6 +396,25 @@ public class ScicatModelMapper {
               .map(Publication::getCreator, CreateDatasetDto::setContactEmail);
           m.map(src -> Instant.now(), CreateDatasetDto::setCreationTime);
           m.map(Publication::getDescription, CreateDatasetDto::setDescription);
+        });
+
+    mapper
+        .typeMap(Dataset.class, CreateDatasetDto.class)
+        .addMappings(m -> {
+          m.when(isNotNull()).map(Dataset::getName, CreateDatasetDto::setDatasetName);
+          m.when(isNotNull()).map(Dataset::getDescription, CreateDatasetDto::setDescription);
+          m.when(isNotNull()).map(src -> DatasetType.BASE, CreateDatasetDto::setType);
+          m.when(isNotNull())
+              .using(uriPathExtractor)
+              .map(Dataset::getResourceIdentifier, CreateDatasetDto::setSourceFolder);
+          m.using(personListToOwnerEmails)
+              .map(Dataset::getCreator, CreateDatasetDto::setContactEmail);
+          m.map(src -> Instant.now(), CreateDatasetDto::setCreationTime);
+          m.when(isNotNull())
+              .using(relationshipsToDto)
+              .map(Dataset::getRelationships, CreateDatasetDto::setRelationships);
+          m.using(scientficMetadaConverter)
+              .map(Dataset::getVariableMeasured, CreateDatasetDto::setScientificMetadata);
         });
 
     return mapper;

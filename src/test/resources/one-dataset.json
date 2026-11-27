@@ -1,0 +1,81 @@
+{
+    "@context": {
+        "CreativeWork": "https://schema.org/CreativeWork",
+        "Dataset": "https://schema.org/Dataset",
+        "Person": "https://schema.org/Person",
+        "about": "https://schema.org/about",
+        "conformsTo": "http://purl.org/dc/terms/conformsTo",
+        "creator": "https://schema.org/creator",
+        "datePublished": "https://schema.org/datePublished",
+        "description": "https://schema.org/description",
+        "email": "https://schema.org/email",
+        "familyName": "https://schema.org/familyName",
+        "givenName": "https://schema.org/givenName",
+        "hasPart": "https://schema.org/hasPart",
+        "identifier": "https://schema.org/identifier",
+        "license": "https://schema.org/license",
+        "name": "https://schema.org/name",
+        "size": "https://schema.org/size"
+    },
+    "@graph": [
+        {
+            "about": {
+                "@id": "./"
+            },
+            "conformsTo": {
+                "@id": "https://w3id.org/ro/crate/1.1"
+            },
+            "@id": "ro-crate-metadata.json",
+            "@type": "CreativeWork"
+        },
+        {
+            "@id": "./",
+            "@type": "Dataset",
+            "name": "A crate with a single dataset attached to the root",
+            "description": "The root dataset has one Dataset part and no Publication",
+            "license": {
+                "@id": "https://creativecommons.org/licenses/by-sa/4.0/"
+            },
+            "hasPart": [
+                {
+                    "@id": "data/ds1/"
+                }
+            ]
+        },
+        {
+            "@id": "data/ds1/",
+            "@type": "Dataset",
+            "name": "Minimal dataset",
+            "creator": [
+                {
+                    "@id": "eaf4cc90-2ea0-44c2-8c9f-a9f8ce448a2a"
+                },
+                {
+                    "@id": "284f40e5-72fe-4414-91f8-141abcd0ed9d"
+                }
+            ]
+        },
+        {
+            "name": "Kahnt, Maik",
+            "givenName": "Maik",
+            "familyName": "Kahnt",
+            "email": "maik.kahnt@example.com",
+            "@id": "284f40e5-72fe-4414-91f8-141abcd0ed9d",
+            "@type": "Person"
+        },
+        {
+            "name": "Constantin, Doru",
+            "givenName": "Doru",
+            "familyName": "Constantin",
+            "email": "doru.constantin@example.com",
+            "@id": "eaf4cc90-2ea0-44c2-8c9f-a9f8ce448a2a",
+            "@type": "Person"
+        },
+        {
+            "identifier": "https://creativecommons.org/licenses/by-sa/4.0/",
+            "name": "Creative Commons Attribution Share Alike 4.0 International",
+            "@id": "https://creativecommons.org/licenses/by-sa/4.0/",
+            "@type": "CreativeWork"
+        }
+    ]
+}

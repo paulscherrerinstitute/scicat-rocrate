@@ -2,6 +2,7 @@ package ch.psi.ord.api;
 
 import ch.psi.ord.core.DoiUtils;
 import ch.psi.ord.core.RoCrate;
+import ch.psi.ord.core.RoCrateException;
 import ch.psi.ord.core.RoCrateExporter;
 import ch.psi.ord.core.RoCrateImporter;
 import ch.psi.ord.model.Error;
@@ -53,10 +54,16 @@ public class RoCrateController {
 
   @ServerExceptionMapper
   public Response mapRiotException(RiotException e) {
-    log.error("Failed to process the crate metadata", e);
+    log.error("Failed to parse the metadata descriptor", e);
     return Response.status(Status.BAD_REQUEST)
         .entity(new Error("Failed to parse the metadata descriptor"))
         .build();
+  }
+
+  @ServerExceptionMapper
+  public Response mapRoCrateException(RoCrateException e) {
+    log.error("Failed to process the crate", e);
+    return Response.status(422).entity(new Error(e.getMessage())).build();
   }
 
   @ServerExceptionMapper
@@ -149,7 +156,7 @@ public class RoCrateController {
   @Consumes(ExtraMediaType.APPLICATION_JSONLD)
   @Produces(MediaType.APPLICATION_JSON)
   public Response validateCrate(InputStream body)
-      throws RdfDeserializationException, RiotException, IOException {
+      throws RdfDeserializationException, RoCrateException, IOException {
     try (RoCrate crate = RoCrate.fromMetadata(body)) {
       importer.loadCrate(crate);
       return Response.ok(importer.validate()).build();
@@ -161,11 +168,7 @@ public class RoCrateController {
   @Consumes(ExtraMediaType.APPLICATION_ZIP)
   @Produces(MediaType.APPLICATION_JSON)
   public Response validateZippedCrate(InputStream body)
-      throws RiotException,
-          FileNotFoundException,
-          ZipException,
-          IOException,
-          RdfDeserializationException {
+      throws RoCrateException, ZipException, IOException, RdfDeserializationException {
     try (RoCrate crate = RoCrate.fromZip(body)) {
       importer.loadCrate(crate);
       return Response.ok(importer.validate()).build();
@@ -181,7 +184,7 @@ public class RoCrateController {
       @HeaderParam(value = "api-key") String scicatToken,
       @HeaderParam(value = "ownerGroup") String ownerGroup,
       InputStream body)
-      throws RdfDeserializationException, RiotException, IOException {
+      throws RdfDeserializationException, RoCrateException, IOException {
     try (RoCrate crate = RoCrate.fromMetadata(body)) {
       importer.loadCrate(crate);
       ValidationReport report = importer.validate();
@@ -205,11 +208,7 @@ public class RoCrateController {
       @HeaderParam(value = "api-key") String scicatToken,
       @HeaderParam(value = "ownerGroup") String ownerGroup,
       InputStream body)
-      throws RiotException,
-          FileNotFoundException,
-          ZipException,
-          IOException,
-          RdfDeserializationException {
+      throws RoCrateException, ZipException, IOException, RdfDeserializationException {
     try (RoCrate crate = RoCrate.fromZip(body)) {
       importer.loadCrate(crate);
       ValidationReport report = importer.validate();

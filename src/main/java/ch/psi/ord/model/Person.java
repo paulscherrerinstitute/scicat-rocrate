@@ -5,12 +5,10 @@ import ch.psi.rdf.annotations.RdfProperty;
 import ch.psi.rdf.annotations.RdfResourceIdentifier;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.apache.jena.vocabulary.SchemaDO;
 
-@Getter
-@Setter
+@Data
 @RdfClass(typesUri = SchemaDO.NS + "Person")
 public class Person {
   @RdfResourceIdentifier String resourceIdentifier;
@@ -30,6 +28,6 @@ public class Person {
   @RdfProperty(uri = SchemaDO.NS + "email", minCardinality = 1)
   public String email;
 
-  @RdfProperty(uri = SchemaDO.NS + "affiliation", minCardinality = 1)
+  @RdfProperty(uri = SchemaDO.NS + "affiliation")
   public List<Organization> affiliation = new ArrayList<>();
 }
