@@ -1,6 +1,9 @@
 FROM mcr.microsoft.com/devcontainers/java:25
 
+# renovate: datasource=github-releases depName=paulscherrerinstitute/scicat-cli
 ARG SCICAT_CLI_VERSION=3.1.0
+# renovate: datasource=node-version depName=node versioning=node
+ARG NODE_VERSION=26.13
 ENV NVM_DIR="/usr/local/share/nvm"
 
 RUN mkdir --parents --mode=777 /rocrate/archive /rocrate/extract
@@ -16,6 +19,6 @@ RUN curl -L -s "https://github.com/paulscherrerinstitute/scicat-cli/releases/dow
 
 USER vscode
 RUN pipx ensurepath && pipx install pre-commit
-RUN . "$NVM_DIR/nvm.sh" && nvm install --lts
+RUN . "$NVM_DIR/nvm.sh" && nvm install "$NODE_VERSION"
 RUN curl -Ls https://sh.jbang.dev | bash -s - trust add https://repo1.maven.org/maven2/io/quarkus/quarkus-cli/ \
     && curl -Ls https://sh.jbang.dev | bash -s - app install --fresh --force quarkus@quarkusio
